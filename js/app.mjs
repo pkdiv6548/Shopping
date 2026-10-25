@@ -370,16 +370,17 @@ function openCart() {
   const list=items.length?'<div class="drawer-items">'+items.map(({item,product})=>
     '<div class="drawer-item"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"><div><b>'+esc(productName(product))+'</b><span>'+esc(item.size||"One size")+' · '+money(product.price)+' · Qty '+item.qty+'</span><strong>'+money(product.price*item.qty)+'</strong><button type="button" data-remove-cart="'+product.id+'" data-remove-variant="'+esc(item.variantId||"")+'">'+esc(t().remove)+'</button></div></div>'
   ).join("")+'</div>':'<div class="drawer-empty"><p>'+esc(t().emptyCart)+'</p><button class="button button-dark" data-close-overlay type="button">'+esc(t().shop)+'</button></div>';
-  const bottom='<div class="drawer-bottom"><div><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p>'+esc(t().demo)+'</p><a class="text-link" href="/cart.html">' + esc(t().viewFullBag) + ' <button class="button button-dark full" data-checkout type="button">'+esc(t().checkout)+'</button></div>';
+  const bottom='<div class="drawer-bottom"><div><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p>'+esc(t().demo)+'</p><a class="text-link" href="/cart.html">'+esc(t().viewFullBag)+' ↗</a><button class="button button-dark full" data-checkout type="button">'+esc(t().checkout)+'</button></div>';
   openOverlay(t().bag,header+list+bottom);
 }
 function openWishlist() {
-  const products = state.wishlist.map(id => state.products.find(product => product.id === id)).filter(Boolean);
-  const header = '<div class="drawer-head"><h2>' + esc(t().saved) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
-  const list = products.length ? '<div class="drawer-items">' + products.map(product =>
-    '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + '</span><button type="button" data-wish="' + product.id + '">' + esc(t().removeWish) + '</button><button type="button" data-add="' + product.id + '">' + esc(t().add) + '</button></div></div>'
-  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyWish) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>";
-  openOverlay(t().saved, header + list);
+  const products=state.wishlist.map(id=>state.products.find(product=>product.id===id)).filter(Boolean);
+  const header='<div class="drawer-head"><h2>'+esc(t().saved)+'</h2><button class="icon-button" data-close-overlay type="button" aria-label="'+esc(t().close)+'">×</button></div>';
+  const list=products.length?'<div class="drawer-items">'+products.map(product=>
+    '<div class="drawer-item"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"><div><b>'+esc(productName(product))+'</b><span>'+money(product.price)+'</span><button type="button" data-wish="'+product.id+'">'+esc(t().removeWish)+'</button><button type="button" data-add="'+product.id+'">'+esc(t().add)+'</button></div></div>'
+  ).join("")+'</div>':'<div class="drawer-empty"><p>'+esc(t().emptyWish)+'</p><button class="button button-dark" data-close-overlay type="button">'+esc(t().shop)+'</button></div>';
+  const bottom='<div class="drawer-bottom"><a class="text-link" href="/wishlist.html">'+esc(t().viewFullWishlist)+' ↗</a></div>';
+  openOverlay(t().saved,header+list+bottom);
 }
 function openQuickView(product) {
   if(!product)return;
