@@ -55,9 +55,40 @@ export default function Home(){
    {!visible.length&&<div className="empty-state"><Sparkles size={24}/><p>{t.empty}</p><button className="text-link" onClick={()=>{setQuery("");setCategory("All")}}>{t.clear}</button></div>}
    <div className="center-cta"><button className="button button-dark" onClick={()=>{setCategory("All");setQuery("")}}>{t.all} <ArrowRight size={16}/></button></div>
   </section>
-  <section className="manifesto"><div className="manifesto-photo"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=85" alt="Fashion editorial showcasing contemporary everyday outfits"/></div><div className="manifesto-copy"><p className="eyebrow">THE SHOPPING MART POINT OF VIEW</p><h2>Less noise.<br/><em>More meaning.</em></h2><p>We believe getting dressed should feel simple. Pieces with considered details, easy combinations and a place in your wardrobe beyond one season.</p><button className="text-link" onClick={()=>document.getElementById("newsletter")?.scrollIntoView({behavior:"smooth"})}>{t.shopNow} <ArrowRight size={15}/></button><span className="manifesto-mark">SM / 001</span></div></section>
+  <section className="manifesto" id="about"><div className="manifesto-photo"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=85" alt="Fashion editorial showcasing contemporary everyday outfits"/></div><div className="manifesto-copy"><p className="eyebrow">THE SHOPPING MART POINT OF VIEW</p><h2>Less noise.<br/><em>More meaning.</em></h2><p>We believe getting dressed should feel simple. Pieces with considered details, easy combinations and a place in your wardrobe beyond one season.</p><button className="text-link" onClick={()=>document.getElementById("newsletter")?.scrollIntoView({behavior:"smooth"})}>{t.shopNow} <ArrowRight size={15}/></button><span className="manifesto-mark">SM / 001</span></div></section>
   <section className="newsletter" id="newsletter"><div><p className="eyebrow">A NOTE FROM US</p><h2>{t.newsletter}</h2><p>{t.newsletterSub}</p></div><form onSubmit={e=>{e.preventDefault();if(newsletterEmail.includes("@")){setSubscribed(true);setNewsletterEmail("")}}}><input type="email" required value={newsletterEmail} onChange={e=>setNewsletterEmail(e.target.value)} placeholder={t.email}/><button type="submit" aria-label={t.join}><ArrowRight/></button>{subscribed&&<small>{t.newsletterThanks}</small>}</form></section>
-  <footer className="site-footer"><a className="wordmark footer-logo" href="#">SHOPPING<span> MART</span><i>®</i></a><p>{t.footer}</p><div><a href="#shop">SHOP</a><a href="#newsletter">CONTACT</a><a href="#top">INSTAGRAM ↗</a></div><small>© 2026 SHOPPING MART · DEMO STORE</small></footer>
+  <footer className="site-footer" id="footer">
+   <div className="footer-main">
+    <div className="footer-brand">
+     <a className="wordmark footer-logo" href="#top" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a>
+     <p className="footer-tagline">{t.footer}</p>
+     <p className="footer-intro">{lang==="hi"?"रोज़मर्रा के लिए सोच-समझकर चुने गए एसेंशियल्स और आधुनिक डिज़ाइन।":"Considered essentials and modern silhouettes for everyday life."}</p>
+    </div>
+    <div className="footer-column">
+     <h3>{lang==="hi"?"शॉप":"SHOP"}</h3>
+     <a href="#shop" onClick={()=>setCategory("All")}>{lang==="hi"?"सभी प्रोडक्ट":"All pieces"}</a>
+     <a href="#shop" onClick={()=>setCategory("New in")}>{lang==="hi"?"नए प्रोडक्ट":"New arrivals"}</a>
+     <a href="#shop" onClick={()=>setCategory("Shirts")}>{lang==="hi"?"शर्ट":"Shirts"}</a>
+     <a href="#shop" onClick={()=>setCategory("Trousers")}>{lang==="hi"?"ट्राउज़र":"Trousers"}</a>
+     <a href="#shop" onClick={()=>setCategory("Dresses")}>{lang==="hi"?"ड्रेस":"Dresses"}</a>
+     <a href="#shop" onClick={()=>setCategory("Accessories")}>{lang==="hi"?"एक्सेसरीज़":"Accessories"}</a>
+    </div>
+    <div className="footer-column">
+     <h3>{lang==="hi"?"जानें":"DISCOVER"}</h3>
+     <a href="#about">{lang==="hi"?"हमारी सोच":"Our point of view"}</a>
+     <a href="#about">{lang==="hi"?"रोज़मर्रा का एडिट":"The everyday edit"}</a>
+     <a href="#newsletter">{lang==="hi"?"न्यूज़लेटर":"Newsletter"}</a>
+     <a href="#shop" onClick={()=>setCategory("New in")}>{lang==="hi"?"नया सीज़न":"New season"}</a>
+    </div>
+    <div className="footer-column footer-help">
+     <h3>{lang==="hi"?"सहायता व जानकारी":"HELP & INFORMATION"}</h3>
+     <a href="#newsletter">{lang==="hi"?"संपर्क व अपडेट":"Contact & updates"}</a>
+     <button type="button" onClick={()=>flash(lang==="hi"?"यह डेमो स्टोर है। वास्तविक ऑर्डर और भुगतान सक्रिय नहीं हैं।":"This is a demo store. Real orders and payments are not enabled.")}>{lang==="hi"?"डेमो स्टोर की जानकारी":"Demo store information"}</button>
+     <span className="footer-demo-note">{lang==="hi"?"डेमो चेकआउट · वास्तविक भुगतान नहीं":"Demo checkout · no real payments"}</span>
+    </div>
+   </div>
+   <div className="footer-bottom"><small>© 2026 SHOPPING MART</small><span>{lang==="hi"?"सोच-समझकर चुनी गई रोज़मर्रा की स्टाइल":"STYLE THAT FEELS LIKE YOU."}</span><small>{lang==="hi"?"डेमो स्टोर · भुगतान सक्रिय नहीं":"DEMO STORE · PAYMENTS NOT ENABLED"}</small></div>
+  </footer>
   {notice&&<div className="toast"><Check size={16}/>{notice}</div>}
   {drawer&&<div className="overlay" onClick={()=>setDrawer(null)}><aside className="drawer" onClick={e=>e.stopPropagation()}><div className="drawer-head"><h2>{drawer==="cart"?t.bag:drawer==="wishlist"?t.saved:t.menu}</h2><button className="icon-button" onClick={()=>setDrawer(null)} aria-label={t.close}><X/></button></div>{drawer==="menu"?<div className="drawer-menu">{["New in","Clothing","Shirts","T-shirts","Trousers","Dresses","Knitwear","Shoes","Accessories"].map(c=><button key={c} onClick={()=>{setCategory(c);setDrawer(null);document.getElementById("shop")?.scrollIntoView({behavior:"smooth"})}}>{c}<ArrowRight size={16}/></button>)}<button onClick={()=>setLang(lang==="en"?"hi":"en")}>{lang==="en"?"हिंदी में देखें":"Switch to English"}</button></div>:<>{(drawer==="cart"?cart:wishlist).length===0?<div className="drawer-empty"><ShoppingBag size={27}/><p>{drawer==="cart"?"Your bag is taking a little breather.":"Your saved edit will appear here."}</p><button className="button button-dark" onClick={()=>{setDrawer(null);document.getElementById("shop")?.scrollIntoView({behavior:"smooth"})}}>DISCOVER PIECES</button></div>:<div className="drawer-items">{(drawer==="cart"?cart:wishlist).map((id,i)=>{const p=products.find(x=>x.id===id);if(!p)return null;return <div className="drawer-item" key={id+"-"+i}><img src={p.image} alt={p.name}/><div><b>{lang==="hi"?p.hi:p.name}</b><span>{p.color}</span><strong>{money(p.price)}</strong><button onClick={()=>drawer==="cart"?setCart(c=>c.filter((_,idx)=>idx!==i)):setWishlist(w=>w.filter(x=>x!==id))}>REMOVE</button></div></div>})}</div>}{drawer==="cart"&&cart.length>0&&<div className="drawer-bottom"><div><span>{t.subtotal}</span><strong>{money(total)}</strong></div><p>{t.demo}</p><button className="button button-dark full" onClick={()=>{setDrawer(null);setNotice("Demo checkout only — payment is not enabled.")}}>{t.checkout}<ArrowRight size={15}/></button></div>}</>}</aside></div>}
   {selected&&<div className="overlay" onClick={()=>setSelected(null)}><section className="quick-view" onClick={e=>e.stopPropagation()}><button className="icon-button modal-close" onClick={()=>setSelected(null)} aria-label={t.close}><X/></button><div className="quick-image" style={{backgroundColor:selected.tone}}><img src={selected.image} alt={selected.name}/></div><div className="quick-info"><p className="eyebrow">{lang==="hi"?selected.categoryHi:selected.category}</p><h2>{lang==="hi"?selected.hi:selected.name}</h2><strong>{money(selected.price)}</strong><p>Thoughtful details, versatile styling and a considered finish. Designed to be worn on repeat.</p><label className="size-select">{t.size}<select defaultValue=""><option value="" disabled>Choose size</option>{["XS","S","M","L","XL"].map(s=><option key={s}>{s}</option>)}</select></label><button className="button button-dark full" onClick={()=>{add(selected);setSelected(null)}}>{t.add}<ShoppingBag size={16}/></button><button className="text-link" onClick={()=>toggleWish(selected)}><Heart size={15}/> {t.saved}</button></div></section></div>}
