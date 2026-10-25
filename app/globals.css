@@ -591,3 +591,47 @@ main[lang] .account-trigger { display:grid; color:var(--ink); }
   .auth-wordmark { margin-bottom:28px; }
   .auth-modal h2 { font-size:31px; }
 }
+
+
+/* Profile editor inside the authenticated account panel */
+.auth-profile-form {
+  width:100%;
+  display:flex;
+  flex-direction:column;
+  gap:17px;
+  margin:0 0 5px;
+}
+.auth-profile-actions {
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+.auth-profile-actions .auth-submit {
+  margin-top:0;
+  justify-content:center;
+  gap:10px;
+}
+.auth-secondary {
+  min-height:43px;
+  width:100%;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:8px;
+  padding:11px 14px;
+  border:1px solid #d9d8d0;
+  background:transparent;
+  color:#252620;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.1em;
+  transition:background .2s,border-color .2s,color .2s;
+}
+.auth-secondary:hover:not(:disabled) {
+  background:#efeee8;
+  border-color:#b4b1a5;
+}
+.auth-secondary:disabled { opacity:.65; cursor:wait; }
+.auth-edit-profile {
+  margin-top:15px;
+}
