@@ -18,7 +18,10 @@ function read(file) {
 }
 for (const file of required.filter(file => file.endsWith(".html") && existsSync(path.join(root,file)))) {
   const html = read(file);
-  const ids = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]));
+  const idList = [...html.matchAll(/\bid=["\']([^"\']+)["\']/g)].map(match => match[1]);
+  const ids = new Set(idList);
+  const duplicateIds = idList.filter((id, index) => idList.indexOf(id) !== index);
+  for (const id of [...new Set(duplicateIds)]) errors.push(file + ": duplicate id attribute #" + id);
   for (const match of html.matchAll(/\b(?:href|src)=["']([^"']+)["']/g)) {
     let target = match[1].trim();
     if (!target || /^(?:https?:|mailto:|tel:|data:|javascript:|\/\/|#)/i.test(target)) {
@@ -38,7 +41,8 @@ for (const match of products.matchAll(/image:"(\/images\/[^"]+)"/g)) {
   const file = match[1].replace(/^\/+/, "");
   if (!existsSync(path.join(root, file))) errors.push("Missing local product image: " + file);
 }
-const combined = ["index.html","styles.css","js/products.mjs"].map(read).join("\n");
+const sourceFiles = [...required.filter(file => /\.(?:html|css|mjs)$/.test(file)), "scripts/validate-site.mjs"];
+const combined = sourceFiles.map(read).join("\n");
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
   if (combined.includes(blocked)) errors.push("External asset dependency found: " + blocked);
 }
