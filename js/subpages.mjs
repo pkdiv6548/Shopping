@@ -33,7 +33,7 @@ function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(ke
 function writeStorage(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(error){console.warn("Storage unavailable",error);}}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
 function guestWishlist(){const value=readStorage("sm_guest_wishlist",[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
-const state={lang:readStorage("sm_lang","en")==="hi"?"hi":"en",user:null,products:PRODUCTS.map(p=>({...p,variants:[]})),dbIds:{},cart:guestCart(),wishlist:guestWishlist(),authMode:"signin"};
+const state={lang:readStorage("sm_lang","en")==="hi"?"hi":"en",user:null,products:PRODUCTS.map(p=>({...p,variants:[]})),dbIds:{},cart:guestCart(),cartRevision:0,wishlist:guestWishlist(),authMode:"signin"};
 let productBySlug={}, productByDbId={}, variantById={};
 
 function toast(message){const node=$("#page-toast");if(!node)return;node.textContent=message;node.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{node.hidden=true;},3000);}
@@ -107,7 +107,9 @@ async function persistWishlist(){
  const active=new Set(rows.map(row=>row.product_id)),stale=(existing||[]).map(row=>row.product_id).filter(id=>!active.has(id));
  if(stale.length){const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error;}
 }
+let restoreSequence=0;
 async function restoreUser(user){
+ const sequence=++restoreSequence,cartRevisionAtStart=state.cartRevision;
  state.user=user||null;
  if(!user){state.cart=guestCart();normalizeGuestCart();state.wishlist=guestWishlist();return;}
  const [wishResult,cartResult]=await Promise.all([
@@ -115,6 +117,7 @@ async function restoreUser(user){
   supabase.from("sm_cart_items").select("product_id,variant_id,quantity").eq("user_id",user.id)
  ]);
  if(wishResult.error)throw wishResult.error;if(cartResult.error)throw cartResult.error;
+ if(sequence!==restoreSequence||state.user?.id!==user.id)return;
  const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),cartByKey=new Map();
  (cartResult.data||[]).forEach(row=>{
   const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
@@ -127,10 +130,12 @@ async function restoreUser(user){
   const key=item.id+":"+variant.id,existing=cartByKey.get(key);
   cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(variant.stock_quantity,99,(existing?.qty||0)+item.qty)});
  });
- state.cart=[...cartByKey.values()];
+ const cartChangedDuringRestore=state.cartRevision!==cartRevisionAtStart;
+ if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
  state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist])];
- if(oldGuestCart.length||oldGuestWishlist.length){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ else if(cartChangedDuringRestore){await persistCart();}
 }
 function card(product){
  const saved=state.wishlist.includes(product.id);
@@ -266,6 +271,7 @@ async function addToCart(productId,variantId,quantity=1){
  if((existing?.qty||0)+amount>variant.stock_quantity)throw new Error(state.lang==="hi"?"चुने गए साइज़ का पर्याप्त स्टॉक उपलब्ध नहीं है।":"There is not enough stock for the selected size.");
  if(existing)existing.qty+=amount;
  else state.cart.push({id:product.id,variantId:variant.id,size:variant.size_label,qty:amount});
+ state.cartRevision++;
  await persistCart();renderPageAfterState();toast(translate("added"));
 }
 async function toggleWishlist(productId){
@@ -286,7 +292,7 @@ document.addEventListener("click",async event=>{
   if(action==="toggle-wishlist"){await toggleWishlist(button.dataset.product);return;}
   if(action==="add-default"){const product=state.products.find(item=>item.id===Number(button.dataset.product));if(!product)throw new Error(translate("error"));const available=(product.variants||[]).filter(variant=>variant.stock_quantity>0);if(available.length>1){location.href="/product.html?slug="+encodeURIComponent(product.slug);return;}const variant=available[0]||defaultVariant(button.dataset.product);if(!variant)throw new Error(translate("invalidSize"));await addToCart(button.dataset.product,variant.id,1);return;}
   if(action==="add-detail"){const amount=Number($("#detail-quantity")?.value||1),variantId=$("#detail-size")?.value||"";await addToCart(button.dataset.product,variantId,amount);return;}
-  if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));await persistCart();renderCart();renderPageTranslations();return;}
+  if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));state.cartRevision++;await persistCart();renderCart();renderPageTranslations();return;}
   if(action==="quantity-up"||action==="quantity-down"){
    const row=state.cart.find(item=>item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant);
    if(row){
@@ -301,6 +307,7 @@ document.addEventListener("click",async event=>{
     if(action==="quantity-up"&&row.qty>=max){toast(state.lang==="hi"?"इस साइज़ की अधिकतम उपलब्ध मात्रा आपके बैग में है।":"Your bag already has the maximum available stock for this size.");return;}
     row.qty=action==="quantity-up"?Math.min(max,row.qty+1):row.qty-1;
     if(row.qty<1)state.cart=state.cart.filter(item=>item!==row);
+    state.cartRevision++;
     await persistCart();renderCart();renderPageTranslations();
    }
    return;
