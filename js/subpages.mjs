@@ -11,19 +11,19 @@ const page = document.body.dataset.page || "collection";
 const text = {
   en: {
     promo:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999",localMarket:"SHOPPING MART / INDIA",searchLabel:"Search",priceFilter:"Price",colorFilter:"Colour",allPrices:"All prices",under1500:"Under ₹1,500",range1500:"₹1,500–₹2,500",above2500:"Above ₹2,500",allColours:"All colours",home:"HOME",shopAll:"SHOP ALL",saved:"WISHLIST",bag:"BAG",account:"ACCOUNT",footer:"Style that feels like you.",demo:"DEMO STORE · PAYMENTS NOT ENABLED",
-    newEdit:"THE EVERYDAY EDIT",shopTitle:"Pieces for everyday.",shopIntro:"Considered essentials, easy layers and modern silhouettes.",search:"Search products, categories…",category:"Category",sort:"Sort by",recommended:"Recommended",low:"Price: low to high",high:"Price: high to low",allPieces:"All pieces",noResults:"No pieces found.",clear:"Clear filters",
+    newEdit:"THE EVERYDAY EDIT",shopTitle:"Pieces for everyday.",shopIntro:"Considered essentials, easy layers and modern silhouettes.",womenNav:"WOMEN",menNav:"MEN",newArrivalsNav:"NEW IN",searchNav:"SEARCH",aboutNav:"ABOUT",womenEyebrow:"THE WOMEN’S EDIT",womenTitle:"A considered women’s edit.",womenIntro:"Versatile layers and considered silhouettes for the everyday.",menEyebrow:"THE MEN’S EDIT",menTitle:"Everyday style, refined.",menIntro:"Easy essentials, modern layers and uncomplicated fits.",newEyebrow:"JUST ARRIVED",newTitle:"New pieces, just in.",newIntro:"Fresh additions to the Shopping Mart everyday edit.",searchEyebrow:"FIND YOUR NEXT FAVOURITE",searchTitle:"Search the collection.",searchIntro:"Search product names, categories and colours.",checkoutEyebrow:"YOUR ORDER",checkoutTitle:"Checkout.",checkoutIntro:"Review your selected pieces before the final step.",backToBag:"BACK TO BAG ↗",aboutEyebrow:"THE SHOPPING MART POINT OF VIEW",aboutTitle:"Less noise. More meaning.",aboutIntro:"Everyday essentials, considered details and modern silhouettes.",aboutPrinciple:"OUR PRINCIPLE",aboutHeading:"Style should feel simple.",aboutBody:"We believe getting dressed should feel simple. Pieces with considered details, easy combinations and a place in your wardrobe beyond one season.",search:"Search products, categories…",category:"Category",sort:"Sort by",recommended:"Recommended",low:"Price: low to high",high:"Price: high to low",allPieces:"All pieces",noResults:"No pieces found.",clear:"Clear filters",
     youMayLike:"YOU MAY ALSO LIKE",new:"NEW",bestSeller:"BESTSELLER",size:"Select a size",color:"Colour",add:"ADD TO BAG",chooseSize:"CHOOSE SIZE",savedButton:"SAVE TO WISHLIST",removeWish:"REMOVE FROM WISHLIST",inStock:"In stock",outOfStock:"Currently unavailable",qty:"Quantity",ship:"Complimentary shipping on orders over ₹2,999.",details:"Product details",back:"BACK TO SHOP",productNotFound:"We couldn't find that piece.",continueShopping:"CONTINUE SHOPPING ↗",
     bagEyebrow:"YOUR EDIT",bagTitle:"Your bag.",bagIntro:"Review pieces and sizes before checkout.",emptyCart:"Your bag is empty.",subtotal:"Subtotal",demoCheckout:"Checkout is a demo only. Real payments and orders are not enabled.",remove:"REMOVE",update:"UPDATE",checkout:"CONTINUE TO CHECKOUT",sizeLabel:"Size",
     savedEyebrow:"YOUR FAVOURITES",savedTitle:"Saved pieces.",savedIntro:"The pieces you want to come back to.",emptyWish:"You haven't saved any pieces yet.",moveToBag:"ADD TO BAG",
-    accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",instockQty:"Available"
+    accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",checkoutItems:"ORDER SUMMARY",checkoutSubtotal:"Subtotal",checkoutNotice:"This is a demo checkout. No payment will be collected and no real order will be placed.",checkoutAction:"CONFIRM DEMO ONLY",checkoutEmpty:"Your bag is empty. Add a few pieces before checkout.",searchMatches:"Matching pieces",searchHint:"Type a product, category or colour to begin.",instockQty:"Available"
   },
   hi: {
     promo:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",localMarket:"SHOPPING MART / भारत",searchLabel:"खोजें",priceFilter:"कीमत",colorFilter:"रंग",allPrices:"सभी कीमतें",under1500:"₹1,500 से कम",range1500:"₹1,500–₹2,500",above2500:"₹2,500 से अधिक",allColours:"सभी रंग",home:"होम",shopAll:"सभी प्रोडक्ट",saved:"विशलिस्ट",bag:"बैग",account:"अकाउंट",footer:"ऐसा स्टाइल जो आप जैसा लगे।",demo:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
-    newEdit:"हर दिन का कलेक्शन",shopTitle:"हर दिन के लिए खास पीस।",shopIntro:"चुने हुए एसेंशियल, आसान लेयर्स और आधुनिक स्टाइल।",search:"प्रोडक्ट या कैटेगरी खोजें…",category:"कैटेगरी",sort:"क्रम",recommended:"सुझाए गए",low:"कीमत: कम से ज़्यादा",high:"कीमत: ज़्यादा से कम",allPieces:"सभी प्रोडक्ट",noResults:"कोई प्रोडक्ट नहीं मिला।",clear:"फ़िल्टर हटाएँ",
+    newEdit:"हर दिन का कलेक्शन",shopTitle:"हर दिन के लिए खास पीस।",shopIntro:"चुने हुए एसेंशियल, आसान लेयर्स और आधुनिक स्टाइल।",womenNav:"महिलाएँ",menNav:"पुरुष",newArrivalsNav:"नए प्रोडक्ट",searchNav:"खोजें",aboutNav:"हमारे बारे में",womenEyebrow:"महिलाओं का कलेक्शन",womenTitle:"महिलाओं के लिए चुना हुआ कलेक्शन।",womenIntro:"हर दिन के लिए बहुउपयोगी लेयर्स और सोच-समझकर चुने गए स्टाइल।",menEyebrow:"पुरुषों का कलेक्शन",menTitle:"हर दिन का बेहतर स्टाइल।",menIntro:"आसान एसेंशियल, आधुनिक लेयर्स और आरामदायक फिट।",newEyebrow:"अभी-अभी आया",newTitle:"नए प्रोडक्ट।",newIntro:"Shopping Mart के रोज़मर्रा के कलेक्शन में नए प्रोडक्ट।",searchEyebrow:"अपना अगला पसंदीदा प्रोडक्ट खोजें",searchTitle:"कलेक्शन में खोजें।",searchIntro:"प्रोडक्ट के नाम, कैटेगरी और रंग से खोजें।",checkoutEyebrow:"आपका ऑर्डर",checkoutTitle:"चेकआउट।",checkoutIntro:"अगले चरण से पहले चुने गए प्रोडक्ट जाँचें।",backToBag:"बैग पर वापस जाएँ ↗",aboutEyebrow:"SHOPPING MART का नज़रिया",aboutTitle:"कम शोर। ज़्यादा मायने।",aboutIntro:"हर दिन के लिए ज़रूरी प्रोडक्ट, सोच-समझकर चुने गए विवरण और आधुनिक स्टाइल।",aboutPrinciple:"हमारा सिद्धांत",aboutHeading:"स्टाइल सरल होना चाहिए।",aboutBody:"हम मानते हैं कि कपड़े चुनना आसान लगना चाहिए। ऐसे प्रोडक्ट जिनमें सोच-समझकर चुने गए विवरण हों, जिन्हें आसानी से साथ पहना जा सके और जो एक सीज़न से आगे भी आपके वॉर्डरोब में रहें।",search:"प्रोडक्ट या कैटेगरी खोजें…",category:"कैटेगरी",sort:"क्रम",recommended:"सुझाए गए",low:"कीमत: कम से ज़्यादा",high:"कीमत: ज़्यादा से कम",allPieces:"सभी प्रोडक्ट",noResults:"कोई प्रोडक्ट नहीं मिला।",clear:"फ़िल्टर हटाएँ",
     youMayLike:"आपको ये भी पसंद आ सकते हैं",new:"नया",bestSeller:"लोकप्रिय",size:"साइज़ चुनें",color:"रंग",add:"बैग में जोड़ें",chooseSize:"साइज़ चुनें",savedButton:"विशलिस्ट में सेव करें",removeWish:"विशलिस्ट से हटाएँ",inStock:"स्टॉक में उपलब्ध",outOfStock:"अभी उपलब्ध नहीं",qty:"मात्रा",ship:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी।",details:"प्रोडक्ट विवरण",back:"शॉप पर वापस जाएँ",productNotFound:"यह प्रोडक्ट नहीं मिला।",continueShopping:"खरीदारी जारी रखें ↗",
     bagEyebrow:"आपका कलेक्शन",bagTitle:"आपका बैग।",bagIntro:"चेकआउट से पहले प्रोडक्ट और साइज़ जाँचें।",emptyCart:"आपका बैग खाली है।",subtotal:"कुल",demoCheckout:"चेकआउट अभी डेमो है। वास्तविक भुगतान या ऑर्डर चालू नहीं हैं।",remove:"हटाएँ",update:"अपडेट",checkout:"चेकआउट जारी रखें",sizeLabel:"साइज़",
     savedEyebrow:"आपके पसंदीदा",savedTitle:"सेव किए गए प्रोडक्ट।",savedIntro:"वे प्रोडक्ट जिन्हें आप बाद में देखना चाहते हैं।",emptyWish:"अभी कोई प्रोडक्ट सेव नहीं किया है।",moveToBag:"बैग में जोड़ें",
-    accountEyebrow:"SHOPPING MART / अकाउंट",accountTitle:"आपका अकाउंट।",accountIntro:"लॉगिन करने पर आपका बैग और विशलिस्ट अकाउंट के साथ सेव रहेंगे।",welcome:"वापस स्वागत है।",createAccount:"अकाउंट बनाएँ",signIn:"लॉगिन",fullName:"पूरा नाम",email:"ईमेल पता",password:"पासवर्ड",confirm:"अकाउंट बनाएँ",submit:"लॉगिन करें",signOut:"लॉगआउट",saveProfile:"प्रोफाइल सेव करें",profileSaved:"प्रोफाइल अपडेट हो गई।",signedIn:"लॉगिन सफल हुआ।",signedOut:"आप लॉगआउट हो गए हैं।",checkEmail:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",demoNewsletter:"न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",loading:"लोड हो रहा है…",continue:"जारी रखें",status:"स्थिति",profile:"प्रोफाइल विवरण",accountHelp:"लॉगिन करने पर आपका बैग और विशलिस्ट आपके अकाउंट से जुड़े रहेंगे।",invalidSize:"पहले उपलब्ध साइज़ चुनें।",added:"बैग में जोड़ दिया गया।",savedToast:"विशलिस्ट में सेव किया गया।",removedToast:"विशलिस्ट से हटा दिया गया।",error:"कुछ गड़बड़ हुई। दोबारा कोशिश करें।",instockQty:"उपलब्ध"
+    accountEyebrow:"SHOPPING MART / अकाउंट",accountTitle:"आपका अकाउंट।",accountIntro:"लॉगिन करने पर आपका बैग और विशलिस्ट अकाउंट के साथ सेव रहेंगे।",welcome:"वापस स्वागत है।",createAccount:"अकाउंट बनाएँ",signIn:"लॉगिन",fullName:"पूरा नाम",email:"ईमेल पता",password:"पासवर्ड",confirm:"अकाउंट बनाएँ",submit:"लॉगिन करें",signOut:"लॉगआउट",saveProfile:"प्रोफाइल सेव करें",profileSaved:"प्रोफाइल अपडेट हो गई।",signedIn:"लॉगिन सफल हुआ।",signedOut:"आप लॉगआउट हो गए हैं।",checkEmail:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",demoNewsletter:"न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",loading:"लोड हो रहा है…",continue:"जारी रखें",status:"स्थिति",profile:"प्रोफाइल विवरण",accountHelp:"लॉगिन करने पर आपका बैग और विशलिस्ट आपके अकाउंट से जुड़े रहेंगे।",invalidSize:"पहले उपलब्ध साइज़ चुनें।",added:"बैग में जोड़ दिया गया।",savedToast:"विशलिस्ट में सेव किया गया।",removedToast:"विशलिस्ट से हटा दिया गया।",error:"कुछ गड़बड़ हुई। दोबारा कोशिश करें।",checkoutItems:"ऑर्डर का सारांश",checkoutSubtotal:"कुल",checkoutNotice:"यह डेमो चेकआउट है। कोई भुगतान नहीं लिया जाएगा और वास्तविक ऑर्डर नहीं बनेगा।",checkoutAction:"केवल डेमो की पुष्टि",checkoutEmpty:"आपका बैग खाली है। चेकआउट से पहले कुछ प्रोडक्ट जोड़ें।",searchMatches:"मिलते-जुलते प्रोडक्ट",searchHint:"शुरू करने के लिए प्रोडक्ट, कैटेगरी या रंग लिखें।",instockQty:"उपलब्ध"
   }
 };
 const translate = key => (text[state.lang] && text[state.lang][key]) || text.en[key] || key;
@@ -166,7 +166,10 @@ function renderCollection(){
   const matchesQuery=!query||[product.name,product.hi,product.category,product.categoryHi,product.color,product.colorHi].some(value=>String(value||"").toLocaleLowerCase().includes(query));
   const matchesPrice=priceValue==="all"||(priceValue==="under1500"?product.price<1500:priceValue==="1500-2500"?product.price>=1500&&product.price<=2500:priceValue==="above2500"?product.price>2500:true);
   const matchesColor=color==="All"||product.color===color;
-  return matchesCategory&&matchesQuery&&matchesPrice&&matchesColor;
+  const audience=product.audience||"unisex";
+  const pageFilter=document.body.dataset.categoryFilter||"";
+  const matchesAudience=!pageFilter||(pageFilter==="new"?product.tag==="new":pageFilter==="women"?["women","unisex"].includes(audience):pageFilter==="men"?["men","unisex"].includes(audience):true);
+  return matchesCategory&&matchesQuery&&matchesPrice&&matchesColor&&matchesAudience;
  });
  if(sort==="low")list.sort((a,b)=>a.price-b.price);if(sort==="high")list.sort((a,b)=>b.price-a.price);
  grid.innerHTML=list.map(card).join("");
@@ -216,9 +219,39 @@ function renderAccount(){
    '<p class="auth-notice" id="account-message" role="status" hidden></p><button class="button button-dark" type="submit">'+escapeHtml(translate(state.authMode==="signin"?"submit":"confirm"))+' ↗</button></form>';
  }
 }
+function renderSearch(){
+ const input=$("#site-search"),grid=$("#site-search-results");
+ if(!input||!grid)return;
+ const params=new URLSearchParams(location.search);
+ if(!input.dataset.initialized){input.value=params.get("q")||"";input.dataset.initialized="true";}
+ const select=$("#site-search-category"),prior=select?.value||"All";
+ if(select){select.innerHTML=CATEGORIES.map(value=>'<option value="'+escapeHtml(value)+'">'+escapeHtml(state.lang==="hi"?(CATEGORY_HI[value]||value):value)+'</option>').join("");select.value=CATEGORIES.includes(prior)?prior:"All";}
+ const query=input.value.trim().toLocaleLowerCase(),category=select?.value||"All",sort=$("#site-search-sort")?.value||"recommended";
+ let list=state.products.filter(product=>{
+  const fields=[product.name,product.hi,product.category,product.categoryHi,product.color,product.colorHi,product.slug];
+  const matchesQuery=!query||fields.some(value=>String(value||"").toLocaleLowerCase().includes(query));
+  const matchesCategory=category==="All"||(category==="New in"?product.tag==="new":category==="Clothing"?!["Accessories","Shoes"].includes(product.category):product.category===category);
+  return matchesQuery&&matchesCategory;
+ });
+ if(sort==="low")list.sort((a,b)=>a.price-b.price);if(sort==="high")list.sort((a,b)=>b.price-a.price);
+ grid.innerHTML=list.map(card).join("");
+ const count=$("#site-search-count"),label=$("#site-search-label"),empty=$("#site-search-empty");
+ if(count)count.textContent=String(list.length)+" "+(state.lang==="hi"?"प्रोडक्ट":"PIECES");
+ if(label)label.textContent=query?(state.lang==="hi"?"खोज परिणाम":"Search results"):translate("allPieces");
+ if(empty)empty.hidden=list.length>0;
+}
+function renderCheckout(){
+ const root=$("#checkout-page");if(!root)return;
+ const rows=state.cart.map(item=>({item,product:state.products.find(p=>p.id===item.id)})).filter(row=>row.product);
+ const subtotal=rows.reduce((sum,row)=>sum+row.product.price*row.item.qty,0);
+ if(!rows.length){root.innerHTML='<div class="page-empty"><p>'+escapeHtml(translate("checkoutEmpty"))+'</p><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("continueShopping"))+'</a></div>';return;}
+ root.innerHTML='<div class="cart-layout"><div class="cart-items"><h2>'+escapeHtml(translate("checkoutItems"))+'</h2>'+rows.map(({item,product})=>'<article class="cart-page-item"><a href="/product.html?slug='+encodeURIComponent(product.slug)+'"><img src="'+escapeHtml(product.image)+'" alt="'+escapeHtml(nameOf(product))+'"></a><div class="cart-page-item-info"><h2><a href="/product.html?slug='+encodeURIComponent(product.slug)+'">'+escapeHtml(nameOf(product))+'</a></h2><p>'+escapeHtml(translate("sizeLabel"))+': <strong>'+escapeHtml(item.size||"One size")+'</strong></p><p>'+escapeHtml(translate("qty"))+': '+item.qty+'</p></div><strong class="cart-line-total">'+price(product.price*item.qty)+'</strong></article>').join("")+'</div><aside class="cart-summary"><p class="eyebrow">'+escapeHtml(translate("checkoutItems"))+'</p><div><span>'+escapeHtml(translate("checkoutSubtotal"))+'</span><strong>'+price(subtotal)+'</strong></div><p>'+escapeHtml(translate("checkoutNotice"))+'</p><button class="button button-dark full" data-action="checkout-demo" type="button">'+escapeHtml(translate("checkoutAction"))+'</button><a href="/cart.html" class="text-link">'+escapeHtml(translate("backToBag"))+'</a></aside></div>';
+}
 function renderCurrentPage(){
  renderPageTranslations();
- if(page==="collection")renderCollection();
+ if(page==="collection"||page==="category")renderCollection();
+ if(page==="search")renderSearch();
+ if(page==="checkout")renderCheckout();
  if(page==="product")renderProduct();
  if(page==="cart")renderCart();
  if(page==="wishlist")renderWishlist();
@@ -242,7 +275,7 @@ async function toggleWishlist(productId){
 }
 function renderPageAfterState(){
  renderPageTranslations();
- if(page==="collection")renderCollection();if(page==="product")renderProduct();if(page==="cart")renderCart();if(page==="wishlist")renderWishlist();
+ if(page==="collection"||page==="category")renderCollection();if(page==="search")renderSearch();if(page==="checkout")renderCheckout();if(page==="product")renderProduct();if(page==="cart")renderCart();if(page==="wishlist")renderWishlist();if(page==="account")renderAccount();
 }
 document.addEventListener("click",async event=>{
  const link=event.target.closest("a[data-action]");if(link&&link.dataset.action==="language-toggle"){event.preventDefault();toggleLanguage();return;}
@@ -274,6 +307,7 @@ document.addEventListener("click",async event=>{
   }
   if(action==="checkout-demo"){toast(translate("demoCheckout"));return;}
   if(action==="clear-collection"){if($("#collection-search"))$("#collection-search").value="";if($("#collection-category"))$("#collection-category").value="All";if($("#collection-sort"))$("#collection-sort").value="recommended";if($("#collection-price"))$("#collection-price").value="all";if($("#collection-color"))$("#collection-color").value="All";renderCollection();return;}
+  if(action==="clear-search-page"){if($("#site-search"))$("#site-search").value="";if($("#site-search-category"))$("#site-search-category").value="All";if($("#site-search-sort"))$("#site-search-sort").value="recommended";history.replaceState(null,"","/search.html");renderSearch();return;}
   if(action==="auth-mode"){state.authMode=button.dataset.mode==="signup"?"signup":"signin";renderAccount();return;}
   if(action==="signout"){const {error}=await supabase.auth.signOut();if(error)throw error;await restoreUser(null);renderAccount();renderPageTranslations();toast(translate("signedOut"));return;}
  }catch(error){console.error(error);toast(error.message||translate("error"));}
@@ -311,6 +345,9 @@ $("#collection-category")?.addEventListener("change",renderCollection);
 $("#collection-sort")?.addEventListener("change",renderCollection);
 $("#collection-price")?.addEventListener("change",renderCollection);
 $("#collection-color")?.addEventListener("change",renderCollection);
+$("#site-search")?.addEventListener("input",renderSearch);
+$("#site-search-category")?.addEventListener("change",renderSearch);
+$("#site-search-sort")?.addEventListener("change",renderSearch);
 function toggleLanguage(){
  state.lang=state.lang==="en"?"hi":"en";writeStorage("sm_lang",state.lang);renderCurrentPage();
 }
