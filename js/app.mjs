@@ -1,170 +1,524 @@
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
 
 const SUPABASE_URL = "https://dbenwifjhdqhiznowncs.supabase.co";
 const SUPABASE_PUBLISHABLE_KEY = "sb_publishable_-x_VjXiyIL7j_dz7b7AgQQ_jv_Wj4dq";
 const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
-const $ = (s, root=document) => root.querySelector(s);
-const $$ = (s, root=document) => [...root.querySelectorAll(s)];
-const state = { lang:"en", category:"All", query:"", sort:"recommended", user:null, cart:[], wishlist:[], dbIds:{}, products:PRODUCTS };
+const $ = (s, root = document) => root.querySelector(s);
+const $$ = (s, root = document) => [...root.querySelectorAll(s)];
+const fallbackProducts = PRODUCTS.map((product) => ({ ...product }));
+const state = { lang: "en", category: "All", query: "", sort: "recommended", user: null, cart: [], wishlist: [], dbIds: {}, products: fallbackProducts };
+
 const words = {
- en:{top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999",new:"NEW SEASON / 2026",subtitle:"Thoughtful pieces. Better everyday dressing. Find your next forever favourite.",shop:"EXPLORE THE EDIT",discover:"THE NEW EDIT",featured:"MADE FOR YOUR EVERYDAY",discoverSub:"Fresh silhouettes, easy layers and pieces made to live in.",all:"VIEW ALL",newsletter:"Good things, occasionally.",newsletterSub:"A little inspiration, new arrivals and notes from our world.",email:"Your email address",join:"SIGN ME UP",footer:"Style that feels like you.",search:"Search pieces, categories...",allProducts:"All pieces",recommended:"Recommended",low:"Price: low to high",high:"Price: high to low",empty:"No pieces found. Try another search.",added:"Added to your bag",bag:"Your bag",close:"Close",checkout:"Continue to demo checkout",demo:"DEMO STORE · NO REAL PAYMENT",subtotal:"Subtotal",saved:"Saved pieces",women:"WOMEN",men:"MEN",studio:"STUDIO",menu:"MENU",count:"pieces",filters:"FILTER",clear:"Clear",color:"Colour",price:"Price",quick:"QUICK VIEW",view:"DISCOVER PIECE",inBag:"IN BAG",size:"Select a size",add:"ADD TO BAG",addedWish:"Saved to wishlist",removeWish:"Removed from wishlist",signIn:"SIGN IN",create:"CREATE ACCOUNT",name:"Full name",password:"Password",logout:"SIGN OUT",profile:"EDIT PROFILE",save:"SAVE CHANGES",signed:"Signed in successfully.",needLogin:"Sign in to save your bag and favourites.",emptyCart:"Your bag is empty.",emptyWish:"No saved pieces yet.",emailConfirm:"Check your email to confirm your account."},
- hi:{top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",new:"नया सीज़न / 2026",subtitle:"सोच-समझकर चुने गए कपड़े। रोज़मर्रा के लिए बेहतर स्टाइल।",shop:"कलेक्शन देखें",discover:"नया कलेक्शन",featured:"आपके हर दिन के लिए",discoverSub:"नए सिल्हूट और हर दिन पहनने के लिए खास पीस।",all:"सभी देखें",newsletter:"अच्छी बातें, कभी-कभी।",newsletterSub:"थोड़ी प्रेरणा और नए कलेक्शन की जानकारी।",email:"अपना ईमेल पता",join:"जुड़ें",footer:"ऐसा स्टाइल जो आप जैसा लगे।",search:"पीस या कैटेगरी खोजें...",allProducts:"सभी पीस",recommended:"सुझाए गए",low:"कीमत: कम से ज़्यादा",high:"कीमत: ज़्यादा से कम",empty:"कोई पीस नहीं मिला। दूसरी खोज आज़माएँ।",added:"बैग में जोड़ा गया",bag:"आपका बैग",close:"बंद करें",checkout:"डेमो चेकआउट पर जाएँ",demo:"डेमो स्टोर · कोई असली भुगतान नहीं",subtotal:"कुल",saved:"सेव किए गए पीस",women:"महिलाएँ",men:"पुरुष",studio:"स्टूडियो",menu:"मेन्यू",count:"पीस",filters:"फ़िल्टर",clear:"हटाएँ",color:"रंग",price:"कीमत",quick:"जल्दी देखें",view:"पीस देखें",inBag:"बैग में",size:"साइज़ चुनें",add:"बैग में जोड़ें",addedWish:"फेवरेट में सेव किया",removeWish:"फेवरेट से हटाया",signIn:"लॉगिन",create:"अकाउंट बनाएँ",name:"पूरा नाम",password:"पासवर्ड",logout:"लॉगआउट",profile:"प्रोफाइल एडिट करें",save:"बदलाव सेव करें",signed:"लॉगिन सफल हुआ।",needLogin:"कार्ट और फेवरेट सेव करने के लिए लॉगिन करें।",emptyCart:"आपका बैग खाली है।",emptyWish:"अभी कोई फेवरेट सेव नहीं है।",emailConfirm:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।"}
+  en: {
+    top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026",
+    title1:"A little less,", title2:"a lot more.", subtitle:"Thoughtful pieces. Better everyday dressing. Find your next forever favourite.",
+    shop:"EXPLORE THE EDIT", discover:"THE NEW EDIT", featured:"MADE FOR YOUR EVERYDAY",
+    discoverSub:"Fresh silhouettes, easy layers and pieces made to live in.", all:"VIEW ALL",
+    newsletter:"Good things, occasionally.", newsletterSub:"A little inspiration, new arrivals and notes from our world.",
+    email:"Your email address", join:"SIGN ME UP", footer:"Style that feels like you.",
+    search:"Search pieces, categories...", allProducts:"All pieces", recommended:"Recommended",
+    low:"Price: low to high", high:"Price: high to low", empty:"No pieces found. Try another search.",
+    added:"Added to your bag", bag:"Your bag", close:"Close", checkout:"Continue to demo checkout",
+    demo:"DEMO STORE · NO REAL PAYMENT", subtotal:"Subtotal", saved:"Saved pieces",
+    women:"WOMEN", men:"MEN", studio:"STUDIO", menu:"MENU", count:"pieces",
+    filters:"FILTER", clear:"Clear", color:"Colour", price:"Price", quick:"QUICK VIEW",
+    view:"DISCOVER PIECE", inBag:"IN BAG", size:"Select a size", add:"ADD TO BAG",
+    addedWish:"Saved to wishlist", removeWish:"Remove from wishlist",
+    signIn:"SIGN IN", create:"CREATE ACCOUNT", name:"Full name", password:"Password",
+    logout:"SIGN OUT", save:"SAVE CHANGES", signed:"Signed in successfully.",
+    needLogin:"Sign in to save your bag and favourites.", emptyCart:"Your bag is empty.",
+    emptyWish:"No saved pieces yet.", emailConfirm:"Check your email to confirm your account.",
+    footerIntro:"Considered essentials and modern silhouettes for everyday life.", footerShop:"SHOP",
+    newArrivals:"New arrivals", shirts:"Shirts", trousers:"Trousers", dresses:"Dresses",
+    accessories:"Accessories", footerDiscover:"DISCOVER", ourView:"Our point of view",
+    everydayEdit:"The everyday edit", newsletterLink:"Newsletter", newSeason:"New season",
+    footerHelp:"HELP & INFORMATION", contact:"Contact & updates", demoInfo:"Demo store information",
+    demoNote:"Demo checkout · no real payments", demoDisclaimer:"DEMO STORE · PAYMENTS NOT ENABLED",
+    strip:"DESIGNED FOR REAL LIFE", arrivals:"New arrivals", essentials:"Everyday essentials",
+    finishing:"Finishing touches", viewPoint:"THE SHOPPING MART POINT OF VIEW",
+    manifestoTitle:"Less noise.", manifestoEm:"More meaning.",
+    manifestoBody:"We believe getting dressed should feel simple. Pieces with considered details, easy combinations and a place in your wardrobe beyond one season.",
+    newsletterEyebrow:"A NOTE FROM US", signedOut:"Signed out successfully.",
+    demoCheckout:"This demo does not process payments.", newsletterDemo:"Newsletter signup is not connected in this demo.",
+    remove:"REMOVE", categoryAll:"All pieces", menuTitle:"Browse categories"
+  },
+  hi: {
+    top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026",
+    title1:"कम में भी,", title2:"बहुत कुछ।", subtitle:"सोच-समझकर चुने गए कपड़े। रोज़मर्रा के लिए बेहतर स्टाइल। अपना अगला पसंदीदा पीस खोजें।",
+    shop:"कलेक्शन देखें", discover:"नया कलेक्शन", featured:"आपके हर दिन के लिए",
+    discoverSub:"नए सिल्हूट, आसान लेयर्स और हर दिन पहनने के लिए खास पीस।", all:"सभी देखें",
+    newsletter:"अच्छी बातें, कभी-कभी।", newsletterSub:"थोड़ी प्रेरणा, नए कलेक्शन और हमारी दुनिया की बातें।",
+    email:"अपना ईमेल पता", join:"जुड़ें", footer:"ऐसा स्टाइल जो आप जैसा लगे।",
+    search:"पीस या कैटेगरी खोजें...", allProducts:"सभी पीस", recommended:"सुझाए गए",
+    low:"कीमत: कम से ज़्यादा", high:"कीमत: ज़्यादा से कम", empty:"कोई पीस नहीं मिला। दूसरी खोज आज़माएँ।",
+    added:"बैग में जोड़ा गया", bag:"आपका बैग", close:"बंद करें", checkout:"डेमो चेकआउट पर जाएँ",
+    demo:"डेमो स्टोर · कोई असली भुगतान नहीं", subtotal:"कुल", saved:"सेव किए गए पीस",
+    women:"महिलाएँ", men:"पुरुष", studio:"स्टूडियो", menu:"मेन्यू", count:"पीस",
+    filters:"फ़िल्टर", clear:"हटाएँ", color:"रंग", price:"कीमत", quick:"जल्दी देखें",
+    view:"पीस देखें", inBag:"बैग में", size:"साइज़ चुनें", add:"बैग में जोड़ें",
+    addedWish:"फेवरेट में सेव किया", removeWish:"फेवरेट से हटाएँ",
+    signIn:"लॉगिन", create:"अकाउंट बनाएँ", name:"पूरा नाम", password:"पासवर्ड",
+    logout:"लॉगआउट", save:"बदलाव सेव करें", signed:"लॉगिन सफल हुआ।",
+    needLogin:"बैग और फेवरेट सेव करने के लिए लॉगिन करें।", emptyCart:"आपका बैग खाली है।",
+    emptyWish:"अभी कोई फेवरेट सेव नहीं है।", emailConfirm:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",
+    footerIntro:"रोज़मर्रा की ज़िंदगी के लिए चुने हुए एसेंशियल और आधुनिक स्टाइल।", footerShop:"खरीदें",
+    newArrivals:"नए प्रोडक्ट", shirts:"शर्ट", trousers:"ट्राउज़र", dresses:"ड्रेस",
+    accessories:"एक्सेसरीज़", footerDiscover:"जानें", ourView:"हमारा नज़रिया",
+    everydayEdit:"हर दिन का कलेक्शन", newsletterLink:"न्यूज़लेटर", newSeason:"नया सीज़न",
+    footerHelp:"सहायता और जानकारी", contact:"संपर्क और अपडेट", demoInfo:"डेमो स्टोर की जानकारी",
+    demoNote:"डेमो चेकआउट · वास्तविक भुगतान नहीं", demoDisclaimer:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
+    strip:"वास्तविक ज़िंदगी के लिए डिज़ाइन", arrivals:"नए प्रोडक्ट", essentials:"रोज़मर्रा के एसेंशियल",
+    finishing:"आख़िरी टच", viewPoint:"SHOPPING MART का नज़रिया",
+    manifestoTitle:"कम शोर।", manifestoEm:"ज़्यादा मायने।",
+    manifestoBody:"हम मानते हैं कि कपड़े पहनना आसान होना चाहिए। सोच-समझकर चुने गए विवरण और ऐसे पीस जो एक सीज़न से आगे भी आपके वॉर्डरोब का हिस्सा रहें।",
+    newsletterEyebrow:"हमारी ओर से एक नोट", signedOut:"सफलतापूर्वक लॉगआउट हुआ।",
+    demoCheckout:"इस डेमो में भुगतान नहीं होता।", newsletterDemo:"इस डेमो में न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",
+    remove:"हटाएँ", categoryAll:"सभी पीस", menuTitle:"कैटेगरी चुनें"
+  }
 };
-const t=()=>words[state.lang];
-const money=n=>new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(n);
-const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-function toast(msg){const box=$("#toast");if(!box)return;$("#toast-message").textContent=msg;box.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>box.hidden=true,2600)}
-function name(p){return state.lang==="hi"?p.hi:p.name}
-function category(p){return state.lang==="hi"?(p.categoryHi||CATEGORY_HI[p.category]||p.category):p.category}
-function renderCategories(){
- const el=$("#category-tabs"); if(!el)return;
- el.innerHTML=CATEGORIES.map(c=>'<button type="button" data-pick-category="'+esc(c)+'" class="'+(state.category===c?'active':'')+'">'+esc(state.lang==="hi"?(CATEGORY_HI[c]||c):c)+'</button>').join("");
+const t = () => words[state.lang];
+const money = value => new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", maximumFractionDigits:0 }).format(Number(value || 0));
+const esc = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
+
+function toast(message) {
+  const box = $("#toast");
+  if (!box) return;
+  $("#toast-message").textContent = message;
+  box.hidden = false;
+  clearTimeout(toast.timer);
+  toast.timer = setTimeout(() => { box.hidden = true; }, 2800);
 }
-function visibleProducts(){
- let list=state.products.filter(p=>{
-  const q=state.query.toLowerCase();
-  const match=!q||[p.name,p.hi,p.category,p.categoryHi].some(x=>String(x||"").toLowerCase().includes(q));
-  const cat=state.category==="All"|| (state.category==="New in"?p.tag==="new":state.category==="Clothing"?true:p.category===state.category);
-  return match&&cat;
- });
- if(state.sort==="low")list.sort((a,b)=>a.price-b.price);
- if(state.sort==="high")list.sort((a,b)=>b.price-a.price);
- return list;
+function productName(product) { return state.lang === "hi" ? (product.hi || product.name) : product.name; }
+function productCategory(product) { return state.lang === "hi" ? (product.categoryHi || CATEGORY_HI[product.category] || product.category) : product.category; }
+
+function renderCategories() {
+  const element = $("#category-tabs");
+  if (!element) return;
+  element.innerHTML = CATEGORIES.map(category => '<button type="button" data-pick-category="' + esc(category) + '" class="' + (state.category === category ? "active" : "") + '">' + esc(state.lang === "hi" ? (CATEGORY_HI[category] || category) : category) + "</button>").join("");
 }
-function renderProducts(){
- const list=visibleProducts(), grid=$("#product-grid");if(!grid)return;
- grid.innerHTML=list.map(p=>'<article class="product-card reveal"><div class="product-image" style="background-color:'+esc(p.tone)+'"><img loading="lazy" src="'+esc(p.image)+'" alt="'+esc(name(p))+'"><span class="product-badge">'+esc(p.badge||"")+'</span><button class="wish-button '+(state.wishlist.includes(p.id)?'is-wished':'')+'" data-wish="'+p.id+'" type="button" aria-label="Wishlist">♥</button><button class="quick-button" data-quick="'+p.id+'" type="button">'+esc(t().quick)+'</button></div><div class="product-meta"><div><h3>'+esc(name(p))+'</h3><p>'+esc(category(p))+' · '+esc(p.color)+'</p></div><strong>'+money(p.price)+'</strong></div><button class="product-add" data-add="'+p.id+'" type="button">'+esc(t().add)+'</button></article>').join("");
- $("#empty-state").hidden=list.length>0;
- $("#result-count").textContent=list.length+" "+t().count.toUpperCase();
- $("#result-category").textContent=state.lang==="hi"?(CATEGORY_HI[state.category]||state.category):state.category;
- $("#cart-count").textContent=state.cart.reduce((a,x)=>a+x.qty,0);
- $("#wishlist-count").textContent=state.wishlist.length;
+function visibleProducts() {
+  let filtered = state.products.filter(product => {
+    const query = state.query.toLocaleLowerCase();
+    const textMatch = !query || [product.name, product.hi, product.category, product.categoryHi, product.color, product.colorHi].some(value => String(value || "").toLocaleLowerCase().includes(query));
+    const categoryMatch = state.category === "All" ||
+      (state.category === "New in" ? product.tag === "new" :
+       state.category === "Clothing" ? !["Accessories", "Shoes"].includes(product.category) : product.category === state.category);
+    return textMatch && categoryMatch;
+  });
+  if (state.sort === "low") filtered.sort((a,b) => a.price - b.price);
+  if (state.sort === "high") filtered.sort((a,b) => b.price - a.price);
+  return filtered;
 }
-function setLanguage(){
- document.documentElement.lang=state.lang;
- $$("[data-copy]").forEach(el=>{const k=el.dataset.copy;if(t()[k])el.textContent=t()[k]});
- const search=$("#product-search");if(search)search.placeholder=t().search;
- const email=$("#newsletter-email");if(email)email.placeholder=t().email;
- const lang=$("#language-switch");if(lang)lang.innerHTML=(state.lang==="en"?"हिंदी":"English")+' <span data-icon="chevron-down"></span>';
- const title=$("#hero-title");if(title&&state.lang==="hi")title.innerHTML="<span>कम में भी,</span><span>बहुत कुछ।</span>";else if(title)title.innerHTML="<span>A little less,</span><span>a lot more.</span>";
- renderCategories();renderProducts();
+function renderProducts() {
+  const products = visibleProducts();
+  const grid = $("#product-grid");
+  if (!grid) return;
+  grid.innerHTML = products.map(product =>
+    '<article class="product-card reveal"><div class="product-image" style="background-color:' + esc(product.tone || "#e9e5dd") + '">' +
+    '<img loading="lazy" src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '">' +
+    (product.badge ? '<span class="badge">' + esc(product.badge) + "</span>" : "") +
+    '<button class="wish-button ' + (state.wishlist.includes(product.id) ? "is-wished" : "") + '" data-wish="' + product.id + '" type="button" aria-label="Wishlist" title="Wishlist">♥</button>' +
+    '<button class="quick-add" data-quick="' + product.id + '" type="button"><span>' + esc(t().quick) + '</span><span>↗</span></button></div>' +
+    '<div class="product-meta"><div><span class="product-category">' + esc(productCategory(product)) + '</span><h3>' + esc(productName(product)) + '</h3><span class="product-color">' + esc(state.lang === "hi" ? (product.colorHi || product.color || "") : (product.color || "")) + '</span></div>' +
+    '<div class="product-prices"><b>' + money(product.price) + '</b>' + (product.oldPrice ? '<del>' + money(product.oldPrice) + '</del>' : "") + '</div></div></article>'
+  ).join("");
+  $("#empty-state").hidden = products.length > 0;
+  $("#result-count").textContent = products.length + " " + t().count.toUpperCase();
+  $("#result-category").textContent = state.lang === "hi" ? (CATEGORY_HI[state.category] || state.category) : (state.category === "All" ? t().categoryAll : state.category);
+  $("#cart-count").textContent = state.cart.reduce((sum, row) => sum + row.qty, 0);
+  $("#wishlist-count").textContent = state.wishlist.length;
+  $("#clear-search").hidden = !state.query;
 }
-async function restoreUser(user){
- state.user=user;
- if(!user){state.cart=[];state.wishlist=[];state.dbIds={};renderProducts();return}
- try{
-  const [{data:dbProducts,error:pErr},{data:wishes,error:wErr},{data:cart,error:cErr}]=await Promise.all([
-   supabase.from("sm_products").select("id,slug").eq("status","active"),
-   supabase.from("sm_wishlists").select("product_id").eq("user_id",user.id),
-   supabase.from("sm_cart_items").select("product_id,quantity").eq("user_id",user.id)
-  ]);
-  if(pErr)throw pErr;if(wErr)throw wErr;if(cErr)throw cErr;
-  const bySlug=Object.fromEntries(state.products.map(p=>[p.slug,p.id]));
-  const slugByDb=Object.fromEntries((dbProducts||[]).map(p=>[p.id,p.slug]));
-  state.dbIds=Object.fromEntries((dbProducts||[]).map(p=>[bySlug[p.slug],p.id]).filter(([k,v])=>k!=="undefined"&&v));
-  state.wishlist=(wishes||[]).map(w=>bySlug[slugByDb[w.product_id]]).filter(Number.isFinite);
-  state.cart=(cart||[]).flatMap(row=>Array(Math.min(99,Math.max(1,row.quantity||1))).fill(bySlug[slugByDb[row.product_id]])).filter(Number.isFinite).map(id=>({id,qty:1}));
-  const grouped=new Map();state.cart.forEach(x=>grouped.set(x.id,(grouped.get(x.id)||0)+1));state.cart=[...grouped].map(([id,qty])=>({id,qty}));
+
+function setLanguage() {
+  document.documentElement.lang = state.lang;
+  const main = $("main[lang]");
+  if (main) main.lang = state.lang;
+  $$("[data-copy]").forEach(element => {
+    const key = element.dataset.copy;
+    if (t()[key]) element.textContent = t()[key];
+  });
+  const search = $("#product-search");
+  if (search) search.placeholder = t().search;
+  const email = $("#newsletter-email");
+  if (email) email.placeholder = t().email;
+  const language = $("#language-switch");
+  if (language) language.innerHTML = (state.lang === "en" ? "हिंदी" : "English") + ' <span data-icon="chevron-down"></span>';
+  const heroTitle = $("#hero-title");
+  if (heroTitle) heroTitle.innerHTML = "<span>" + esc(t().title1) + "</span><span>" + esc(t().title2) + "</span>";
+  const sort = $("#sort-select");
+  if (sort) {
+    [...sort.options].forEach(option => {
+      if (t()[option.value]) option.textContent = t()[option.value];
+    });
+  }
+  const strip = $(".category-strip > span");
+  if (strip) strip.textContent = t().strip;
+  const stripLabels = [t().arrivals, t().essentials, t().finishing];
+  $$(".category-strip > div button").forEach((button, index) => {
+    const icon = button.querySelector("[data-icon]");
+    button.textContent = stripLabels[index] || button.textContent;
+    if (icon) { button.append(" "); button.append(icon); }
+  });
+  const manifesto = $("#about .manifesto-copy");
+  if (manifesto) {
+    const eyebrow = manifesto.querySelector(".eyebrow");
+    const title = manifesto.querySelector("h2");
+    const body = manifesto.querySelector("p:not(.eyebrow)");
+    if (eyebrow) eyebrow.textContent = t().viewPoint;
+    if (title) title.innerHTML = esc(t().manifestoTitle) + "<br><em>" + esc(t().manifestoEm) + "</em>";
+    if (body) body.textContent = t().manifestoBody;
+  }
+  renderCategories();
   renderProducts();
- }catch(e){console.error("Unable to restore account shopping data",e);toast("Could not load your saved bag/favourites. Check Supabase table policies.");}
+  refreshIcons();
 }
-async function persistCart(){
- if(!state.user)return;
- const rows=state.cart.map(x=>({user_id:state.user.id,product_id:state.dbIds[x.id],quantity:x.qty,updated_at:new Date().toISOString()})).filter(x=>x.product_id);
- const {data:existing,error:rErr}=await supabase.from("sm_cart_items").select("product_id").eq("user_id",state.user.id);if(rErr)throw rErr;
- if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error}
- const active=new Set(rows.map(x=>x.product_id)), stale=(existing||[]).map(x=>x.product_id).filter(id=>!active.has(id));
- if(stale.length){const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error}
+
+const iconPaths = {
+  search:'<circle cx="11" cy="11" r="7"></circle><path d="m20 20-4-4"></path>',
+  heart:'<path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1.1-1.1a5.5 5.5 0 0 0-7.8 7.8l1.1 1.1L12 21l7.8-7.5 1.1-1.1a5.5 5.5 0 0 0-.1-7.8Z"></path>',
+  bag:'<path d="M5 8h14l1 13H4L5 8Z"></path><path d="M9 8a3 3 0 0 1 6 0"></path>',
+  user:'<circle cx="12" cy="8" r="4"></circle><path d="M4 21a8 8 0 0 1 16 0"></path>',
+  "chevron-down":'<path d="m6 9 6 6 6-6"></path>',
+  "arrow-right":'<path d="M4 12h16"></path><path d="m13 5 7 7-7 7"></path>',
+  "arrow-up-right":'<path d="M7 17 17 7"></path><path d="M7 7h10v10"></path>',
+  sliders:'<path d="M4 6h16M4 12h16M4 18h16"></path><circle cx="8" cy="6" r="2"></circle><circle cx="15" cy="12" r="2"></circle><circle cx="10" cy="18" r="2"></circle>',
+  x:'<path d="m6 6 12 12M18 6 6 18"></path>',
+  check:'<path d="m5 12 4 4L19 6"></path>',
+  sparkles:'<path d="m12 3 1.9 5.8L20 11l-6.1 2.2L12 19l-1.9-5.8L4 11l6.1-2.2L12 3Z"></path><path d="m19 14 1 2 2 1-2 1-1 2-1-2-2-1 2-1 1-2Z"></path>',
+  menu:'<path d="M4 7h16M4 12h16M4 17h16"></path>'
+};
+function refreshIcons() {
+  document.querySelectorAll("[data-icon]").forEach(element => {
+    const path = iconPaths[element.dataset.icon];
+    if (path) element.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' + path + "</svg>";
+  });
 }
-async function persistWishlist(){
- if(!state.user)return;
- const rows=state.wishlist.map(id=>({user_id:state.user.id,product_id:state.dbIds[id]})).filter(x=>x.product_id);
- const {data:existing,error:rErr}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",state.user.id);if(rErr)throw rErr;
- if(rows.length){const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error}
- const active=new Set(rows.map(x=>x.product_id)),stale=(existing||[]).map(x=>x.product_id).filter(id=>!active.has(id));
- if(stale.length){const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error}
+
+async function loadCatalogue() {
+  try {
+    const { data, error } = await supabase.from("sm_products")
+      .select("id,slug,name_en,name_hi,price_inr,compare_at_price_inr,colour_en,colour_hi,status,featured")
+      .eq("status", "active");
+    if (error) throw error;
+    if (!Array.isArray(data) || data.length === 0) return;
+    const localBySlug = Object.fromEntries(fallbackProducts.map(product => [product.slug, product]));
+    state.products = data.map((row, index) => {
+      const fallback = localBySlug[row.slug] || {};
+      return {
+        ...fallback,
+        id: Number.isInteger(fallback.id) ? fallback.id : index + 100,
+        dbId: row.id,
+        slug: row.slug,
+        name: row.name_en || fallback.name || row.slug,
+        hi: row.name_hi || fallback.hi || row.name_en || row.slug,
+        price: Number(row.price_inr ?? fallback.price ?? 0),
+        oldPrice: row.compare_at_price_inr ?? fallback.oldPrice,
+        color: row.colour_en || fallback.color || "",
+        colorHi: row.colour_hi || fallback.color || "",
+        tag: fallback.tag || (row.featured ? "new" : "popular"),
+        tone: fallback.tone || "#e9e5dd",
+        image: fallback.image || "/public/images/placeholder.svg",
+        category: fallback.category || "Clothing",
+        categoryHi: fallback.categoryHi || "कपड़े",
+        badge: fallback.badge
+      };
+    });
+  } catch (error) {
+    console.error("Catalogue fallback active; Supabase product read failed", error);
+  }
 }
-function overlay(title,body){
- const root=$("#overlay-root");root.innerHTML='<div class="drawer-backdrop" data-close-overlay></div><aside class="cart-drawer"><button class="drawer-close" data-close-overlay aria-label="Close">×</button><p class="eyebrow">SHOPPING MART</p><h2>'+esc(title)+'</h2>'+body+'</aside>';
+
+async function restoreUser(user) {
+  state.user = user || null;
+  if (!user) {
+    state.cart = [];
+    state.wishlist = [];
+    state.dbIds = {};
+    renderProducts();
+    return;
+  }
+  try {
+    const [productsResult, wishesResult, cartResult] = await Promise.all([
+      supabase.from("sm_products").select("id,slug").eq("status", "active"),
+      supabase.from("sm_wishlists").select("product_id").eq("user_id", user.id),
+      supabase.from("sm_cart_items").select("product_id,quantity").eq("user_id", user.id)
+    ]);
+    if (productsResult.error) throw productsResult.error;
+    if (wishesResult.error) throw wishesResult.error;
+    if (cartResult.error) throw cartResult.error;
+    const idBySlug = Object.fromEntries(state.products.map(product => [product.slug, product.id]));
+    const slugByDatabaseId = Object.fromEntries((productsResult.data || []).map(row => [row.id, row.slug]));
+    state.dbIds = Object.fromEntries((productsResult.data || [])
+      .map(row => [idBySlug[row.slug], row.id])
+      .filter(([localId]) => Number.isInteger(localId)));
+    state.wishlist = (wishesResult.data || [])
+      .map(row => idBySlug[slugByDatabaseId[row.product_id]])
+      .filter(Number.isInteger);
+    const quantities = new Map();
+    (cartResult.data || []).forEach(row => {
+      const localId = idBySlug[slugByDatabaseId[row.product_id]];
+      if (Number.isInteger(localId)) quantities.set(localId, Math.min(99, Math.max(1, Number(row.quantity) || 1)));
+    });
+    state.cart = [...quantities].map(([id, qty]) => ({ id, qty }));
+    renderProducts();
+  } catch (error) {
+    console.error("Unable to restore account shopping data", error);
+    toast(state.lang === "hi" ? "सेव किया हुआ बैग या फेवरेट लोड नहीं हुआ। Supabase policies जाँचें।" : "Could not load your saved bag/favourites. Check Supabase permissions.");
+  }
 }
-function openCart(){
- const items=state.cart.map(row=>({row,p:state.products.find(p=>p.id===row.id)})).filter(x=>x.p);
- const total=items.reduce((s,x)=>s+x.p.price*x.row.qty,0);
- overlay(t().bag,'<div class="drawer-items">'+(items.length?items.map(({row,p})=>'<div class="drawer-item"><img src="'+esc(p.image)+'" alt=""><div><strong>'+esc(name(p))+'</strong><p>'+money(p.price)+' · Qty '+row.qty+'</p><button data-remove-cart="'+p.id+'">REMOVE</button></div></div>').join(""):'<p>'+esc(t().emptyCart)+'</p>')+'</div><div class="drawer-total"><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p class="demo-note">'+esc(t().demo)+'</p><button class="button button-dark drawer-checkout" data-checkout>'+esc(t().checkout)+'</button>');
+
+async function persistCart() {
+  if (!state.user) return;
+  const rows = state.cart.map(item => ({
+    user_id: state.user.id,
+    product_id: state.dbIds[item.id],
+    quantity: item.qty,
+    updated_at: new Date().toISOString()
+  })).filter(row => row.product_id);
+  const { data: existing, error: readError } = await supabase.from("sm_cart_items").select("product_id").eq("user_id", state.user.id);
+  if (readError) throw readError;
+  if (rows.length) {
+    const { error } = await supabase.from("sm_cart_items").upsert(rows, { onConflict: "user_id,product_id" });
+    if (error) throw error;
+  }
+  const activeIds = new Set(rows.map(row => row.product_id));
+  const staleIds = (existing || []).map(row => row.product_id).filter(id => !activeIds.has(id));
+  if (staleIds.length) {
+    const { error } = await supabase.from("sm_cart_items").delete().eq("user_id", state.user.id).in("product_id", staleIds);
+    if (error) throw error;
+  }
 }
-function openWishlist(){
- const items=state.wishlist.map(id=>state.products.find(p=>p.id===id)).filter(Boolean);
- overlay(t().saved,'<div class="drawer-items">'+(items.length?items.map(p=>'<div class="drawer-item"><img src="'+esc(p.image)+'" alt=""><div><strong>'+esc(name(p))+'</strong><p>'+money(p.price)+'</p><button data-wish="'+p.id+'">'+esc(t().removeWish)+'</button><button data-add="'+p.id+'">'+esc(t().add)+'</button></div></div>').join(""):'<p>'+esc(t().emptyWish)+'</p>')+'</div>');
+async function persistWishlist() {
+  if (!state.user) return;
+  const rows = state.wishlist.map(id => ({ user_id: state.user.id, product_id: state.dbIds[id] })).filter(row => row.product_id);
+  const { data: existing, error: readError } = await supabase.from("sm_wishlists").select("product_id").eq("user_id", state.user.id);
+  if (readError) throw readError;
+  if (rows.length) {
+    const { error } = await supabase.from("sm_wishlists").upsert(rows, { onConflict: "user_id,product_id" });
+    if (error) throw error;
+  }
+  const activeIds = new Set(rows.map(row => row.product_id));
+  const staleIds = (existing || []).map(row => row.product_id).filter(id => !activeIds.has(id));
+  if (staleIds.length) {
+    const { error } = await supabase.from("sm_wishlists").delete().eq("user_id", state.user.id).in("product_id", staleIds);
+    if (error) throw error;
+  }
 }
-function openAuth(){
- const root=$("#auth-root");
- const displayName=state.user?.user_metadata?.full_name||state.user?.user_metadata?.name||"";
- root.innerHTML='<div class="auth-backdrop" data-close-auth></div><section class="auth-panel" role="dialog" aria-modal="true" aria-label="Account"><button class="auth-close" data-close-auth aria-label="Close">×</button><p class="eyebrow">SHOPPING MART / ACCOUNT</p><h2>'+(state.user?"YOUR ACCOUNT":"Welcome back.")+'</h2>'+(state.user?'<p>'+esc(state.user.email)+'</p><form id="profile-form" class="auth-profile-form"><label>'+esc(t().name)+'<input name="full_name" required maxlength="100" value="'+esc(displayName)+'"></label><label>Email<input name="email" type="email" required value="'+esc(state.user.email||"")+'"></label><button class="button button-dark" type="submit">'+esc(t().save)+'</button></form><button class="button auth-secondary" data-signout>'+esc(t().logout)+'</button>':'<div class="auth-tabs"><button type="button" data-auth-mode="signin" class="active">'+esc(t().signIn)+'</button><button type="button" data-auth-mode="signup">'+esc(t().create)+'</button></div><form id="auth-form"><label>'+esc(t().name)+'<input name="full_name" autocomplete="name" maxlength="100" placeholder="Prem Kumar"></label><label>Email<input name="email" type="email" required autocomplete="email" placeholder="you@example.com"></label><label>'+esc(t().password)+'<input name="password" type="password" required minlength="8" autocomplete="current-password"></label><p class="auth-message" id="auth-message" role="status"></p><button class="button button-dark" type="submit" id="auth-submit">'+esc(t().signIn)+'</button></form>')+'</section>';
+let cartSaveQueue = Promise.resolve();
+let wishlistSaveQueue = Promise.resolve();
+function saveCart() {
+  cartSaveQueue = cartSaveQueue.then(() => persistCart());
+  return cartSaveQueue;
 }
-let authMode="signin";
-document.addEventListener("click",async e=>{
- const b=e.target.closest("button");if(!b)return;
- if(b.id==="language-switch"){state.lang=state.lang==="en"?"hi":"en";setLanguage();return}
- if(b.dataset.pickCategory){state.category=b.dataset.pickCategory;renderCategories();renderProducts();return}
- if(b.dataset.category){state.category=b.dataset.category;renderCategories();renderProducts();$("#shop")?.scrollIntoView({behavior:"smooth"});return}
- if(b.dataset.categoryLink){state.category=b.dataset.categoryLink;renderCategories();renderProducts();$("#shop")?.scrollIntoView({behavior:"smooth"});return}
- if(b.id==="hero-shop"||b.id==="view-all"||b.id==="manifesto-shop"){state.category="All";renderCategories();renderProducts();$("#shop")?.scrollIntoView({behavior:"smooth"});return}
- if(b.id==="account-trigger"){openAuth();return}
- if(b.id==="cart-trigger"){openCart();return}
- if(b.id==="wishlist-trigger"){openWishlist();return}
- if(b.id==="mobile-menu"){state.category="All";$("#shop")?.scrollIntoView({behavior:"smooth"});return}
- if(b.id==="search-toggle"){ $("#product-search")?.focus();$("#shop")?.scrollIntoView({behavior:"smooth"});return}
- if(b.dataset.closeOverlay!==undefined){$("#overlay-root").innerHTML="";return}
- if(b.dataset.closeAuth!==undefined){$("#auth-root").innerHTML="";return}
- if(b.dataset.authMode){authMode=b.dataset.authMode;$$("[data-auth-mode]").forEach(x=>x.classList.toggle("active",x===b));$("#auth-submit").textContent=authMode==="signin"?t().signIn:t().create;const nameField=$('#auth-form [name="full_name"]');nameField.required=authMode==="signup";nameField.closest("label").hidden=authMode!=="signup";return}
- if(b.dataset.signout!==undefined){const {error}=await supabase.auth.signOut();if(error)toast(error.message);else{await restoreUser(null);$("#auth-root").innerHTML="";toast("Signed out")};return}
- if(b.dataset.wish){
-  const id=Number(b.dataset.wish);if(!state.user){toast(t().needLogin);openAuth();return}
-  const has=state.wishlist.includes(id);state.wishlist=has?state.wishlist.filter(x=>x!==id):[...state.wishlist,id];renderProducts();
-  try{await persistWishlist();toast(has?t().removeWish:t().addedWish)}catch(err){console.error(err);toast("Could not save favourite. Please retry.")};if($("#overlay-root").innerHTML)openWishlist();return
- }
- if(b.dataset.add){
-  const id=Number(b.dataset.add);if(!state.user){toast(t().needLogin);openAuth();return}
-  const found=state.cart.find(x=>x.id===id);if(found)found.qty++;else state.cart.push({id,qty:1});renderProducts();
-  try{await persistCart();toast(t().added)}catch(err){console.error(err);toast("Could not save bag. Please retry.")};if($("#overlay-root").innerHTML)openCart();return
- }
- if(b.dataset.removeCart){
-  state.cart=state.cart.filter(x=>x.id!==Number(b.dataset.removeCart));renderProducts();
-  try{await persistCart();openCart()}catch(err){console.error(err);toast("Could not update bag.")};return
- }
- if(b.dataset.quick){
-  const p=state.products.find(x=>x.id===Number(b.dataset.quick));if(!p)return;
-  overlay(name(p),'<div class="quick-view"><img src="'+esc(p.image)+'" alt="'+esc(name(p))+'"><p>'+esc(category(p))+' · '+esc(p.color)+'</p><strong>'+money(p.price)+'</strong><button class="button button-dark" data-add="'+p.id+'">'+esc(t().add)+'</button></div>');return
- }
- if(b.dataset.checkout!==undefined){toast(t().demo);return}
- if(b.id==="clear-filters"){state.query="";state.category="All";$("#product-search").value="";renderCategories();renderProducts();return}
+function saveWishlist() {
+  wishlistSaveQueue = wishlistSaveQueue.then(() => persistWishlist());
+  return wishlistSaveQueue;
+}
+
+function closeOverlay() { $("#overlay-root").innerHTML = ""; }
+function openOverlay(title, body, panelClass = "drawer") {
+  $("#overlay-root").innerHTML = '<div class="overlay" role="presentation"><aside class="' + panelClass + '" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' + body + "</aside></div>";
+}
+function openCart() {
+  if (!state.user) { toast(t().needLogin); openAuth(); return; }
+  const items = state.cart.map(item => ({ item, product: state.products.find(product => product.id === item.id) })).filter(entry => entry.product);
+  const total = items.reduce((sum, entry) => sum + entry.product.price * entry.item.qty, 0);
+  const header = '<div class="drawer-head"><h2>' + esc(t().bag) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
+  const list = items.length ? '<div class="drawer-items">' + items.map(({item, product}) =>
+    '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + " · Qty " + item.qty + '</span><strong>' + money(product.price * item.qty) + '</strong><button type="button" data-remove-cart="' + product.id + '">' + esc(t().remove) + "</button></div></div>"
+  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyCart) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>");
+  const bottom = '<div class="drawer-bottom"><div><span>' + esc(t().subtotal) + '</span><strong>' + money(total) + '</strong></div><p>' + esc(t().demo) + '</p><button class="button button-dark full" data-checkout type="button">' + esc(t().checkout) + "</button></div>";
+  openOverlay(t().bag, header + list + bottom);
+}
+function openWishlist() {
+  if (!state.user) { toast(t().needLogin); openAuth(); return; }
+  const products = state.wishlist.map(id => state.products.find(product => product.id === id)).filter(Boolean);
+  const header = '<div class="drawer-head"><h2>' + esc(t().saved) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
+  const list = products.length ? '<div class="drawer-items">' + products.map(product =>
+    '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + '</span><button type="button" data-wish="' + product.id + '">' + esc(t().removeWish) + '</button><button type="button" data-add="' + product.id + '">' + esc(t().add) + '</button></div></div>'
+  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyWish) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>");
+  openOverlay(t().saved, header + list);
+}
+function openQuickView(product) {
+  if (!product) return;
+  const body = '<button class="icon-button modal-close" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button>' +
+    '<div class="quick-image"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"></div>' +
+    '<div class="quick-info"><p class="eyebrow">' + esc(productCategory(product)) + " / " + esc(product.color || "") + '</p><h2>' + esc(productName(product)) + '</h2><strong>' + money(product.price) + '</strong><p>' + esc(state.lang === "hi" ? "रोज़ पहनने के लिए सोच-समझकर चुना गया स्टाइल।" : "A considered everyday piece designed to work with the rest of your wardrobe.") + '</p><button class="button button-dark" data-add="' + product.id + '" type="button">' + esc(t().add) + "</button></div>";
+  openOverlay(productName(product), body, "quick-view");
+}
+let authMode = "signin";
+function openAuth() {
+  const root = $("#auth-root");
+  const user = state.user;
+  const displayName = user?.user_metadata?.full_name || user?.user_metadata?.name || "";
+  const field = (label, name, type, value, required, autocomplete, placeholder) =>
+    '<label class="auth-field">' + esc(label) + '<div><input name="' + name + '" type="' + type + '" ' + (required ? "required " : "") +
+    (autocomplete ? 'autocomplete="' + autocomplete + '" ' : "") + (placeholder ? 'placeholder="' + esc(placeholder) + '" ' : "") +
+    'maxlength="160" value="' + esc(value || "") + '"></div></label>';
+  const heading = user ? (state.lang === "hi" ? "आपका अकाउंट" : "Your account") : (state.lang === "hi" ? "वापस स्वागत है।" : "Welcome back.");
+  const content = user ?
+    '<div class="auth-account"><div class="auth-avatar">♙</div><p class="auth-muted">' + esc(user.email || "") + '</p><form id="profile-form" class="auth-profile-form">' +
+    field(t().name, "full_name", "text", displayName, true, "name", "") + field("Email", "email", "email", user.email || "", true, "email", "") +
+    '<div class="auth-profile-actions"><button class="auth-submit" type="submit">' + esc(t().save) + ' <span>↗</span></button></div></form><button class="auth-secondary auth-signout" type="button" data-signout>' + esc(t().logout) + "</button></div>" :
+    '<p class="auth-intro">' + esc(state.lang === "hi" ? "लॉगिन करें या अपना अकाउंट बनाएँ। सेव किए गए प्रोडक्ट और बैग आपके अकाउंट से जुड़े रहेंगे।" : "Sign in or create an account. Your saved pieces and bag stay linked to your account.") + '</p>' +
+    '<div class="auth-tabs"><button type="button" data-auth-mode="signin" class="' + (authMode === "signin" ? "is-active" : "") + '">' + esc(t().signIn) + '</button><button type="button" data-auth-mode="signup" class="' + (authMode === "signup" ? "is-active" : "") + '">' + esc(t().create) + "</button></div>" +
+    '<form id="auth-form" class="auth-form"><label class="auth-field" data-field="name" ' + (authMode !== "signup" ? "hidden" : "") + '>' + esc(t().name) + '<div><input name="full_name" autocomplete="name" maxlength="100" placeholder="Prem Kumar" ' + (authMode === "signup" ? "required" : "") + '></div></label>' +
+    field("Email", "email", "email", "", true, "email", "you@example.com") + field(t().password, "password", "password", "", true, authMode === "signin" ? "current-password" : "new-password", "") +
+    '<p class="auth-notice" id="auth-message" role="status" hidden></p><button class="auth-submit" type="submit" id="auth-submit">' + esc(authMode === "signin" ? t().signIn : t().create) + ' <span>↗</span></button></form>' +
+    '<p class="auth-secure">♧ ' + esc(state.lang === "hi" ? "सुरक्षित अकाउंट एक्सेस" : "Secure account access") + "</p>";
+  root.innerHTML = '<div class="auth-overlay" data-close-auth></div><section class="auth-modal" role="dialog" aria-modal="true" aria-label="Account"><button class="auth-close" data-close-auth type="button" aria-label="' + esc(t().close) + '">×</button><a class="auth-wordmark" href="#top">SHOPPING<span> MART</span></a><p class="auth-eyebrow">SHOPPING MART / ACCOUNT</p><h2>' + esc(heading) + "</h2>" + content + "</section>";
+}
+
+document.addEventListener("click", async event => {
+  if (event.target.matches(".overlay")) { closeOverlay(); return; }
+  if (event.target.matches(".auth-overlay")) { $("#auth-root").innerHTML = ""; return; }
+  const button = event.target.closest("button");
+  if (!button) return;
+
+  if (button.id === "language-switch") { state.lang = state.lang === "en" ? "hi" : "en"; setLanguage(); return; }
+  if (button.dataset.pickCategory) { state.category = button.dataset.pickCategory; renderCategories(); renderProducts(); return; }
+  if (button.dataset.category) { state.category = button.dataset.category; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.dataset.categoryLink) { state.category = button.dataset.categoryLink; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (["hero-shop", "view-all", "manifesto-shop"].includes(button.id)) { state.category = "All"; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.id === "account-trigger") { openAuth(); return; }
+  if (button.id === "cart-trigger") { openCart(); return; }
+  if (button.id === "wishlist-trigger") { openWishlist(); return; }
+  if (button.id === "mobile-menu") { openMenu(); return; }
+  if (button.id === "search-toggle") { $("#product-search")?.focus(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.dataset.closeOverlay !== undefined) { closeOverlay(); return; }
+  if (button.dataset.closeAuth !== undefined) { $("#auth-root").innerHTML = ""; return; }
+  if (button.id === "demo-info") { toast(t().demoCheckout); return; }
+  if (button.dataset.authMode) {
+    authMode = button.dataset.authMode;
+    $$("[data-auth-mode]").forEach(item => item.classList.toggle("is-active", item === button));
+    const submit = $("#auth-submit");
+    if (submit) submit.innerHTML = esc(authMode === "signin" ? t().signIn : t().create) + " <span>↗</span>";
+    const nameField = $('#auth-form [name="full_name"]');
+    if (nameField) { nameField.required = authMode === "signup"; nameField.closest("label").hidden = authMode !== "signup"; }
+    const password = $('#auth-form [name="password"]');
+    if (password) password.autocomplete = authMode === "signin" ? "current-password" : "new-password";
+    const message = $("#auth-message");
+    if (message) { message.hidden = true; message.textContent = ""; }
+    return;
+  }
+  if (button.dataset.signout !== undefined) {
+    const { error } = await supabase.auth.signOut();
+    if (error) toast(error.message);
+    else { await restoreUser(null); $("#auth-root").innerHTML = ""; toast(t().signedOut); }
+    return;
+  }
+  if (button.dataset.wish !== undefined) {
+    const id = Number(button.dataset.wish);
+    if (!state.user) { toast(t().needLogin); openAuth(); return; }
+    const wasSaved = state.wishlist.includes(id);
+    state.wishlist = wasSaved ? state.wishlist.filter(item => item !== id) : [...state.wishlist, id];
+    renderProducts();
+    try { await saveWishlist(); toast(wasSaved ? t().removeWish : t().addedWish); }
+    catch (error) { console.error(error); toast(state.lang === "hi" ? "फेवरेट सेव नहीं हुआ। दोबारा कोशिश करें।" : "Could not save favourite. Please retry."); }
+    if ($("#overlay-root").innerHTML) openWishlist();
+    return;
+  }
+  if (button.dataset.add !== undefined) {
+    const id = Number(button.dataset.add);
+    if (!state.user) { toast(t().needLogin); openAuth(); return; }
+    const existing = state.cart.find(item => item.id === id);
+    if (existing) existing.qty = Math.min(99, existing.qty + 1);
+    else state.cart.push({ id, qty:1 });
+    renderProducts();
+    try { await saveCart(); toast(t().added); }
+    catch (error) { console.error(error); toast(state.lang === "hi" ? "बैग सेव नहीं हुआ। दोबारा कोशिश करें।" : "Could not save bag. Please retry."); }
+    if ($("#overlay-root").innerHTML) openCart();
+    return;
+  }
+  if (button.dataset.removeCart !== undefined) {
+    state.cart = state.cart.filter(item => item.id !== Number(button.dataset.removeCart));
+    renderProducts();
+    try { await saveCart(); openCart(); }
+    catch (error) { console.error(error); toast(state.lang === "hi" ? "बैग अपडेट नहीं हुआ।" : "Could not update bag."); }
+    return;
+  }
+  if (button.dataset.quick !== undefined) { openQuickView(state.products.find(product => product.id === Number(button.dataset.quick))); return; }
+  if (button.dataset.checkout !== undefined) { toast(t().demoCheckout); return; }
+  if (button.id === "clear-filters") {
+    state.query = ""; state.category = "All";
+    if ($("#product-search")) $("#product-search").value = "";
+    renderCategories(); renderProducts(); return;
+  }
 });
-document.addEventListener("submit",async e=>{
- if(e.target.id==="auth-form"){
-  e.preventDefault();const form=new FormData(e.target),email=String(form.get("email")||"").trim(),password=String(form.get("password")||""),full_name=String(form.get("full_name")||"").trim(),msg=$("#auth-message"),submit=$("#auth-submit");submit.disabled=true;msg.textContent="";
-  try{
-   if(authMode==="signup"){
-    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:location.origin}});
-    if(error)throw error;
-    if(data.session){await restoreUser(data.user);$("#auth-root").innerHTML="";toast(t().signed)}else msg.textContent=t().emailConfirm;
-   }else{
-    const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
-    await restoreUser(data.user);$("#auth-root").innerHTML="";toast(t().signed);
-   }
-  }catch(err){msg.textContent=err.message||"Authentication failed"}finally{submit.disabled=false}return;
- }
- if(e.target.id==="profile-form"){
-  e.preventDefault();const form=new FormData(e.target),full_name=String(form.get("full_name")||"").trim(),email=String(form.get("email")||"").trim();
-  try{const patch={data:{...state.user.user_metadata,full_name}};if(email.toLowerCase()!==(state.user.email||"").toLowerCase())patch.email=email;
-   const {data,error}=await supabase.auth.updateUser(patch);if(error)throw error;state.user=data.user;toast(email.toLowerCase()!==(state.user.email||"").toLowerCase()?"Check your email to confirm the change.":"Profile saved.");openAuth();
-  }catch(err){toast(err.message||"Could not update profile")}return;
- }
- if(e.target.id==="newsletter-form"){e.preventDefault();$("#newsletter-status").hidden=false;$("#newsletter-status").textContent=state.lang==="hi"?"धन्यवाद!":"Thank you for subscribing.";e.target.reset()}
+
+function openMenu() {
+  const header = '<div class="drawer-head"><h2>' + esc(t().menuTitle) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
+  const menu = '<nav class="drawer-menu">' + CATEGORIES.map(category => '<button type="button" data-category="' + esc(category) + '">' + esc(state.lang === "hi" ? (CATEGORY_HI[category] || category) : category) + '<span>↗</span></button>').join("") + "</nav>";
+  openOverlay(t().menuTitle, header + menu);
+}
+
+document.addEventListener("submit", async event => {
+  if (event.target.id === "auth-form") {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const email = String(form.get("email") || "").trim();
+    const password = String(form.get("password") || "");
+    const fullName = String(form.get("full_name") || "").trim();
+    const message = $("#auth-message");
+    const submit = $("#auth-submit");
+    submit.disabled = true;
+    message.hidden = true;
+    try {
+      if (authMode === "signup") {
+        const { data, error } = await supabase.auth.signUp({ email, password, options:{ data:{ full_name:fullName }, emailRedirectTo:location.origin } });
+        if (error) throw error;
+        if (data.session) {
+          await restoreUser(data.user); $("#auth-root").innerHTML = ""; toast(t().signed);
+        } else {
+          message.hidden = false; message.className = "auth-notice auth-notice-success"; message.textContent = t().emailConfirm;
+        }
+      } else {
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        await restoreUser(data.user); $("#auth-root").innerHTML = ""; toast(t().signed);
+      }
+    } catch (error) {
+      message.hidden = false; message.className = "auth-notice auth-notice-error"; message.textContent = error.message || "Authentication failed";
+    } finally { submit.disabled = false; }
+    return;
+  }
+  if (event.target.id === "profile-form") {
+    event.preventDefault();
+    const form = new FormData(event.target);
+    const fullName = String(form.get("full_name") || "").trim();
+    const email = String(form.get("email") || "").trim();
+    const previousEmail = (state.user?.email || "").toLowerCase();
+    try {
+      const updates = { data:{ ...(state.user.user_metadata || {}), full_name:fullName } };
+      if (email.toLowerCase() !== previousEmail) updates.email = email;
+      const { data, error } = await supabase.auth.updateUser(updates);
+      if (error) throw error;
+      state.user = data.user;
+      toast(email.toLowerCase() !== previousEmail
+        ? (state.lang === "hi" ? "नया ईमेल पता पुष्टि करने के लिए मेल देखें।" : "Check your new email to confirm the address change.")
+        : (state.lang === "hi" ? "प्रोफाइल सेव हो गई।" : "Profile saved."));
+      openAuth();
+    } catch (error) { toast(error.message || "Could not update profile"); }
+    return;
+  }
+  if (event.target.id === "newsletter-form") {
+    event.preventDefault();
+    toast(t().newsletterDemo);
+    $("#newsletter-status").hidden = false;
+    $("#newsletter-status").textContent = t().newsletterDemo;
+  }
 });
-$("#product-search")?.addEventListener("input",e=>{state.query=e.target.value;renderProducts()});
-$("#sort-select")?.addEventListener("change",e=>{state.sort=e.target.value;renderProducts()});
-$("#clear-search")?.addEventListener("click",()=>{$("#product-search").value="";state.query="";renderProducts()});
-const {data:{subscription}}=supabase.auth.onAuthStateChange((_event,session)=>{void restoreUser(session?.user||null)});
-const {data:{session}}=await supabase.auth.getSession();await restoreUser(session?.user||null);
+
+$("#product-search")?.addEventListener("input", event => { state.query = event.target.value; renderProducts(); });
+$("#sort-select")?.addEventListener("change", event => { state.sort = event.target.value; renderProducts(); });
+$("#clear-search")?.addEventListener("click", () => { $("#product-search").value = ""; state.query = ""; renderProducts(); });
+
+const { data:{ session } } = await supabase.auth.getSession();
+await loadCatalogue();
+await restoreUser(session?.user || null);
+supabase.auth.onAuthStateChange((_event, session) => {
+  setTimeout(() => { void restoreUser(session?.user || null); }, 0);
+});
 setLanguage();
