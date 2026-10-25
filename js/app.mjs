@@ -27,7 +27,7 @@ function loadGuestWishlist() {
   return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
 }
 
-const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
+const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), cartRevision: 0, wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
 
 const words = {
   en: {
@@ -273,6 +273,7 @@ async function loadCatalogue() {
 let restoreUserSequence = 0;
 async function restoreUser(user) {
   const restoreSequence = ++restoreUserSequence;
+  const cartRevisionAtStart = state.cartRevision;
   state.user=user||null;
   if(!user){
     state.cart=loadGuestCart().map(item=>{
@@ -315,13 +316,15 @@ async function restoreUser(user) {
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
       if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
     });
-    state.cart=[...quantities.values()];
-    if(guestCart.length||guestWishlist.length){
+    const cartChangedDuringRestore = state.cartRevision !== cartRevisionAtStart;
+    if (!cartChangedDuringRestore) state.cart=[...quantities.values()];
+    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length)){
       // Route guest-cart migration through the same queues as click-driven saves to avoid competing writes.
       await Promise.all([saveCart(),saveWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
     }
     if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
+    if (cartChangedDuringRestore) await saveCart();
     renderProducts();
   }catch(error){
     if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
@@ -492,6 +495,7 @@ document.addEventListener("click", async event => {
     if((existing?.qty||0)+1>variant.stock_quantity){toast(state.lang==="hi"?"इस साइज़ का उपलब्ध स्टॉक खत्म हो गया है।":"The available stock for this size has been reached.");return;}
     if(existing)existing.qty+=1;
     else state.cart.push({id,qty:1,variantId,size});
+    state.cartRevision++;
     renderProducts();
     try{await saveCart();toast(t().added);}catch(error){console.error(error);toast(state.lang==="hi"?"बैग सेव नहीं हुआ। दोबारा कोशिश करें।":"Could not save bag. Please retry.");}
     if($("#overlay-root").innerHTML)openCart();
@@ -499,6 +503,7 @@ document.addEventListener("click", async event => {
   }
   if (button.dataset.removeCart !== undefined) {
     state.cart = state.cart.filter(item => !(item.id === Number(button.dataset.removeCart) && item.variantId === button.dataset.removeVariant));
+    state.cartRevision++;
     renderProducts();
     try { await saveCart(); openCart(); }
     catch (error) { console.error(error); toast(state.lang === "hi" ? "बैग अपडेट नहीं हुआ।" : "Could not update bag."); }
