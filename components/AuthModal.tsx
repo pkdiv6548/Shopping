@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type FormEvent } from "react";
-import { ArrowRight, LockKeyhole, Mail, UserRound, X, LogOut, LoaderCircle, ShieldCheck } from "lucide-react";
+import { ArrowRight, LockKeyhole, Mail, UserRound, X, LogOut, LoaderCircle, ShieldCheck, Pencil, Save } from "lucide-react";
 import type { User } from "@supabase/supabase-js";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 
@@ -32,6 +32,11 @@ const labels = {
     confirm: "Almost there — check your inbox and confirm your email before signing in.",
     signedIn: "YOU'RE SIGNED IN",
     accountDetails: "Account details",
+    editProfile: "EDIT PROFILE",
+    saveProfile: "SAVE CHANGES",
+    cancel: "CANCEL",
+    profileSaved: "Your profile has been updated.",
+    emailChange: "Profile saved. Check your email to confirm the address change; it may not become active until you confirm it.",
     logout: "SIGN OUT",
     loggedOut: "You have been signed out.",
     invalid: "That email and password combination didn't work. Check your details and try again.",
@@ -65,6 +70,11 @@ const labels = {
     confirm: "लगभग हो गया — अपने ईमेल में जाकर अकाउंट की पुष्टि करें, फिर लॉगिन करें।",
     signedIn: "आप लॉगिन हैं",
     accountDetails: "अकाउंट की जानकारी",
+    editProfile: "प्रोफाइल एडिट करें",
+    saveProfile: "बदलाव सेव करें",
+    cancel: "रद्द करें",
+    profileSaved: "आपकी प्रोफाइल अपडेट हो गई है।",
+    emailChange: "प्रोफाइल सेव हो गई है। ईमेल बदलने की पुष्टि के लिए अपना इनबॉक्स देखें; पुष्टि होने तक नया ईमेल सक्रिय नहीं हो सकता।",
     logout: "लॉगआउट",
     loggedOut: "आप लॉगआउट हो गए हैं।",
     invalid: "ईमेल या पासवर्ड सही नहीं है। जानकारी जाँचकर फिर प्रयास करें।",
@@ -102,6 +112,9 @@ export default function AuthModal({ open, onClose, lang }: AuthModalProps) {
   const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [notice, setNotice] = useState<Notice>(null);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editEmail, setEditEmail] = useState("");
 
   useEffect(() => {
     if (!open || !supabase) return;
@@ -167,6 +180,53 @@ export default function AuthModal({ open, onClose, lang }: AuthModalProps) {
     }
   }
 
+  async function handleProfileSave(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    if (!supabase || !user) {
+      setNotice({ kind: "error", text: copy.config });
+      return;
+    }
+    const nextName = editName.trim();
+    const nextEmail = editEmail.trim();
+    if (!nextName) {
+      setNotice({ kind: "error", text: copy.requiredName });
+      return;
+    }
+    const emailChanged = nextEmail.toLowerCase() !== (user.email ?? "").toLowerCase();
+    setBusy(true);
+    setNotice(null);
+    try {
+      const { data, error } = await supabase.auth.updateUser({
+        data: { full_name: nextName },
+        ...(emailChanged ? { email: nextEmail } : {}),
+      });
+      if (error) throw error;
+      if (data.user) setUser(data.user);
+      setEditingProfile(false);
+      setEditName(typeof data.user?.user_metadata?.full_name === "string" ? data.user.user_metadata.full_name : nextName);
+      setEditEmail(data.user?.email ?? nextEmail);
+      setNotice({ kind: "success", text: emailChanged ? copy.emailChange : copy.profileSaved });
+    } catch (error) {
+      setNotice({ kind: "error", text: authErrorMessage(error, copy) });
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  function beginProfileEdit() {
+    setEditName(typeof user?.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "");
+    setEditEmail(user?.email ?? "");
+    setEditingProfile(true);
+    setNotice(null);
+  }
+
+  function cancelProfileEdit() {
+    setEditName(typeof user?.user_metadata?.full_name === "string" ? user.user_metadata.full_name : "");
+    setEditEmail(user?.email ?? "");
+    setEditingProfile(false);
+    setNotice(null);
+  }
+
   async function handleSignOut() {
     if (!supabase) return;
     setBusy(true);
@@ -200,7 +260,29 @@ export default function AuthModal({ open, onClose, lang }: AuthModalProps) {
             <p className="auth-eyebrow"><ShieldCheck size={14} /> {copy.signedIn}</p>
             <h2 id="auth-title">{displayName}</h2>
             <p className="auth-muted">{user.email}</p>
-            <div className="auth-account-info"><span>{copy.accountDetails}</span><strong>{user.email}</strong></div>
+            {editingProfile ? (
+              <form className="auth-profile-form" onSubmit={handleProfileSave}>
+                <label className="auth-field">
+                  <span>{copy.name}</span>
+                  <div><UserRound size={17} /><input autoComplete="name" name="profile-name" value={editName} onChange={(event) => setEditName(event.target.value)} placeholder={copy.namePlaceholder} required maxLength={100} /></div>
+                </label>
+                <label className="auth-field">
+                  <span>{copy.email}</span>
+                  <div><Mail size={17} /><input type="email" autoComplete="email" name="profile-email" value={editEmail} onChange={(event) => setEditEmail(event.target.value)} placeholder={copy.emailPlaceholder} required /></div>
+                </label>
+                <div className="auth-profile-actions">
+                  <button className="auth-submit" type="submit" disabled={busy}>
+                    {busy ? <LoaderCircle className="auth-spinner" size={17} /> : <><Save size={16} />{copy.saveProfile}</>}
+                  </button>
+                  <button className="auth-secondary" type="button" disabled={busy} onClick={cancelProfileEdit}>{copy.cancel}</button>
+                </div>
+              </form>
+            ) : (
+              <>
+                <div className="auth-account-info"><span>{copy.accountDetails}</span><strong>{user.email}</strong></div>
+                <button className="auth-secondary auth-edit-profile" type="button" disabled={busy} onClick={beginProfileEdit}><Pencil size={15} />{copy.editProfile}</button>
+              </>
+            )}
             {notice && <p className={`auth-notice auth-notice-${notice.kind}`} role="status">{notice.text}</p>}
             <button className="auth-submit auth-signout" type="button" disabled={busy} onClick={handleSignOut}>
               {busy ? <LoaderCircle className="auth-spinner" size={17} /> : <LogOut size={17} />}
