@@ -309,11 +309,11 @@ async function persistWishlist() {
 let cartSaveQueue = Promise.resolve();
 let wishlistSaveQueue = Promise.resolve();
 function saveCart() {
-  cartSaveQueue = cartSaveQueue.then(() => persistCart());
+  cartSaveQueue = cartSaveQueue.catch(() => {}).then(() => persistCart());
   return cartSaveQueue;
 }
 function saveWishlist() {
-  wishlistSaveQueue = wishlistSaveQueue.then(() => persistWishlist());
+  wishlistSaveQueue = wishlistSaveQueue.catch(() => {}).then(() => persistWishlist());
   return wishlistSaveQueue;
 }
 
@@ -368,7 +368,7 @@ function openAuth() {
     field("Email", "email", "email", "", true, "email", "you@example.com") + field(t().password, "password", "password", "", true, authMode === "signin" ? "current-password" : "new-password", "") +
     '<p class="auth-notice" id="auth-message" role="status" hidden></p><button class="auth-submit" type="submit" id="auth-submit">' + esc(authMode === "signin" ? t().signIn : t().create) + ' <span>↗</span></button></form>' +
     '<p class="auth-secure">♧ ' + esc(state.lang === "hi" ? "सुरक्षित अकाउंट एक्सेस" : "Secure account access") + "</p>";
-  root.innerHTML = '<div class="auth-overlay" data-close-auth></div><section class="auth-modal" role="dialog" aria-modal="true" aria-label="Account"><button class="auth-close" data-close-auth type="button" aria-label="' + esc(t().close) + '">×</button><a class="auth-wordmark" href="#top">SHOPPING<span> MART</span></a><p class="auth-eyebrow">SHOPPING MART / ACCOUNT</p><h2>' + esc(heading) + "</h2>" + content + "</section>";
+  root.innerHTML = '<div class="auth-overlay" data-close-auth><section class="auth-modal" role="dialog" aria-modal="true" aria-label="Account"><button class="auth-close" data-close-auth type="button" aria-label="' + esc(t().close) + '">×</button><a class="auth-wordmark" href="#top">SHOPPING<span> MART</span></a><p class="auth-eyebrow">SHOPPING MART / ACCOUNT</p><h2>' + esc(heading) + "</h2>" + content + "</section></div>";
 }
 
 document.addEventListener("click", async event => {
@@ -379,7 +379,7 @@ document.addEventListener("click", async event => {
 
   if (button.id === "language-switch") { state.lang = state.lang === "en" ? "hi" : "en"; setLanguage(); return; }
   if (button.dataset.pickCategory) { state.category = button.dataset.pickCategory; renderCategories(); renderProducts(); return; }
-  if (button.dataset.category) { state.category = button.dataset.category; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.dataset.category) { state.category = button.dataset.category; closeOverlay(); renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
   if (button.dataset.categoryLink) { state.category = button.dataset.categoryLink; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
   if (["hero-shop", "view-all", "manifesto-shop"].includes(button.id)) { state.category = "All"; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
   if (button.id === "account-trigger") { openAuth(); return; }
