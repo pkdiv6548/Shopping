@@ -270,7 +270,9 @@ async function loadCatalogue() {
   }
 }
 
+let restoreUserSequence = 0;
 async function restoreUser(user) {
+  const restoreSequence = ++restoreUserSequence;
   state.user=user||null;
   if(!user){
     state.cart=loadGuestCart().map(item=>{
@@ -288,6 +290,9 @@ async function restoreUser(user) {
     if(productsResult.error)throw productsResult.error;
     if(wishesResult.error)throw wishesResult.error;
     if(cartResult.error)throw cartResult.error;
+    // Auth events and the explicit sign-in handler can both call restoreUser.
+    // Ignore stale responses so an older empty-cart response cannot overwrite the latest session state.
+    if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
     const idBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p.id]));
     const slugByDatabaseId=Object.fromEntries((productsResult.data||[]).map(row=>[row.id,row.slug]));
     state.dbIds=Object.fromEntries((productsResult.data||[]).map(row=>[idBySlug[row.slug],row.id]).filter(([localId])=>Number.isInteger(localId)));
@@ -315,8 +320,10 @@ async function restoreUser(user) {
       await Promise.all([persistCart(),persistWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
     }
+    if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
     renderProducts();
   }catch(error){
+    if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
     console.error("Unable to restore account shopping data",error);
     toast(state.lang==="hi"?"सेव किया हुआ बैग या फेवरेट लोड नहीं हुआ। Supabase permissions जाँचें।":"Could not load your saved bag/favourites. Check Supabase permissions.");
   }
