@@ -115,6 +115,7 @@ function toast(message) {
 }
 function productName(product) { return state.lang === "hi" ? (product.hi || product.name) : product.name; }
 function productCategory(product) { return state.lang === "hi" ? (product.categoryHi || CATEGORY_HI[product.category] || product.category) : product.category; }
+function productBadge(product){if(state.lang!=="hi")return product.badge||"";return ({BESTSELLER:"सबसे लोकप्रिय","JUST IN":"नया आया",NEW:"नया"})[product.badge]||product.badge||"";}
 
 function renderCategories() {
   const element = $("#category-tabs");
@@ -139,12 +140,12 @@ function renderProducts() {
   grid.innerHTML=products.map(product=>
     '<article class="product-card reveal"><div class="product-image" style="background-color:'+esc(product.tone||"#e9e5dd")+'">'+
     '<a class="product-image-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'" aria-label="'+esc(t().view+" "+productName(product))+'"><img loading="lazy" src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"></a>'+
-    (product.badge?'<span class="badge">'+esc(product.badge)+"</span>":"")+
+    (product.badge?'<span class="badge">'+esc(productBadge(product))+"</span>":"")+
     '<button class="wish-button '+(state.wishlist.includes(product.id)?"is-wished":"")+'" data-wish="'+product.id+'" type="button" aria-label="'+esc(t().wishlistNav)+'" title="'+esc(t().wishlistNav)+'">♥</button>'+
     '<button class="quick-add" data-quick="'+product.id+'" type="button"><span>'+esc(t().quick)+'</span><span>↗</span></button></div>'+
     '<div class="product-meta"><div><span class="product-category">'+esc(productCategory(product))+'</span><a class="product-name-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'"><h3>'+esc(productName(product))+'</h3></a><span class="product-color">'+esc(state.lang==="hi"?(product.colorHi||product.color||""):(product.color||""))+'</span></div>'+
     '<div class="product-prices"><b>'+money(product.price)+'</b>'+(product.oldPrice?'<del>'+money(product.oldPrice)+'</del>':"")+'</div></div>'+
-    '<button class="product-add" data-add="'+product.id+'" type="button"><span>'+esc(t().add)+'</span><span>＋</span></button></article>'
+    '<button class="product-add" data-add="'+product.id+'" data-choose-size="true" type="button"><span>'+esc(t().add)+'</span><span>＋</span></button></article>'
   ).join("");
   $("#empty-state").hidden=products.length>0;
   $("#result-count").textContent=products.length+" "+t().count.toUpperCase();
@@ -469,12 +470,16 @@ document.addEventListener("click", async event => {
   if (button.dataset.add !== undefined) {
     const id=Number(button.dataset.add);
     const product=state.products.find(item=>item.id===id);
+    if(!product)return;
+    const available=(product.variants||[]).filter(item=>item.stock_quantity>0);
+    if(button.dataset.chooseSize!==undefined&&available.length>1){openQuickView(product);return;}
     const selectedId=$("#quick-size")?.value||defaultVariant(id)?.id;
-    const variant=product?.variants?.find(item=>item.id===selectedId)||defaultVariant(id);
-    if(!variant&&!selectedId){toast(state.lang==="hi"?"इस प्रोडक्ट का साइज़ उपलब्ध नहीं है।":"No size is currently available.");return;}
-    const variantId=variant?.id||"local-default",size=variant?.size_label||"One size";
+    const variant=product.variants?.find(item=>item.id===selectedId)||defaultVariant(id);
+    if(!variant){toast(state.lang==="hi"?"इस प्रोडक्ट का साइज़ उपलब्ध नहीं है।":"No size is currently available.");return;}
+    const variantId=variant.id,size=variant.size_label||"One size";
     const existing=state.cart.find(item=>item.id===id&&item.variantId===variantId);
-    if(existing)existing.qty=Math.min(99,existing.qty+1);
+    if((existing?.qty||0)+1>variant.stock_quantity){toast(state.lang==="hi"?"इस साइज़ का उपलब्ध स्टॉक खत्म हो गया है।":"The available stock for this size has been reached.");return;}
+    if(existing)existing.qty+=1;
     else state.cart.push({id,qty:1,variantId,size});
     renderProducts();
     try{await saveCart();toast(t().added);}catch(error){console.error(error);toast(state.lang==="hi"?"बैग सेव नहीं हुआ। दोबारा कोशिश करें।":"Could not save bag. Please retry.");}
