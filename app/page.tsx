@@ -126,7 +126,7 @@ export default function Home(){
   if(!accountItemsReady)throw new Error("Account items are still loading");
   const ids=nextWishlist.map(id=>databaseProductIds[id]);
   if(ids.some(id=>!id))throw new Error("A saved product has no database mapping");
-  const rows=ids.map(product_id=>({user_id:authUserId,product_id}));
+  const rows=ids.map(product_id=>({user_id:authUserId,product_id:product_id as string}));
   if(rows.length){
    const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});
    if(error)throw error;
