@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { getSupabaseBrowserClient } from "@/lib/supabase";
 import AuthModal from "@/components/AuthModal";
 import { Search, Heart, ShoppingBag, Menu, X, ArrowUpRight, SlidersHorizontal, ChevronDown, ArrowRight, Check, Sparkles, UserRound } from "lucide-react";
@@ -29,7 +29,7 @@ function ProductCard({p,lang,wished,onWish,onAdd,onOpen}:{p:Product;lang:Lang;wi
 export default function Home(){
  const [lang,setLang]=useState<Lang>("en"); const [query,setQuery]=useState(""); const [category,setCategory]=useState("All"); const [sort,setSort]=useState("recommended");
  const [wishlist,setWishlist]=useState<number[]>([]); const [cart,setCart]=useState<number[]>([]); const [drawer,setDrawer]=useState<"cart"|"wishlist"|"menu"|null>(null);
- const [authUserId,setAuthUserId]=useState<string|null>(null); const [databaseProductIds,setDatabaseProductIds]=useState<Record<number,string>>({}); const [accountItemsReady,setAccountItemsReady]=useState(false);
+ const [authUserId,setAuthUserId]=useState<string|null>(null); const [databaseProductIds,setDatabaseProductIds]=useState<Record<number,string>>({}); const [accountItemsReady,setAccountItemsReady]=useState(false); const cartWriteQueue=useRef<Promise<void>>(Promise.resolve()); const wishlistWriteQueue=useRef<Promise<void>>(Promise.resolve());
  const [selected,setSelected]=useState<Product|null>(null); const [notice,setNotice]=useState(""); const [newsletterEmail,setNewsletterEmail]=useState(""); const [subscribed,setSubscribed]=useState(false); const [authOpen,setAuthOpen]=useState(false);
  const t=copy[lang];
  const supabase=getSupabaseBrowserClient();
@@ -116,10 +116,37 @@ export default function Home(){
    if(error)throw error;
   }
  };
+ const queueCartSave=(nextCart:number[])=>{
+  cartWriteQueue.current=cartWriteQueue.current.catch(()=>{}).then(()=>persistCart(nextCart));
+  return cartWriteQueue.current;
+ };
+ const persistWishlist=async(nextWishlist:number[])=>{
+  if(!supabase||!authUserId)return;
+  if(!accountItemsReady)throw new Error("Account items are still loading");
+  const ids=nextWishlist.map(id=>databaseProductIds[id]);
+  if(ids.some(id=>!id))throw new Error("A saved product has no database mapping");
+  const rows=ids.map(product_id=>({user_id:authUserId,product_id}));
+  if(rows.length){
+   const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});
+   if(error)throw error;
+  }
+  const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",authUserId);
+  if(readError)throw readError;
+  const activeIds=new Set(rows.map(row=>row.product_id));
+  const stale=(existing||[]).map((row:{product_id:string})=>row.product_id).filter(id=>!activeIds.has(id));
+  if(stale.length){
+   const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",authUserId).in("product_id",stale);
+   if(error)throw error;
+  }
+ };
+ const queueWishlistSave=(nextWishlist:number[])=>{
+  wishlistWriteQueue.current=wishlistWriteQueue.current.catch(()=>{}).then(()=>persistWishlist(nextWishlist));
+  return wishlistWriteQueue.current;
+ };
  const add=(p:Product)=>{
   if(authUserId&&!accountItemsReady){flash(lang==="hi"?"आपकी सेव सूची लोड हो रही है। एक पल बाद फिर प्रयास करें।":"Your saved items are still loading. Please try again in a moment.");return}
   const next=[...cart,p.id];setCart(next);
-  if(authUserId)void persistCart(next).catch(error=>{console.error("Could not save Shopping Mart cart",error);setCart(cart);flash(lang==="hi"?"कार्ट सेव नहीं हो सकी। फिर प्रयास करें।":"Could not save your bag. Please try again.")});
+  if(authUserId)void queueCartSave(next).catch(error=>{console.error("Could not save Shopping Mart cart",error);flash(lang==="hi"?"कार्ट सेव नहीं हो सकी। फिर प्रयास करें।":"Could not save your bag. Please try again.")});
   flash(t.added);
  };
  const toggleWish=(p:Product)=>{
@@ -127,22 +154,13 @@ export default function Home(){
   const has=wishlist.includes(p.id);
   const next=has?wishlist.filter(id=>id!==p.id):[...wishlist,p.id];
   setWishlist(next);
-  if(authUserId&&supabase){
-   const product_id=databaseProductIds[p.id];
-   if(!product_id){setWishlist(wishlist);flash(lang==="hi"?"यह प्रोडक्ट सेव नहीं हो सका।":"This product could not be saved.");return}
-   const request=has
-    ?supabase.from("sm_wishlists").delete().eq("user_id",authUserId).eq("product_id",product_id)
-    :supabase.from("sm_wishlists").upsert({user_id:authUserId,product_id},{onConflict:"user_id,product_id"});
-   void request.then(({error})=>{
-    if(error){console.error("Could not save Shopping Mart wishlist",error);setWishlist(wishlist);flash(lang==="hi"?"फेवरेट सेव नहीं हुआ। फिर प्रयास करें।":"Could not save your favourites. Please try again.")}
-   });
-  }
+  if(authUserId)void queueWishlistSave(next).catch(error=>{console.error("Could not save Shopping Mart wishlist",error);flash(lang==="hi"?"फेवरेट सेव नहीं हुआ। फिर प्रयास करें।":"Could not save your favourites. Please try again.")});
   flash(has?t.removeWish:t.addedWish);
  };
  const removeCartItem=(index:number)=>{
   const next=cart.filter((_,itemIndex)=>itemIndex!==index);
   setCart(next);
-  if(authUserId)void persistCart(next).catch(error=>{console.error("Could not update Shopping Mart cart",error);setCart(cart);flash(lang==="hi"?"कार्ट अपडेट नहीं हुई। फिर प्रयास करें।":"Could not update your bag. Please try again.")});
+  if(authUserId)void queueCartSave(next).catch(error=>{console.error("Could not update Shopping Mart cart",error);flash(lang==="hi"?"कार्ट अपडेट नहीं हुई। फिर प्रयास करें।":"Could not update your bag. Please try again.")});
  };
  return <main lang={lang} id="top">
   <div className="announcement"><span>{t.top}</span><span className="announcement-right">NEW YORK · LONDON · EVERYWHERE</span></div>
