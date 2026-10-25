@@ -118,14 +118,14 @@ async function restoreUser(user){
  const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),cartByKey=new Map();
  (cartResult.data||[]).forEach(row=>{
   const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
-  if(!product||!variant)return;
+  if(!product||!variant||variant.stock_quantity<=0)return;
   const key=product.id+":"+variant.id;
-  cartByKey.set(key,{id:product.id,variantId:variant.id,size:variant.size_label,qty:Math.min(99,Math.max(1,Number(row.quantity)||1))});
+  cartByKey.set(key,{id:product.id,variantId:variant.id,size:variant.size_label,qty:Math.min(variant.stock_quantity,99,Math.max(1,Number(row.quantity)||1))});
  });
  oldGuestCart.forEach(item=>{
-  const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant)return;
+  const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant||variant.stock_quantity<=0)return;
   const key=item.id+":"+variant.id,existing=cartByKey.get(key);
-  cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(99,(existing?.qty||0)+item.qty)});
+  cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(variant.stock_quantity,99,(existing?.qty||0)+item.qty)});
  });
  state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
@@ -256,7 +256,20 @@ document.addEventListener("click",async event=>{
   if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));await persistCart();renderCart();renderPageTranslations();return;}
   if(action==="quantity-up"||action==="quantity-down"){
    const row=state.cart.find(item=>item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant);
-   if(row){const variant=variantById[row.variantId],max=Math.min(99,variant?.stock_quantity||99);row.qty=action==="quantity-up"?Math.min(max,row.qty+1):row.qty-1;if(row.qty<1)state.cart=state.cart.filter(item=>item!==row);await persistCart();renderCart();renderPageTranslations();}
+   if(row){
+    const variant=variantById[row.variantId];
+    if(!variant||variant.stock_quantity<=0){
+     state.cart=state.cart.filter(item=>item!==row);
+     await persistCart();renderCart();renderPageTranslations();
+     toast(state.lang==="hi"?"यह साइज़ अब उपलब्ध नहीं है।":"This size is no longer available.");
+     return;
+    }
+    const max=Math.min(99,variant.stock_quantity);
+    if(action==="quantity-up"&&row.qty>=max){toast(state.lang==="hi"?"इस साइज़ की अधिकतम उपलब्ध मात्रा आपके बैग में है।":"Your bag already has the maximum available stock for this size.");return;}
+    row.qty=action==="quantity-up"?Math.min(max,row.qty+1):row.qty-1;
+    if(row.qty<1)state.cart=state.cart.filter(item=>item!==row);
+    await persistCart();renderCart();renderPageTranslations();
+   }
    return;
   }
   if(action==="checkout-demo"){toast(translate("demoCheckout"));return;}

@@ -260,8 +260,10 @@ async function loadCatalogue() {
     });
     state.cart=state.cart.map(item=>{
       const variant=(item.variantId&&state.products.find(p=>p.id===item.id)?.variants?.find(v=>v.id===item.variantId))||defaultVariant(item.id);
-      return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};
-    });
+      if(variant&&variant.stock_quantity<=0)return null;
+      const quantity=variant?Math.min(Math.max(1,Number(item.qty)||1),variant.stock_quantity):Math.max(1,Number(item.qty)||1);
+      return {...item,qty:quantity,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};
+    }).filter(Boolean);
     if(!state.user)saveGuest("sm_guest_cart",state.cart);
   } catch(error) {
     console.error("Catalogue fallback active; Supabase product/variant read failed",error);
@@ -300,12 +302,13 @@ async function restoreUser(user) {
       quantities.set(key,{id:localId,variantId:variant.id,size:size||variant.size_label,qty:Math.min(99,(previous?.qty||0)+qty)});
     };
     (cartResult.data||[]).forEach(row=>{
-      const localId=idBySlug[slugByDatabaseId[row.product_id]];
-      addQuantity(localId,row.variant_id,Math.max(1,Number(row.quantity)||1),variantById[row.variant_id]?.size_label);
+      const localId=idBySlug[slugByDatabaseId[row.product_id]],variant=variantById[row.variant_id];
+      if(!variant||variant.stock_quantity<=0)return;
+      addQuantity(localId,row.variant_id,Math.min(variant.stock_quantity,Math.max(1,Number(row.quantity)||1)),variant.size_label);
     });
     guestCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
-      if(state.dbIds[item.id]&&variant)addQuantity(item.id,variant.id,item.qty,item.size||variant.size_label);
+      if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
     });
     state.cart=[...quantities.values()];
     if(guestCart.length||guestWishlist.length){
