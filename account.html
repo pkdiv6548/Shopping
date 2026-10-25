@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="Manage your Shopping Mart account and profile.">
+  <title>Your account | Shopping Mart</title>
+  <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/pages.css">
+</head>
+<body data-page="account">
+  <div class="announcement page-announcement"><span data-page-copy="promo">COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999</span><span>SHOPPING MART / INDIA</span></div>
+  <header class="page-header">
+    <a class="wordmark" href="/" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a>
+    <nav aria-label="Store navigation">
+      <a href="/" data-page-copy="home">HOME</a>
+      <a href="/collection.html" data-page-copy="shopAll">SHOP ALL</a>
+      <a href="/wishlist.html" data-page-copy="saved">WISHLIST</a>
+      <a href="/cart.html" data-page-copy="bag">BAG <span class="page-count" id="page-cart-count">0</span></a>
+      <a href="/account.html" data-page-copy="account">ACCOUNT</a>
+    </nav>
+    <button class="language-switch" type="button" data-action="language-toggle" id="page-language">हिंदी</button>
+  </header>
+  <main class="page-main"><section class="page-heading"><p class="eyebrow" data-page-copy="accountEyebrow">SHOPPING MART / ACCOUNT</p><h1 data-page-copy="accountTitle">Your account.</h1><p data-page-copy="accountIntro">Sign in to keep your bag and favourites in sync.</p></section><div id="account-page" class="account-page-panel"><p class="page-loading">Loading account…</p></div></main>
+  <footer class="page-footer">
+    <a class="wordmark footer-logo" href="/">SHOPPING<span> MART</span><i>®</i></a>
+    <p data-page-copy="footer">Style that feels like you.</p>
+    <div><a href="/collection.html" data-page-copy="shopAll">Shop all</a><a href="/account.html" data-page-copy="account">Account</a><a href="/cart.html" data-page-copy="bag">Bag</a><a href="/" data-page-copy="home">Home</a></div>
+    <small>© 2026 SHOPPING MART · <span data-page-copy="demo">DEMO STORE · PAYMENTS NOT ENABLED</span></small>
+  </footer>
+  <div class="page-toast" id="page-toast" hidden role="status"></div>
+  <script type="module" src="/js/subpages.mjs"></script>
+</body>
+</html>
