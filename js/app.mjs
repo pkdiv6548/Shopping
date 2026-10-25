@@ -13,7 +13,7 @@ const words = {
   en: {
     top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026",
     title1:"A little less,", title2:"a lot more.", subtitle:"Thoughtful pieces. Better everyday dressing. Find your next forever favourite.",
-    shop:"EXPLORE THE EDIT", discover:"THE NEW EDIT", featured:"MADE FOR YOUR EVERYDAY",
+    shop:"EXPLORE THE EDIT", shopNow:"SHOP THE COLLECTION", discover:"THE NEW EDIT", featured:"MADE FOR YOUR EVERYDAY",
     discoverSub:"Fresh silhouettes, easy layers and pieces made to live in.", all:"VIEW ALL",
     newsletter:"Good things, occasionally.", newsletterSub:"A little inspiration, new arrivals and notes from our world.",
     email:"Your email address", join:"SIGN ME UP", footer:"Style that feels like you.",
@@ -46,7 +46,7 @@ const words = {
   hi: {
     top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026",
     title1:"कम में भी,", title2:"बहुत कुछ।", subtitle:"सोच-समझकर चुने गए कपड़े। रोज़मर्रा के लिए बेहतर स्टाइल। अपना अगला पसंदीदा पीस खोजें।",
-    shop:"कलेक्शन देखें", discover:"नया कलेक्शन", featured:"आपके हर दिन के लिए",
+    shop:"कलेक्शन देखें", shopNow:"कलेक्शन खरीदें", discover:"नया कलेक्शन", featured:"आपके हर दिन के लिए",
     discoverSub:"नए सिल्हूट, आसान लेयर्स और हर दिन पहनने के लिए खास पीस।", all:"सभी देखें",
     newsletter:"अच्छी बातें, कभी-कभी।", newsletterSub:"थोड़ी प्रेरणा, नए कलेक्शन और हमारी दुनिया की बातें।",
     email:"अपना ईमेल पता", join:"जुड़ें", footer:"ऐसा स्टाइल जो आप जैसा लगे।",
@@ -140,9 +140,11 @@ function setLanguage() {
     if (t()[key]) element.textContent = t()[key];
   });
   const search = $("#product-search");
-  if (search) search.placeholder = t().search;
+  if (search) { search.placeholder = t().search; search.setAttribute("aria-label", t().search); }
   const email = $("#newsletter-email");
-  if (email) email.placeholder = t().email;
+  if (email) { email.placeholder = t().email; email.setAttribute("aria-label", t().email); }
+  const signup = $("#newsletter-form button[type=submit]");
+  if (signup) signup.setAttribute("aria-label", t().join);
   const language = $("#language-switch");
   if (language) language.innerHTML = (state.lang === "en" ? "हिंदी" : "English") + ' <span data-icon="chevron-down"></span>';
   const heroTitle = $("#hero-title");
