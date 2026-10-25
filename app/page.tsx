@@ -48,6 +48,7 @@ export default function Home(){
     return;
    }
    setAccountItemsReady(false);
+   setCart([]);setWishlist([]);setDatabaseProductIds({});
    try{
     const {data:catalog,error:catalogError}=await supabase.from("sm_products").select("id,slug").eq("status","active");
     if(catalogError)throw catalogError;
