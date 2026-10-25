@@ -1,29 +1,17 @@
 # Shopping Mart
 
-A premium, bilingual fashion shopping web app inspired by editorial fashion presentation, strong product discovery, and practical product information.
+Premium bilingual fashion storefront built with **HTML5, CSS3 and vanilla JavaScript**. Supabase provides authentication and database services. Vercel deploys this as a static site; there is no PHP host, Node application server, React, Next.js, or TypeScript runtime in production.
 
-## Stack
-- Next.js App Router + TypeScript
-- CSS Modules / design tokens
-- Supabase (planned; connect only to a dedicated project)
-- Vercel deployment
-
-## Current status
-The repository is being bootstrapped with a responsive demo storefront, sample catalogue, client-side search/filter/sort, wishlist and cart interactions, English/Hindi UI, motion details, and a Supabase migration starter. Checkout is demo-only; no real payments are processed.
-
-## Run locally
-```bash
-npm install
-npm run dev
-```
-
-Open http://localhost:3000.
-
-## Environment
-Copy `.env.example` to `.env.local` and fill in the Supabase project URL and publishable key when a dedicated Shopping Mart project is ready. Do not add secret/service-role keys to browser code or commit `.env.local`.
+## Deploy
+Vercel project uses the root directory and `vercel.json` static configuration. Pushes to `main` trigger deployment when Git integration is enabled.
 
 ## Supabase
-SQL migration files are in `supabase/migrations/`. Apply them only to a dedicated Shopping Mart Supabase project after reviewing the schema and RLS policies. Existing projects should not be reused blindly.
+Browser client uses the Supabase publishable key. This key is designed for browser use and is only safe with correctly configured grants and Row Level Security. Never expose service-role/secret keys.
 
-## Demo disclaimer
-Products, inventory, orders and checkout are demo data/flows until a dedicated backend and admin authentication are configured. This is not a production commerce system yet.
+The app uses:
+- `sm_products` for the product catalog (matching local product slugs)
+- `sm_wishlists` for each signed-in user's favourites
+- `sm_cart_items` for each signed-in user's bag
+
+## Current limitations
+Checkout is demo-only and does not take payments. Product images are hosted on Unsplash. Product catalogue is a 12-item local presentation catalogue; user-specific bag/favourites are loaded from Supabase. The app expects product slugs in Supabase to match `js/products.mjs`.
