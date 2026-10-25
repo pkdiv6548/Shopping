@@ -41,7 +41,7 @@ for (const match of products.matchAll(/image:"(\/images\/[^"]+)"/g)) {
   const file = match[1].replace(/^\/+/, "");
   if (!existsSync(path.join(root, file))) errors.push("Missing local product image: " + file);
 }
-const sourceFiles = [...required.filter(file => /\.(?:html|css|mjs)$/.test(file)), "scripts/validate-site.mjs"];
+const sourceFiles = required.filter(file => /\.(?:html|css|mjs)$/.test(file));
 const combined = sourceFiles.map(read).join("\n");
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
   if (combined.includes(blocked)) errors.push("External asset dependency found: " + blocked);
