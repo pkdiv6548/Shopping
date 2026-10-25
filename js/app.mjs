@@ -7,6 +7,7 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const fallbackProducts = PRODUCTS.map((product) => ({ ...product }));
+function writeStorageLanguage(lang){try{localStorage.setItem("sm_lang",lang);}catch(error){console.warn("Language preference not stored",error);}}
 function readGuest(key, fallback) {
   try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value ?? fallback; }
   catch { return fallback; }
@@ -26,11 +27,11 @@ function loadGuestWishlist() {
   return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
 }
 
-const state = { lang: "en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
+const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
 
 const words = {
   en: {
-    top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026",
+    top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026", shopAll:"SHOP ALL",
     title1:"A little less,", title2:"a lot more.", subtitle:"Thoughtful pieces. Better everyday dressing. Find your next forever favourite.",
     shop:"EXPLORE THE EDIT", shopNow:"SHOP THE COLLECTION", discover:"THE NEW EDIT", featured:"MADE FOR YOUR EVERYDAY",
     discoverSub:"Fresh silhouettes, easy layers and pieces made to live in.", all:"VIEW ALL",
@@ -63,7 +64,7 @@ const words = {
     remove:"REMOVE", categoryAll:"All pieces", menuTitle:"Browse categories"
   },
   hi: {
-    top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026",
+    top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026", shopAll:"सभी प्रोडक्ट",
     title1:"कम में भी,", title2:"बहुत कुछ।", subtitle:"सोच-समझकर चुने गए कपड़े। रोज़मर्रा के लिए बेहतर स्टाइल। अपना अगला पसंदीदा पीस खोजें।",
     shop:"कलेक्शन देखें", shopNow:"कलेक्शन खरीदें", discover:"नया कलेक्शन", featured:"आपके हर दिन के लिए",
     discoverSub:"नए सिल्हूट, आसान लेयर्स और हर दिन पहनने के लिए खास पीस।", all:"सभी देखें",
@@ -153,6 +154,7 @@ function renderProducts() {
   $("#clear-search").hidden=!state.query;
 }
 function setLanguage() {
+  writeStorageLanguage(state.lang);
   document.documentElement.lang = state.lang;
   const main = $("main[lang]");
   if (main) main.lang = state.lang;
