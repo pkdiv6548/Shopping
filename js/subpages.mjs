@@ -1,0 +1,286 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
+import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
+
+const supabase = createClient(
+  "https://dbenwifjhdqhiznowncs.supabase.co",
+  "sb_publishable_-x_VjXiyIL7j_dz7b7AgQQ_jv_Wj4dq"
+);
+const $ = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+const page = document.body.dataset.page || "collection";
+const text = {
+  en: {
+    promo:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999",home:"HOME",shopAll:"SHOP ALL",saved:"WISHLIST",bag:"BAG",account:"ACCOUNT",footer:"Style that feels like you.",demo:"DEMO STORE · PAYMENTS NOT ENABLED",
+    newEdit:"THE EVERYDAY EDIT",shopTitle:"Pieces for everyday.",shopIntro:"Considered essentials, easy layers and modern silhouettes.",search:"Search products, categories…",category:"Category",sort:"Sort by",recommended:"Recommended",low:"Price: low to high",high:"Price: high to low",allPieces:"All pieces",noResults:"No pieces found.",clear:"Clear filters",
+    youMayLike:"YOU MAY ALSO LIKE",new:"NEW",bestSeller:"BESTSELLER",size:"Select a size",color:"Colour",add:"ADD TO BAG",savedButton:"SAVE TO WISHLIST",removeWish:"REMOVE FROM WISHLIST",inStock:"In stock",outOfStock:"Currently unavailable",qty:"Quantity",ship:"Complimentary shipping on orders over ₹2,999.",details:"Product details",back:"BACK TO SHOP",productNotFound:"We couldn't find that piece.",continueShopping:"CONTINUE SHOPPING ↗",
+    bagEyebrow:"YOUR EDIT",bagTitle:"Your bag.",bagIntro:"Review pieces and sizes before checkout.",emptyCart:"Your bag is empty.",subtotal:"Subtotal",demoCheckout:"Checkout is a demo only. Real payments and orders are not enabled.",remove:"REMOVE",update:"UPDATE",checkout:"CONTINUE TO CHECKOUT",sizeLabel:"Size",
+    savedEyebrow:"YOUR FAVOURITES",savedTitle:"Saved pieces.",savedIntro:"The pieces you want to come back to.",emptyWish:"You haven't saved any pieces yet.",moveToBag:"ADD TO BAG",
+    accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",instockQty:"Available"
+  },
+  hi: {
+    promo:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",home:"होम",shopAll:"सभी प्रोडक्ट",saved:"विशलिस्ट",bag:"बैग",account:"अकाउंट",footer:"ऐसा स्टाइल जो आप जैसा लगे।",demo:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
+    newEdit:"हर दिन का कलेक्शन",shopTitle:"हर दिन के लिए खास पीस।",shopIntro:"चुने हुए एसेंशियल, आसान लेयर्स और आधुनिक स्टाइल।",search:"प्रोडक्ट या कैटेगरी खोजें…",category:"कैटेगरी",sort:"क्रम",recommended:"सुझाए गए",low:"कीमत: कम से ज़्यादा",high:"कीमत: ज़्यादा से कम",allPieces:"सभी प्रोडक्ट",noResults:"कोई प्रोडक्ट नहीं मिला।",clear:"फ़िल्टर हटाएँ",
+    youMayLike:"आपको ये भी पसंद आ सकते हैं",new:"नया",bestSeller:"लोकप्रिय",size:"साइज़ चुनें",color:"रंग",add:"बैग में जोड़ें",savedButton:"विशलिस्ट में सेव करें",removeWish:"विशलिस्ट से हटाएँ",inStock:"स्टॉक में उपलब्ध",outOfStock:"अभी उपलब्ध नहीं",qty:"मात्रा",ship:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी।",details:"प्रोडक्ट विवरण",back:"शॉप पर वापस जाएँ",productNotFound:"यह प्रोडक्ट नहीं मिला।",continueShopping:"खरीदारी जारी रखें ↗",
+    bagEyebrow:"आपका कलेक्शन",bagTitle:"आपका बैग।",bagIntro:"चेकआउट से पहले प्रोडक्ट और साइज़ जाँचें।",emptyCart:"आपका बैग खाली है।",subtotal:"कुल",demoCheckout:"चेकआउट अभी डेमो है। वास्तविक भुगतान या ऑर्डर चालू नहीं हैं।",remove:"हटाएँ",update:"अपडेट",checkout:"चेकआउट जारी रखें",sizeLabel:"साइज़",
+    savedEyebrow:"आपके पसंदीदा",savedTitle:"सेव किए गए प्रोडक्ट।",savedIntro:"वे प्रोडक्ट जिन्हें आप बाद में देखना चाहते हैं।",emptyWish:"अभी कोई प्रोडक्ट सेव नहीं किया है।",moveToBag:"बैग में जोड़ें",
+    accountEyebrow:"SHOPPING MART / अकाउंट",accountTitle:"आपका अकाउंट।",accountIntro:"लॉगिन करने पर आपका बैग और विशलिस्ट अकाउंट के साथ सेव रहेंगे।",welcome:"वापस स्वागत है।",createAccount:"अकाउंट बनाएँ",signIn:"लॉगिन",fullName:"पूरा नाम",email:"ईमेल पता",password:"पासवर्ड",confirm:"अकाउंट बनाएँ",submit:"लॉगिन करें",signOut:"लॉगआउट",saveProfile:"प्रोफाइल सेव करें",profileSaved:"प्रोफाइल अपडेट हो गई।",signedIn:"लॉगिन सफल हुआ।",signedOut:"आप लॉगआउट हो गए हैं।",checkEmail:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",demoNewsletter:"न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",loading:"लोड हो रहा है…",continue:"जारी रखें",status:"स्थिति",profile:"प्रोफाइल विवरण",accountHelp:"लॉगिन करने पर आपका बैग और विशलिस्ट आपके अकाउंट से जुड़े रहेंगे।",invalidSize:"पहले उपलब्ध साइज़ चुनें।",added:"बैग में जोड़ दिया गया।",savedToast:"विशलिस्ट में सेव किया गया।",removedToast:"विशलिस्ट से हटा दिया गया।",error:"कुछ गड़बड़ हुई। दोबारा कोशिश करें।",instockQty:"उपलब्ध"
+  }
+};
+const translate = key => (text[state.lang] && text[state.lang][key]) || text.en[key] || key;
+const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
+const price = value => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(value)||0);
+function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback;}catch{return fallback;}}
+function writeStorage(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(error){console.warn("Storage unavailable",error);}}
+function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
+function guestWishlist(){const value=readStorage("sm_guest_wishlist",[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
+const state={lang:readStorage("sm_lang","en")==="hi"?"hi":"en",user:null,products:PRODUCTS.map(p=>({...p,variants:[]})),dbIds:{},cart:guestCart(),wishlist:guestWishlist(),authMode:"signin"};
+let productBySlug={}, productByDbId={}, variantById={};
+
+function toast(message){const node=$("#page-toast");if(!node)return;node.textContent=message;node.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{node.hidden=true;},3000);}
+function defaultVariant(productId){const product=state.products.find(p=>p.id===Number(productId));return product?.variants?.find(v=>v.stock_quantity>0)||product?.variants?.[0]||null;}
+function normalizeGuestCart(){state.cart=state.cart.map(item=>{const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};}).filter(item=>Number.isInteger(item.id));}
+function nameOf(product){return state.lang==="hi"?(product.hi||product.name):product.name;}
+function categoryOf(product){return state.lang==="hi"?(product.categoryHi||CATEGORY_HI[product.category]||product.category):product.category;}
+function renderPageTranslations(){
+ document.documentElement.lang=state.lang;
+ $$("[data-page-copy]").forEach(node=>{const key=node.dataset.pageCopy;if(translate(key)!==key)node.textContent=translate(key);});
+ const language=$("#page-language");if(language)language.textContent=state.lang==="en"?"हिंदी":"English";
+ const count=$("#page-cart-count");if(count)count.textContent=String(state.cart.reduce((sum,item)=>sum+item.qty,0));
+}
+async function loadCatalogue(){
+ try{
+  const [productsResult,variantsResult,imagesResult]=await Promise.all([
+   supabase.from("sm_products").select("id,slug,name_en,name_hi,description_en,description_hi,price_inr,compare_at_price_inr,colour_en,colour_hi,featured,status").eq("status","active"),
+   supabase.from("sm_variants").select("id,product_id,size_label,stock_quantity,sku"),
+   supabase.from("sm_product_images").select("id,product_id,image_path,alt_en,alt_hi,sort_order").order("sort_order")
+  ]);
+  if(productsResult.error)throw productsResult.error;
+  const fallbackBySlug=Object.fromEntries(PRODUCTS.map(p=>[p.slug,p]));
+  const imagesByProduct={};
+  if(!imagesResult.error)(imagesResult.data||[]).forEach(image=>{if(!imagesByProduct[image.product_id])imagesByProduct[image.product_id]=[];if(String(image.image_path||"").startsWith("/images/"))imagesByProduct[image.product_id].push(image);});
+  const variantsByProduct={};
+  if(!variantsResult.error)(variantsResult.data||[]).forEach(v=>{if(!variantsByProduct[v.product_id])variantsByProduct[v.product_id]=[];variantsByProduct[v.product_id].push({id:v.id,size_label:v.size_label,stock_quantity:Number(v.stock_quantity)||0,sku:v.sku});});
+  if(Array.isArray(productsResult.data)&&productsResult.data.length){
+   state.products=productsResult.data.map((row,index)=>{
+    const fallback=fallbackBySlug[row.slug]||{},images=(imagesByProduct[row.id]||[]).sort((a,b)=>(a.sort_order||0)-(b.sort_order||0));
+    return {...fallback,id:Number.isInteger(fallback.id)?fallback.id:index+101,dbId:row.id,slug:row.slug,
+     name:row.name_en||fallback.name||row.slug,hi:row.name_hi||fallback.hi||row.name_en||row.slug,
+     description:row.description_en||fallback.description||"",descriptionHi:row.description_hi||fallback.descriptionHi||"",
+     price:Number(row.price_inr??fallback.price??0),oldPrice:row.compare_at_price_inr??fallback.oldPrice,
+     color:row.colour_en||fallback.color||"",colorHi:row.colour_hi||fallback.colorHi||fallback.color||"",
+     tag:fallback.tag||(row.featured?"new":"popular"),tone:fallback.tone||"#e9e5dd",
+     image:images[0]?.image_path||fallback.image||"/images/editorial-detail.svg",
+     imageAlt:state.lang==="hi"?(images[0]?.alt_hi||fallback.hi||row.name_hi):(images[0]?.alt_en||fallback.name||row.name_en),
+     images:images.map(image=>({src:image.image_path,alt:state.lang==="hi"?(image.alt_hi||row.name_hi):(image.alt_en||row.name_en)})),
+     category:fallback.category||"Clothing",categoryHi:fallback.categoryHi||"कपड़े",
+     badge:fallback.badge,variants:variantsByProduct[row.id]||[]};
+   });
+  }else{
+   state.products=PRODUCTS.map(p=>({...p,variants:[]}));
+  }
+ }catch(error){console.error("Supabase catalogue unavailable; using local catalogue",error);}
+ productBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p]));
+ productByDbId=Object.fromEntries(state.products.filter(p=>p.dbId).map(p=>[p.dbId,p]));
+ variantById=Object.fromEntries(state.products.flatMap(p=>(p.variants||[]).map(v=>[v.id,{...v,productId:p.id}])));
+ state.dbIds=Object.fromEntries(state.products.filter(p=>p.dbId).map(p=>[p.id,p.dbId]));
+ normalizeGuestCart();
+}
+async function persistCart(){
+ if(!state.user){writeStorage("sm_guest_cart",state.cart);return;}
+ const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
+  .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+ const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
+ if(readError)throw readError;
+ if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
+ const active=new Set(rows.map(row=>row.product_id+":"+row.variant_id));
+ for(const row of (existing||[]).filter(item=>!active.has(item.product_id+":"+item.variant_id))){
+  const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",state.user.id).eq("product_id",row.product_id).eq("variant_id",row.variant_id);if(error)throw error;
+ }
+}
+async function persistWishlist(){
+ if(!state.user){writeStorage("sm_guest_wishlist",state.wishlist);return;}
+ const rows=state.wishlist.map(id=>({user_id:state.user.id,product_id:state.dbIds[id]})).filter(row=>row.product_id);
+ const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",state.user.id);if(readError)throw readError;
+ if(rows.length){const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error;}
+ const active=new Set(rows.map(row=>row.product_id)),stale=(existing||[]).map(row=>row.product_id).filter(id=>!active.has(id));
+ if(stale.length){const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error;}
+}
+async function restoreUser(user){
+ state.user=user||null;
+ if(!user){state.cart=guestCart();normalizeGuestCart();state.wishlist=guestWishlist();return;}
+ const [wishResult,cartResult]=await Promise.all([
+  supabase.from("sm_wishlists").select("product_id").eq("user_id",user.id),
+  supabase.from("sm_cart_items").select("product_id,variant_id,quantity").eq("user_id",user.id)
+ ]);
+ if(wishResult.error)throw wishResult.error;if(cartResult.error)throw cartResult.error;
+ const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),cartByKey=new Map();
+ (cartResult.data||[]).forEach(row=>{
+  const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
+  if(!product||!variant)return;
+  const key=product.id+":"+variant.id;
+  cartByKey.set(key,{id:product.id,variantId:variant.id,size:variant.size_label,qty:Math.min(99,Math.max(1,Number(row.quantity)||1))});
+ });
+ oldGuestCart.forEach(item=>{
+  const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant)return;
+  const key=item.id+":"+variant.id,existing=cartByKey.get(key);
+  cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(99,(existing?.qty||0)+item.qty)});
+ });
+ state.cart=[...cartByKey.values()];
+ const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
+ state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist])];
+ if(oldGuestCart.length||oldGuestWishlist.length){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+}
+function card(product){
+ const saved=state.wishlist.includes(product.id);
+ return '<article class="product-card"><div class="product-image" style="background:'+escapeHtml(product.tone||"#e9e5dd")+'"><a class="product-image-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'"><img loading="lazy" src="'+escapeHtml(product.image)+'" alt="'+escapeHtml(product.imageAlt||nameOf(product))+'"></a><button class="wish-button '+(saved?"is-wished":"")+'" data-action="toggle-wishlist" data-product="'+product.id+'" type="button" aria-label="'+escapeHtml(translate("saved"))+'">♥</button></div><div class="product-meta"><div><span class="product-category">'+escapeHtml(categoryOf(product))+'</span><a class="product-name-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'"><h3>'+escapeHtml(nameOf(product))+'</h3></a><span class="product-color">'+escapeHtml(state.lang==="hi"?(product.colorHi||product.color):(product.color||""))+'</span></div><div class="product-prices"><b>'+price(product.price)+'</b>'+(product.oldPrice?'<del>'+price(product.oldPrice)+'</del>':"")+'</div></div><button class="product-add" data-action="add-default" data-product="'+product.id+'" type="button"><span>'+escapeHtml(translate("add"))+'</span><span>＋</span></button></article>';
+}
+function renderCollection(){
+ const grid=$("#collection-grid");if(!grid)return;
+ const query=($("#collection-search")?.value||"").trim().toLocaleLowerCase();
+ const category=$("#collection-category")?.value||"All",sort=$("#collection-sort")?.value||"recommended";
+ let list=state.products.filter(p=>(category==="All"||category==="Clothing"?!((category==="Clothing")&&["Accessories","Shoes"].includes(p.category)):p.category===category)
+  &&(!query||[p.name,p.hi,p.category,p.categoryHi,p.color].some(v=>String(v||"").toLocaleLowerCase().includes(query))));
+ if(category==="All")list=state.products.filter(p=>!query||[p.name,p.hi,p.category,p.categoryHi,p.color].some(v=>String(v||"").toLocaleLowerCase().includes(query)));
+ if(sort==="low")list.sort((a,b)=>a.price-b.price);if(sort==="high")list.sort((a,b)=>b.price-a.price);
+ grid.innerHTML=list.map(card).join("");
+ $("#collection-result-label").textContent=state.lang==="hi"?(CATEGORY_HI[category]||category):category;
+ $("#collection-result-count").textContent=list.length+" "+(state.lang==="hi"?"प्रोडक्ट":"PIECES");
+ $("#collection-empty").hidden=list.length>0;
+}
+function renderProduct(){
+ const root=$("#product-page");if(!root)return;
+ const slug=new URLSearchParams(location.search).get("slug"),product=productBySlug[slug];
+ if(!product){root.innerHTML='<div class="page-empty"><h2>'+escapeHtml(translate("productNotFound"))+'</h2><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("back"))+'</a></div>';return;}
+ $("#product-breadcrumb").textContent=nameOf(product);
+ const available=(product.variants||[]).filter(v=>v.stock_quantity>0);
+ const images=(product.images&&product.images.length?product.images:[{src:product.image,alt:product.imageAlt||nameOf(product)},{src:"/images/editorial-detail.svg",alt:nameOf(product)}]);
+ const gallery='<div class="product-gallery">'+images.slice(0,3).map((image,index)=>'<img class="'+(index===0?"product-gallery-main":"product-gallery-secondary")+'" src="'+escapeHtml(image.src)+'" alt="'+escapeHtml(image.alt||nameOf(product))+'" loading="'+(index===0?"eager":"lazy")+'">').join("")+'</div>';
+ const sizes=available.length?available.map((variant,index)=>'<option value="'+escapeHtml(variant.id)+'"'+(index===0?" selected":"")+'>'+escapeHtml(variant.size_label)+' · '+variant.stock_quantity+' '+escapeHtml(translate("instockQty"))+'</option>').join(""):'<option value="">'+escapeHtml(translate("outOfStock"))+'</option>';
+ const oldPrice=product.oldPrice?'<del>'+price(product.oldPrice)+'</del>':"";
+ const saved=state.wishlist.includes(product.id);
+ root.innerHTML=gallery+'<section class="product-detail-copy"><div class="page-breadcrumb"><a href="/collection.html">'+escapeHtml(translate("back"))+'</a><span>/</span><span>'+escapeHtml(categoryOf(product))+'</span></div><p class="eyebrow">'+escapeHtml(categoryOf(product))+' / '+escapeHtml(product.color||"")+'</p><h1>'+escapeHtml(nameOf(product))+'</h1><div class="product-detail-price"><strong>'+price(product.price)+'</strong>'+oldPrice+'</div><p class="stock-note">'+escapeHtml(available.length?translate("inStock"):translate("outOfStock"))+'</p><p class="product-detail-description">'+escapeHtml(state.lang==="hi"?(product.descriptionHi||"रोज़ पहनने के लिए सोच-समझकर चुना गया प्रोडक्ट। बेहतर फिट और आसान स्टाइल के लिए बनाया गया।"):(product.description||"A considered everyday piece designed to fit easily into your wardrobe. Made for simple styling and repeat wear."))+'</p><p class="eyebrow size-title">'+escapeHtml(translate("size"))+'</p><label class="detail-size-field"><span>'+escapeHtml(translate("sizeLabel"))+'</span><select id="detail-size" '+(!available.length?"disabled":"")+'>'+sizes+'</select></label><label class="detail-quantity"><span>'+escapeHtml(translate("qty"))+'</span><input id="detail-quantity" type="number" min="1" max="99" value="1"></label><button class="button button-dark product-detail-add" data-action="add-detail" data-product="'+product.id+'" '+(!available.length?"disabled":"")+'>'+escapeHtml(translate("add"))+' ↗</button><button class="button product-detail-wish '+(saved?"is-wished":"")+'" data-action="toggle-wishlist" data-product="'+product.id+'" type="button">'+escapeHtml(saved?translate("removeWish"):translate("savedButton"))+'</button><p class="shipping-note">'+escapeHtml(translate("ship"))+'</p><div class="detail-extra"><h2>'+escapeHtml(translate("details"))+'</h2><p>'+escapeHtml(state.lang==="hi"?(product.descriptionHi||"सामग्री, फिट और साइज़ की जानकारी के लिए चयनित वैरिएंट देखें।"):(product.description||"Choose an available size before adding this piece to your bag."))+'</p></div></section>';
+ const related=$("#related-grid");if(related)related.innerHTML=state.products.filter(p=>p.id!==product.id&&p.category===product.category).slice(0,4).map(card).join("");
+}
+function renderCart(){
+ const root=$("#cart-page");if(!root)return;
+ const rows=state.cart.map(item=>({item,product:state.products.find(p=>p.id===item.id)})).filter(row=>row.product);
+ const subtotal=rows.reduce((sum,row)=>sum+row.product.price*row.item.qty,0);
+ if(!rows.length){root.innerHTML='<div class="page-empty"><p>'+escapeHtml(translate("emptyCart"))+'</p><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("continueShopping"))+'</a></div>';return;}
+ root.innerHTML='<div class="cart-layout"><div class="cart-items">'+rows.map(({item,product})=>'<article class="cart-page-item"><a href="/product.html?slug='+encodeURIComponent(product.slug)+'"><img src="'+escapeHtml(product.image)+'" alt="'+escapeHtml(nameOf(product))+'"></a><div class="cart-page-item-info"><span class="product-category">'+escapeHtml(categoryOf(product))+'</span><h2><a href="/product.html?slug='+encodeURIComponent(product.slug)+'">'+escapeHtml(nameOf(product))+'</a></h2><p>'+escapeHtml(translate("sizeLabel"))+': <strong>'+escapeHtml(item.size||"One size")+'</strong></p><strong>'+price(product.price)+'</strong><div class="quantity-control"><button data-action="quantity-down" data-product="'+item.id+'" data-variant="'+escapeHtml(item.variantId)+'" aria-label="Decrease quantity">−</button><span>'+item.qty+'</span><button data-action="quantity-up" data-product="'+item.id+'" data-variant="'+escapeHtml(item.variantId)+'" aria-label="Increase quantity">＋</button></div><button class="text-link" data-action="remove-cart" data-product="'+item.id+'" data-variant="'+escapeHtml(item.variantId)+'">'+escapeHtml(translate("remove"))+'</button></div><strong class="cart-line-total">'+price(product.price*item.qty)+'</strong></article>').join("")+'</div><aside class="cart-summary"><p class="eyebrow">'+escapeHtml(translate("subtotal"))+'</p><div><span>'+escapeHtml(translate("subtotal"))+'</span><strong>'+price(subtotal)+'</strong></div><p>'+escapeHtml(translate("demoCheckout"))+'</p><button class="button button-dark full" data-action="checkout-demo">'+escapeHtml(translate("checkout"))+'</button><a href="/collection.html" class="text-link">'+escapeHtml(translate("continueShopping"))+'</a></aside></div>';
+}
+function renderWishlist(){
+ const root=$("#wishlist-page");if(!root)return;
+ const list=state.wishlist.map(id=>state.products.find(p=>p.id===id)).filter(Boolean);
+ root.innerHTML=list.length?'<div class="page-product-grid wishlist-grid">'+list.map(product=>card(product).replace('data-action="add-default"','data-action="add-default"')).join("")+'</div>':'<div class="page-empty"><p>'+escapeHtml(translate("emptyWish"))+'</p><a href="/collection.html" class="button button-dark">'+escapeHtml(translate("continueShopping"))+'</a></div>';
+}
+function renderAccount(){
+ const root=$("#account-page");if(!root)return;
+ if(state.user){
+  const fullName=state.user.user_metadata?.full_name||state.user.user_metadata?.name||"";
+  root.innerHTML='<p class="eyebrow">'+escapeHtml(translate("profile"))+'</p><p class="account-help">'+escapeHtml(translate("accountHelp"))+'</p><form id="profile-form" class="page-form">'+
+   '<label>'+escapeHtml(translate("fullName"))+'<input name="full_name" maxlength="100" required value="'+escapeHtml(fullName)+'"></label>'+
+   '<label>'+escapeHtml(translate("email"))+'<input name="email" type="email" required value="'+escapeHtml(state.user.email||"")+'"></label>'+
+   '<button class="button button-dark" type="submit">'+escapeHtml(translate("saveProfile"))+' ↗</button></form><button class="button account-signout" type="button" data-action="signout">'+escapeHtml(translate("signOut"))+'</button><p class="auth-notice" id="account-message" role="status" hidden></p>';
+ }else{
+  root.innerHTML='<p class="account-help">'+escapeHtml(translate("accountHelp"))+'</p><div class="auth-tabs"><button type="button" data-action="auth-mode" data-mode="signin" class="'+(state.authMode==="signin"?"is-active":"")+'">'+escapeHtml(translate("signIn"))+'</button><button type="button" data-action="auth-mode" data-mode="signup" class="'+(state.authMode==="signup"?"is-active":"")+'">'+escapeHtml(translate("createAccount"))+'</button></div><form id="account-auth-form" class="page-form">'+
+   '<label data-name-field '+(state.authMode!=="signup"?"hidden":"")+'>'+escapeHtml(translate("fullName"))+'<input name="full_name" autocomplete="name" maxlength="100" '+(state.authMode==="signup"?"required":"")+'></label>'+
+   '<label>'+escapeHtml(translate("email"))+'<input name="email" type="email" autocomplete="email" required></label>'+
+   '<label>'+escapeHtml(translate("password"))+'<input name="password" type="password" minlength="8" autocomplete="'+(state.authMode==="signin"?"current-password":"new-password")+'" required></label>'+
+   '<p class="auth-notice" id="account-message" role="status" hidden></p><button class="button button-dark" type="submit">'+escapeHtml(translate(state.authMode==="signin"?"submit":"confirm"))+' ↗</button></form>';
+ }
+}
+function renderCurrentPage(){
+ renderPageTranslations();
+ if(page==="collection")renderCollection();
+ if(page==="product")renderProduct();
+ if(page==="cart")renderCart();
+ if(page==="wishlist")renderWishlist();
+ if(page==="account")renderAccount();
+}
+async function addToCart(productId,variantId,quantity=1){
+ const product=state.products.find(p=>p.id===Number(productId));if(!product)throw new Error("Product not found");
+ const variant=(variantId&&variantById[variantId])||defaultVariant(product.id);
+ if(!variant||variant.stock_quantity<=0)throw new Error(translate("invalidSize"));
+ const existing=state.cart.find(item=>item.id===product.id&&item.variantId===variant.id);
+ const amount=Math.min(99,Math.max(1,Number(quantity)||1));
+ if(existing)existing.qty=Math.min(99,existing.qty+amount);
+ else state.cart.push({id:product.id,variantId:variant.id,size:variant.size_label,qty:amount});
+ await persistCart();renderPageAfterState();toast(translate("added"));
+}
+async function toggleWishlist(productId){
+ const id=Number(productId),has=state.wishlist.includes(id);
+ state.wishlist=has?state.wishlist.filter(item=>item!==id):[...state.wishlist,id];
+ await persistWishlist();renderPageAfterState();toast(translate(has?"removedToast":"savedToast"));
+}
+function renderPageAfterState(){
+ renderPageTranslations();
+ if(page==="collection")renderCollection();if(page==="product")renderProduct();if(page==="cart")renderCart();if(page==="wishlist")renderWishlist();
+}
+document.addEventListener("click",async event=>{
+ const link=event.target.closest("a[data-action]");if(link&&link.dataset.action==="language-toggle"){event.preventDefault();toggleLanguage();return;}
+ const button=event.target.closest("[data-action]");if(!button)return;
+ try{
+  const action=button.dataset.action;
+  if(action==="language-toggle"){toggleLanguage();return;}
+  if(action==="toggle-wishlist"){await toggleWishlist(button.dataset.product);return;}
+  if(action==="add-default"){const variant=defaultVariant(button.dataset.product);if(!variant)throw new Error(translate("invalidSize"));await addToCart(button.dataset.product,variant.id,1);return;}
+  if(action==="add-detail"){const amount=Number($("#detail-quantity")?.value||1),variantId=$("#detail-size")?.value||"";await addToCart(button.dataset.product,variantId,amount);return;}
+  if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));await persistCart();renderCart();renderPageTranslations();return;}
+  if(action==="quantity-up"||action==="quantity-down"){
+   const row=state.cart.find(item=>item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant);
+   if(row){const variant=variantById[row.variantId],max=Math.min(99,variant?.stock_quantity||99);row.qty=action==="quantity-up"?Math.min(max,row.qty+1):row.qty-1;if(row.qty<1)state.cart=state.cart.filter(item=>item!==row);await persistCart();renderCart();renderPageTranslations();}
+   return;
+  }
+  if(action==="checkout-demo"){toast(translate("demoCheckout"));return;}
+  if(action==="clear-collection"){if($("#collection-search"))$("#collection-search").value="";if($("#collection-category"))$("#collection-category").value="All";if($("#collection-sort"))$("#collection-sort").value="recommended";renderCollection();return;}
+  if(action==="auth-mode"){state.authMode=button.dataset.mode==="signup"?"signup":"signin";renderAccount();return;}
+  if(action==="signout"){const {error}=await supabase.auth.signOut();if(error)throw error;await restoreUser(null);renderAccount();renderPageTranslations();toast(translate("signedOut"));return;}
+ }catch(error){console.error(error);toast(error.message||translate("error"));}
+});
+document.addEventListener("submit",async event=>{
+ if(event.target.id==="account-auth-form"){
+  event.preventDefault();const form=new FormData(event.target),email=String(form.get("email")||"").trim(),password=String(form.get("password")||""),full_name=String(form.get("full_name")||"").trim(),message=$("#account-message"),submit=event.target.querySelector('button[type="submit"]');
+  submit.disabled=true;message.hidden=true;
+  try{
+   if(state.authMode==="signup"){
+    const {data,error}=await supabase.auth.signUp({email,password,options:{data:{full_name},emailRedirectTo:location.origin+"/account.html"}});
+    if(error)throw error;
+    if(data.session){await restoreUser(data.user);renderAccount();renderPageTranslations();toast(translate("signedIn"));}
+    else{message.hidden=false;message.className="auth-notice auth-notice-success";message.textContent=translate("checkEmail");}
+   }else{
+    const {data,error}=await supabase.auth.signInWithPassword({email,password});if(error)throw error;
+    await restoreUser(data.user);renderAccount();renderPageTranslations();toast(translate("signedIn"));
+   }
+  }catch(error){message.hidden=false;message.className="auth-notice auth-notice-error";message.textContent=error.message||translate("error");}
+  finally{if(submit)submit.disabled=false;}
+  return;
+ }
+ if(event.target.id==="profile-form"){
+  event.preventDefault();const form=new FormData(event.target),full_name=String(form.get("full_name")||"").trim(),email=String(form.get("email")||"").trim();
+  const oldEmail=(state.user?.email||"").toLowerCase();
+  try{
+   const updates={data:{...(state.user?.user_metadata||{}),full_name}};if(email.toLowerCase()!==oldEmail)updates.email=email;
+   const {data,error}=await supabase.auth.updateUser(updates);if(error)throw error;
+   state.user=data.user;renderAccount();toast(email.toLowerCase()!==oldEmail?(state.lang==="hi"?"ईमेल बदलने के लिए पुष्टि करें।":"Check your email to confirm the email change."):translate("profileSaved"));
+  }catch(error){toast(error.message||translate("error"));}
+ }
+});
+$("#collection-search")?.addEventListener("input",renderCollection);
+$("#collection-category")?.addEventListener("change",renderCollection);
+$("#collection-sort")?.addEventListener("change",renderCollection);
+function toggleLanguage(){
+ state.lang=state.lang==="en"?"hi":"en";writeStorage("sm_lang",state.lang);renderCurrentPage();
+}
+function populateCategorySelect(){
+ const select=$("#collection-category");if(!select)return;
+ select.innerHTML=CATEGORIES.map(category=>'<option value="'+escapeHtml(category)+'">'+escapeHtml(state.lang==="hi"?(CATEGORY_HI[category]||category):category)+'</option>').join("");
+}
+async function initialize(){
+ await loadCatalogue();
+ const sessionResult=await supabase.auth.getSession();
+ await restoreUser(sessionResult.data.session?.user||null);
+ supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{try{await restoreUser(session?.user||null);renderCurrentPage();}catch(error){console.error(error);toast(translate("error"));}},0);});
+ populateCategorySelect();
+ renderCurrentPage();
+}
+await initialize();
