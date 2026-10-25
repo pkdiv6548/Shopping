@@ -4,7 +4,8 @@ import path from "node:path";
 const root = process.cwd();
 const required = [
   "index.html", "product.html", "collection.html", "cart.html", "wishlist.html",
-  "account.html", "styles.css", "pages.css", "vercel.json", "js/products.mjs",
+  "account.html", "women.html", "men.html", "new-arrivals.html", "search.html",
+  "checkout.html", "about.html", "styles.css", "pages.css", "vercel.json", "js/products.mjs",
   "js/app.mjs", "js/subpages.mjs"
 ];
 const errors = [];
@@ -42,7 +43,7 @@ const combined = ["index.html","styles.css","js/products.mjs"].map(read).join("\
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
   if (combined.includes(blocked)) errors.push("External asset dependency found: " + blocked);
 }
-for (const page of ["product.html","collection.html","cart.html","wishlist.html","account.html"]) {
+for (const page of ["product.html","collection.html","cart.html","wishlist.html","account.html","women.html","men.html","new-arrivals.html","search.html","checkout.html","about.html"]) {
   if (!read(page).includes('src="/js/subpages.mjs"')) errors.push(page + ": missing subpage behaviour module");
 }
 if (!read("index.html").includes('src="/js/app.mjs"')) errors.push("index.html: missing storefront behaviour module");
