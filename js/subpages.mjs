@@ -10,7 +10,7 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const page = document.body.dataset.page || "collection";
 const text = {
   en: {
-    promo:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999",home:"HOME",shopAll:"SHOP ALL",saved:"WISHLIST",bag:"BAG",account:"ACCOUNT",footer:"Style that feels like you.",demo:"DEMO STORE · PAYMENTS NOT ENABLED",
+    promo:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999",localMarket:"SHOPPING MART / INDIA",searchLabel:"Search",home:"HOME",shopAll:"SHOP ALL",saved:"WISHLIST",bag:"BAG",account:"ACCOUNT",footer:"Style that feels like you.",demo:"DEMO STORE · PAYMENTS NOT ENABLED",
     newEdit:"THE EVERYDAY EDIT",shopTitle:"Pieces for everyday.",shopIntro:"Considered essentials, easy layers and modern silhouettes.",search:"Search products, categories…",category:"Category",sort:"Sort by",recommended:"Recommended",low:"Price: low to high",high:"Price: high to low",allPieces:"All pieces",noResults:"No pieces found.",clear:"Clear filters",
     youMayLike:"YOU MAY ALSO LIKE",new:"NEW",bestSeller:"BESTSELLER",size:"Select a size",color:"Colour",add:"ADD TO BAG",savedButton:"SAVE TO WISHLIST",removeWish:"REMOVE FROM WISHLIST",inStock:"In stock",outOfStock:"Currently unavailable",qty:"Quantity",ship:"Complimentary shipping on orders over ₹2,999.",details:"Product details",back:"BACK TO SHOP",productNotFound:"We couldn't find that piece.",continueShopping:"CONTINUE SHOPPING ↗",
     bagEyebrow:"YOUR EDIT",bagTitle:"Your bag.",bagIntro:"Review pieces and sizes before checkout.",emptyCart:"Your bag is empty.",subtotal:"Subtotal",demoCheckout:"Checkout is a demo only. Real payments and orders are not enabled.",remove:"REMOVE",update:"UPDATE",checkout:"CONTINUE TO CHECKOUT",sizeLabel:"Size",
@@ -18,7 +18,7 @@ const text = {
     accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",instockQty:"Available"
   },
   hi: {
-    promo:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",home:"होम",shopAll:"सभी प्रोडक्ट",saved:"विशलिस्ट",bag:"बैग",account:"अकाउंट",footer:"ऐसा स्टाइल जो आप जैसा लगे।",demo:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
+    promo:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",localMarket:"SHOPPING MART / भारत",searchLabel:"खोजें",home:"होम",shopAll:"सभी प्रोडक्ट",saved:"विशलिस्ट",bag:"बैग",account:"अकाउंट",footer:"ऐसा स्टाइल जो आप जैसा लगे।",demo:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
     newEdit:"हर दिन का कलेक्शन",shopTitle:"हर दिन के लिए खास पीस।",shopIntro:"चुने हुए एसेंशियल, आसान लेयर्स और आधुनिक स्टाइल।",search:"प्रोडक्ट या कैटेगरी खोजें…",category:"कैटेगरी",sort:"क्रम",recommended:"सुझाए गए",low:"कीमत: कम से ज़्यादा",high:"कीमत: ज़्यादा से कम",allPieces:"सभी प्रोडक्ट",noResults:"कोई प्रोडक्ट नहीं मिला।",clear:"फ़िल्टर हटाएँ",
     youMayLike:"आपको ये भी पसंद आ सकते हैं",new:"नया",bestSeller:"लोकप्रिय",size:"साइज़ चुनें",color:"रंग",add:"बैग में जोड़ें",savedButton:"विशलिस्ट में सेव करें",removeWish:"विशलिस्ट से हटाएँ",inStock:"स्टॉक में उपलब्ध",outOfStock:"अभी उपलब्ध नहीं",qty:"मात्रा",ship:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी।",details:"प्रोडक्ट विवरण",back:"शॉप पर वापस जाएँ",productNotFound:"यह प्रोडक्ट नहीं मिला।",continueShopping:"खरीदारी जारी रखें ↗",
     bagEyebrow:"आपका कलेक्शन",bagTitle:"आपका बैग।",bagIntro:"चेकआउट से पहले प्रोडक्ट और साइज़ जाँचें।",emptyCart:"आपका बैग खाली है।",subtotal:"कुल",demoCheckout:"चेकआउट अभी डेमो है। वास्तविक भुगतान या ऑर्डर चालू नहीं हैं।",remove:"हटाएँ",update:"अपडेट",checkout:"चेकआउट जारी रखें",sizeLabel:"साइज़",
@@ -43,6 +43,7 @@ function nameOf(product){return state.lang==="hi"?(product.hi||product.name):pro
 function categoryOf(product){return state.lang==="hi"?(product.categoryHi||CATEGORY_HI[product.category]||product.category):product.category;}
 function renderPageTranslations(){
  document.documentElement.lang=state.lang;
+ const search=$("#collection-search");if(search)search.placeholder=translate("search");
  $$("[data-page-copy]").forEach(node=>{const key=node.dataset.pageCopy;if(translate(key)!==key)node.textContent=translate(key);});
  const language=$("#page-language");if(language)language.textContent=state.lang==="en"?"हिंदी":"English";
  const count=$("#page-cart-count");if(count)count.textContent=String(state.cart.reduce((sum,item)=>sum+item.qty,0));
