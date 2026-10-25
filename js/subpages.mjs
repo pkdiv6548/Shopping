@@ -136,14 +136,23 @@ function card(product){
 }
 function renderCollection(){
  const grid=$("#collection-grid");if(!grid)return;
+ const select=$("#collection-category"),prior=select?.value||"All";
+ if(select){
+  select.innerHTML=CATEGORIES.map(value=>'<option value="'+escapeHtml(value)+'">'+escapeHtml(state.lang==="hi"?(CATEGORY_HI[value]||value):value)+'</option>').join("");
+  select.value=CATEGORIES.includes(prior)?prior:"All";
+ }
+ const sortSelect=$("#collection-sort");
+ if(sortSelect)[...sortSelect.options].forEach(option=>{const key=option.value;if(translate(key)!==key)option.textContent=translate(key);});
  const query=($("#collection-search")?.value||"").trim().toLocaleLowerCase();
- const category=$("#collection-category")?.value||"All",sort=$("#collection-sort")?.value||"recommended";
- let list=state.products.filter(p=>(category==="All"||category==="Clothing"?!((category==="Clothing")&&["Accessories","Shoes"].includes(p.category)):p.category===category)
-  &&(!query||[p.name,p.hi,p.category,p.categoryHi,p.color].some(v=>String(v||"").toLocaleLowerCase().includes(query))));
- if(category==="All")list=state.products.filter(p=>!query||[p.name,p.hi,p.category,p.categoryHi,p.color].some(v=>String(v||"").toLocaleLowerCase().includes(query)));
+ const category=select?.value||"All",sort=sortSelect?.value||"recommended";
+ let list=state.products.filter(product=>{
+  const matchesCategory=category==="All"||(category==="New in"?product.tag==="new":category==="Clothing"?!["Accessories","Shoes"].includes(product.category):product.category===category);
+  const matchesQuery=!query||[product.name,product.hi,product.category,product.categoryHi,product.color,product.colorHi].some(value=>String(value||"").toLocaleLowerCase().includes(query));
+  return matchesCategory&&matchesQuery;
+ });
  if(sort==="low")list.sort((a,b)=>a.price-b.price);if(sort==="high")list.sort((a,b)=>b.price-a.price);
  grid.innerHTML=list.map(card).join("");
- $("#collection-result-label").textContent=state.lang==="hi"?(CATEGORY_HI[category]||category):category;
+ $("#collection-result-label").textContent=state.lang==="hi"?(CATEGORY_HI[category]||category):(category==="All"?translate("allPieces"):category);
  $("#collection-result-count").textContent=list.length+" "+(state.lang==="hi"?"प्रोडक्ट":"PIECES");
  $("#collection-empty").hidden=list.length>0;
 }
