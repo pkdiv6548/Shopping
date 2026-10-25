@@ -31,7 +31,7 @@ const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All
 
 const words = {
   en: {
-    top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026", shopAll:"SHOP ALL",
+    top:"COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999", new:"NEW SEASON / 2026", shopAll:"SHOP ALL", announcementRight:"INDIA · EVERYDAY ESSENTIALS", captionLeft:"FORM / FUNCTION / FEELING", captionRight:"VOL. 01 — THE EVERYDAY EDIT", newsletterEyebrow:"A NOTE FROM US", wishlistNav:"Wishlist", bagNav:"Your bag", accountNav:"Account", viewFullBag:"VIEW FULL BAG", viewFullWishlist:"VIEW FULL WISHLIST", stockAvailable:"IN STOCK",
     title1:"A little less,", title2:"a lot more.", subtitle:"Thoughtful pieces. Better everyday dressing. Find your next forever favourite.",
     shop:"EXPLORE THE EDIT", shopNow:"SHOP THE COLLECTION", discover:"THE NEW EDIT", featured:"MADE FOR YOUR EVERYDAY",
     discoverSub:"Fresh silhouettes, easy layers and pieces made to live in.", all:"VIEW ALL",
@@ -64,7 +64,7 @@ const words = {
     remove:"REMOVE", categoryAll:"All pieces", menuTitle:"Browse categories"
   },
   hi: {
-    top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026", shopAll:"सभी प्रोडक्ट",
+    top:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी", new:"नया सीज़न / 2026", shopAll:"सभी प्रोडक्ट", announcementRight:"भारत · रोज़मर्रा का स्टाइल", captionLeft:"फॉर्म / फंक्शन / एहसास", captionRight:"वॉल्यूम 01 — हर दिन का कलेक्शन", newsletterEyebrow:"हमारी ओर से एक नोट", wishlistNav:"विशलिस्ट", bagNav:"आपका बैग", accountNav:"अकाउंट", viewFullBag:"पूरा बैग देखें", viewFullWishlist:"पूरी विशलिस्ट देखें", stockAvailable:"स्टॉक में",
     title1:"कम में भी,", title2:"बहुत कुछ।", subtitle:"सोच-समझकर चुने गए कपड़े। रोज़मर्रा के लिए बेहतर स्टाइल। अपना अगला पसंदीदा पीस खोजें।",
     shop:"कलेक्शन देखें", shopNow:"कलेक्शन खरीदें", discover:"नया कलेक्शन", featured:"आपके हर दिन के लिए",
     discoverSub:"नए सिल्हूट, आसान लेयर्स और हर दिन पहनने के लिए खास पीस।", all:"सभी देखें",
@@ -158,6 +158,13 @@ function setLanguage() {
   document.documentElement.lang = state.lang;
   const main = $("main[lang]");
   if (main) main.lang = state.lang;
+  const announcementRight = $(".announcement-right");
+  if (announcementRight) announcementRight.textContent = t().announcementRight;
+  const heroCaptions = $(".hero-caption span");
+  if (heroCaptions[0]) heroCaptions[0].textContent = t().captionLeft;
+  if (heroCaptions[1]) heroCaptions[1].textContent = t().captionRight;
+  const newsletterEyebrow = $("#newsletter .eyebrow");
+  if (newsletterEyebrow) newsletterEyebrow.textContent = t().newsletterEyebrow;
   $$("[data-copy]").forEach(element => {
     const key = element.dataset.copy;
     if (t()[key]) element.textContent = t()[key];
@@ -363,7 +370,7 @@ function openCart() {
   const list=items.length?'<div class="drawer-items">'+items.map(({item,product})=>
     '<div class="drawer-item"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"><div><b>'+esc(productName(product))+'</b><span>'+esc(item.size||"One size")+' · '+money(product.price)+' · Qty '+item.qty+'</span><strong>'+money(product.price*item.qty)+'</strong><button type="button" data-remove-cart="'+product.id+'" data-remove-variant="'+esc(item.variantId||"")+'">'+esc(t().remove)+'</button></div></div>'
   ).join("")+'</div>':'<div class="drawer-empty"><p>'+esc(t().emptyCart)+'</p><button class="button button-dark" data-close-overlay type="button">'+esc(t().shop)+'</button></div>';
-  const bottom='<div class="drawer-bottom"><div><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p>'+esc(t().demo)+'</p><a class="text-link" href="/cart.html">VIEW FULL BAG ↗</a><button class="button button-dark full" data-checkout type="button">'+esc(t().checkout)+'</button></div>';
+  const bottom='<div class="drawer-bottom"><div><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p>'+esc(t().demo)+'</p><a class="text-link" href="/cart.html">' + esc(t().viewFullBag) + ' <button class="button button-dark full" data-checkout type="button">'+esc(t().checkout)+'</button></div>';
   openOverlay(t().bag,header+list+bottom);
 }
 function openWishlist() {
@@ -377,7 +384,7 @@ function openWishlist() {
 function openQuickView(product) {
   if(!product)return;
   const choices=(product.variants||[]).filter(variant=>variant.stock_quantity>0);
-  const sizes=choices.length?'<label class="size-select">'+esc(t().size)+'<select id="quick-size" aria-label="'+esc(t().size)+'">'+choices.map((variant,index)=>'<option value="'+esc(variant.id)+'"'+(index===0?" selected":"")+'>'+esc(variant.size_label)+'</option>').join("")+'</select></label>':'';
+  const sizes=choices.length?'<label class="size-select">'+esc(t().size)+'<select id="quick-size" aria-label="'+esc(t().size)+'">'+choices.map((variant,index)=>'<option value="'+esc(variant.id)+'"'+(index===0?" selected":"")+'>'+esc(variant.size_label)+' · '+variant.stock_quantity+' '+esc(t().stockAvailable)+'</option>').join("")+'</select></label>':'';
   const body='<button class="icon-button modal-close" data-close-overlay type="button" aria-label="'+esc(t().close)+'">×</button>'+
     '<div class="quick-image"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"></div>'+
     '<div class="quick-info"><p class="eyebrow">'+esc(productCategory(product))+" / "+esc(product.color||"")+'</p><h2>'+esc(productName(product))+'</h2><strong>'+money(product.price)+'</strong>'+
