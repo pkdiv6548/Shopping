@@ -161,7 +161,7 @@ function setLanguage() {
   if (main) main.lang = state.lang;
   const announcementRight = $(".announcement-right");
   if (announcementRight) announcementRight.textContent = t().announcementRight;
-  const heroCaptions = $(".hero-caption span");
+  const heroCaptions = $$(".hero-caption span");
   if (heroCaptions[0]) heroCaptions[0].textContent = t().captionLeft;
   if (heroCaptions[1]) heroCaptions[1].textContent = t().captionRight;
   const newsletterEyebrow = $("#newsletter .eyebrow");
