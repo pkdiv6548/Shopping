@@ -12,5 +12,5 @@ export const PRODUCTS = [
  {id:11,slug:"textured-relaxed-sweatshirt",name:"Textured relaxed sweatshirt",hi:"टेक्सचर्ड रिलैक्स्ड स्वेटशर्ट",category:"Knitwear",categoryHi:"निटवेयर",price:2199,color:"Grey marl",tone:"#a5a39e",image:"/images/sweatshirt.svg",tag:"new"},
  {id:12,slug:"classic-straight-denim",name:"Classic straight denim",hi:"क्लासिक स्ट्रेट डेनिम",category:"Denim",categoryHi:"डेनिम",price:2399,color:"Indigo",tone:"#46586c",image:"/images/denim.svg",tag:"popular"}
 ];
-export const CATEGORIES = ["All","New in","Clothing","Shirts","T-shirts","Trousers","Dresses","Knitwear","Outerwear","Denim","Shoes","Accessories"];
-export const CATEGORY_HI = { "All":"सभी प्रोडक्ट","New in":"नए प्रोडक्ट","Clothing":"कपड़े","Shirts":"शर्ट","T-shirts":"टी-शर्ट","Trousers":"ट्राउज़र","Dresses":"ड्रेस","Knitwear":"निटवेयर","Outerwear":"जैकेट","Denim":"डेनिम","Shoes":"जूते","Accessories":"एक्सेसरीज़" };
+export const CATEGORIES = ["All","New in","Clothing","Shirts","T-shirts","Trousers","Dresses","Skirts","Knitwear","Outerwear","Denim","Shoes","Accessories"];
+export const CATEGORY_HI = { "All":"सभी प्रोडक्ट","New in":"नए प्रोडक्ट","Clothing":"कपड़े","Shirts":"शर्ट","T-shirts":"टी-शर्ट","Trousers":"ट्राउज़र","Dresses":"ड्रेस","Skirts":"स्कर्ट","Knitwear":"निटवेयर","Outerwear":"जैकेट","Denim":"डेनिम","Shoes":"जूते","Accessories":"एक्सेसरीज़" };
