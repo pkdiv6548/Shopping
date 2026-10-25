@@ -317,7 +317,8 @@ async function restoreUser(user) {
     });
     state.cart=[...quantities.values()];
     if(guestCart.length||guestWishlist.length){
-      await Promise.all([persistCart(),persistWishlist()]);
+      // Route guest-cart migration through the same queues as click-driven saves to avoid competing writes.
+      await Promise.all([saveCart(),saveWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
     }
     if (restoreSequence !== restoreUserSequence || state.user?.id !== user.id) return;
