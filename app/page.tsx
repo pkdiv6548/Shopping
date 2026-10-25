@@ -98,6 +98,7 @@ export default function Home(){
   if(!supabase||!authUserId)return;
   if(!accountItemsReady)throw new Error("Account items are still loading");
   const counts=new Map<string,number>();
+  if(nextCart.some(localId=>!databaseProductIds[localId]))throw new Error("A cart product has no database mapping");
   nextCart.forEach(localId=>{
    const databaseId=databaseProductIds[localId];
    if(databaseId)counts.set(databaseId,(counts.get(databaseId)||0)+1);
