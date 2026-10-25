@@ -298,6 +298,8 @@ async function restoreUser(user) {
     const slugByDatabaseId=Object.fromEntries((productsResult.data||[]).map(row=>[row.id,row.slug]));
     state.dbIds=Object.fromEntries((productsResult.data||[]).map(row=>[idBySlug[row.slug],row.id]).filter(([localId])=>Number.isInteger(localId)));
     const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart();
+    const accountCart=readGuest("sm_user_cart_"+user.id,[]);
+    const recoveryCart=Array.isArray(accountCart)?accountCart.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
     state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist])];
     const variantById=Object.fromEntries(state.products.flatMap(product=>(product.variants||[]).map(variant=>[variant.id,{...variant,productId:product.id}])));
     const quantities=new Map();
@@ -312,13 +314,13 @@ async function restoreUser(user) {
       if(!variant||variant.stock_quantity<=0)return;
       addQuantity(localId,row.variant_id,Math.min(variant.stock_quantity,Math.max(1,Number(row.quantity)||1)),variant.size_label);
     });
-    guestCart.forEach(item=>{
+    [...guestCart,...recoveryCart].forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
       if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
     });
     const cartChangedDuringRestore = state.cartRevision !== cartRevisionAtStart;
     if (!cartChangedDuringRestore) state.cart=[...quantities.values()];
-    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length)){
+    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length||recoveryCart.length)){
       // Route guest-cart migration through the same queues as click-driven saves to avoid competing writes.
       await Promise.all([saveCart(),saveWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
@@ -335,6 +337,7 @@ async function restoreUser(user) {
 
 async function persistCart() {
   if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
+  saveGuest("sm_user_cart_"+state.user.id,state.cart);
   const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
     .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
   const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
