@@ -45,7 +45,7 @@ const words = {
     filters:"FILTER", clear:"Clear", color:"Colour", price:"Price", quick:"QUICK VIEW",
     view:"DISCOVER PIECE", inBag:"IN BAG", size:"Select a size", add:"ADD TO BAG",
     addedWish:"Saved to wishlist", removeWish:"Remove from wishlist",
-    signIn:"SIGN IN", create:"CREATE ACCOUNT", name:"Full name", password:"Password",
+    signIn:"SIGN IN", create:"CREATE ACCOUNT", name:"Full name", quantityShort:"Qty", wishlistNav:"Wishlist", bagNav:"Your bag", accountNav:"Account", password:"Password",
     logout:"SIGN OUT", save:"SAVE CHANGES", signed:"Signed in successfully.",
     needLogin:"Sign in to save your bag and favourites.", emptyCart:"Your bag is empty.",
     emptyWish:"No saved pieces yet.", emailConfirm:"Check your email to confirm your account.",
@@ -78,7 +78,7 @@ const words = {
     filters:"फ़िल्टर", clear:"हटाएँ", color:"रंग", price:"कीमत", quick:"जल्दी देखें",
     view:"पीस देखें", inBag:"बैग में", size:"साइज़ चुनें", add:"बैग में जोड़ें",
     addedWish:"फेवरेट में सेव किया", removeWish:"फेवरेट से हटाएँ",
-    signIn:"लॉगिन", create:"अकाउंट बनाएँ", name:"पूरा नाम", password:"पासवर्ड",
+    signIn:"लॉगिन", create:"अकाउंट बनाएँ", name:"पूरा नाम", quantityShort:"मात्रा", wishlistNav:"विशलिस्ट", bagNav:"आपका बैग", accountNav:"अकाउंट", password:"पासवर्ड",
     logout:"लॉगआउट", save:"बदलाव सेव करें", signed:"लॉगिन सफल हुआ।",
     needLogin:"बैग और फेवरेट सेव करने के लिए लॉगिन करें।", emptyCart:"आपका बैग खाली है।",
     emptyWish:"अभी कोई फेवरेट सेव नहीं है।", emailConfirm:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",
@@ -140,7 +140,7 @@ function renderProducts() {
     '<article class="product-card reveal"><div class="product-image" style="background-color:'+esc(product.tone||"#e9e5dd")+'">'+
     '<a class="product-image-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'" aria-label="'+esc(t().view+" "+productName(product))+'"><img loading="lazy" src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"></a>'+
     (product.badge?'<span class="badge">'+esc(product.badge)+"</span>":"")+
-    '<button class="wish-button '+(state.wishlist.includes(product.id)?"is-wished":"")+'" data-wish="'+product.id+'" type="button" aria-label="Wishlist" title="Wishlist">♥</button>'+
+    '<button class="wish-button '+(state.wishlist.includes(product.id)?"is-wished":"")+'" data-wish="'+product.id+'" type="button" aria-label="'+esc(t().wishlistNav)+'" title="'+esc(t().wishlistNav)+'">♥</button>'+
     '<button class="quick-add" data-quick="'+product.id+'" type="button"><span>'+esc(t().quick)+'</span><span>↗</span></button></div>'+
     '<div class="product-meta"><div><span class="product-category">'+esc(productCategory(product))+'</span><a class="product-name-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'"><h3>'+esc(productName(product))+'</h3></a><span class="product-color">'+esc(state.lang==="hi"?(product.colorHi||product.color||""):(product.color||""))+'</span></div>'+
     '<div class="product-prices"><b>'+money(product.price)+'</b>'+(product.oldPrice?'<del>'+money(product.oldPrice)+'</del>':"")+'</div></div>'+
@@ -407,7 +407,7 @@ function openAuth() {
   const heading = user ? (state.lang === "hi" ? "आपका अकाउंट" : "Your account") : (state.lang === "hi" ? "वापस स्वागत है।" : "Welcome back.");
   const content = user ?
     '<div class="auth-account"><div class="auth-avatar">♙</div><p class="auth-muted">' + esc(user.email || "") + '</p><form id="profile-form" class="auth-profile-form">' +
-    field(t().name, "full_name", "text", displayName, true, "name", "") + field("Email", "email", "email", user.email || "", true, "email", "") +
+    field(t().name, "full_name", "text", displayName, true, "name", "") + field(state.lang==="hi"?"ईमेल पता":"Email address", "email", "email", user.email || "", true, "email", "") +
     '<div class="auth-profile-actions"><button class="auth-submit" type="submit">' + esc(t().save) + ' <span>↗</span></button></div></form><button class="auth-secondary auth-signout" type="button" data-signout>' + esc(t().logout) + "</button></div>" :
     '<p class="auth-intro">' + esc(state.lang === "hi" ? "लॉगिन करें या अपना अकाउंट बनाएँ। सेव किए गए प्रोडक्ट और बैग आपके अकाउंट से जुड़े रहेंगे।" : "Sign in or create an account. Your saved pieces and bag stay linked to your account.") + '</p>' +
     '<div class="auth-tabs"><button type="button" data-auth-mode="signin" class="' + (authMode === "signin" ? "is-active" : "") + '">' + esc(t().signIn) + '</button><button type="button" data-auth-mode="signup" class="' + (authMode === "signup" ? "is-active" : "") + '">' + esc(t().create) + "</button></div>" +
