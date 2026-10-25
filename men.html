@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="Explore the Shopping Mart men's fashion edit.">
+  <title>Men | Shopping Mart | Shopping Mart</title>
+  <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+  <link rel="stylesheet" href="/pages.css">
+</head>
+<body data-page="category" data-category-filter="men">
+  <div class="announcement page-announcement"><span data-page-copy="promo">COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999</span><span data-page-copy="localMarket">SHOPPING MART / INDIA</span></div>
+  <header class="page-header">
+    <a class="wordmark" href="/" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a>
+    <nav aria-label="Store navigation">
+      <a href="/" data-page-copy="home">HOME</a>
+      <a href="/women.html" data-page-copy="womenNav">WOMEN</a>
+      <a href="/men.html" data-page-copy="menNav">MEN</a>
+      <a href="/new-arrivals.html" data-page-copy="newArrivalsNav">NEW IN</a>
+      <a href="/collection.html" data-page-copy="shopAll">SHOP ALL</a>
+      <a href="/wishlist.html" data-page-copy="saved">WISHLIST</a>
+      <a href="/cart.html" data-page-copy="bag">BAG <span class="page-count" id="page-cart-count">0</span></a>
+      <a href="/account.html" data-page-copy="account">ACCOUNT</a>
+    </nav>
+    <button class="language-switch" type="button" data-action="language-toggle" id="page-language">हिंदी</button>
+  </header>
+  <main class="page-main">
+  <section class="page-heading">
+    <p class="eyebrow" data-page-copy="menEyebrow">THE MEN'S EDIT</p>
+    <h1 data-page-copy="menTitle">Everyday style, refined.</h1>
+    <p data-page-copy="menIntro">Easy essentials, modern layers and uncomplicated fits.</p>
+  </section>
+  <div class="collection-controls">
+    <label><span data-page-copy="searchLabel">Search</span><input id="collection-search" type="search" placeholder="Search products, categories…"></label>
+    <label><span data-page-copy="category">Category</span><select id="collection-category"><option value="All">All pieces</option></select></label>
+    <label><span data-page-copy="sort">Sort by</span><select id="collection-sort"><option value="recommended">Recommended</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label>
+    <label><span data-page-copy="priceFilter">Price</span><select id="collection-price"><option value="all">All prices</option><option value="under1500">Under ₹1,500</option><option value="1500-2500">₹1,500–₹2,500</option><option value="above2500">Above ₹2,500</option></select></label>
+    <label><span data-page-copy="colorFilter">Colour</span><select id="collection-color"><option value="All">All colours</option></select></label>
+  </div>
+  <div class="collection-count"><span id="collection-result-label">All pieces</span><span id="collection-result-count"></span></div>
+  <div id="collection-grid" class="page-product-grid"></div>
+  <div id="collection-empty" class="page-empty" hidden><h2 data-page-copy="noResults">No pieces found.</h2><button data-action="clear-collection" class="button button-dark" data-page-copy="clear">Clear filters</button></div>
+</main>
+  <footer class="page-footer">
+    <a class="wordmark footer-logo" href="/">SHOPPING<span> MART</span><i>®</i></a>
+    <p data-page-copy="footer">Style that feels like you.</p>
+    <div>
+      <a href="/collection.html" data-page-copy="shopAll">Shop all</a>
+      <a href="/search.html" data-page-copy="searchNav">Search</a>
+      <a href="/about.html" data-page-copy="aboutNav">About</a>
+      <a href="/account.html" data-page-copy="account">Account</a>
+      <a href="/cart.html" data-page-copy="bag">Bag</a>
+      <a href="/" data-page-copy="home">Home</a>
+    </div>
+    <small>© 2026 SHOPPING MART · <span data-page-copy="demo">DEMO STORE · PAYMENTS NOT ENABLED</span></small>
+  </footer>
+  <div class="page-toast" id="page-toast" hidden role="status"></div>
+  <script type="module" src="/js/subpages.mjs"></script>
+</body>
+</html>
