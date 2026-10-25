@@ -33,7 +33,7 @@ export default function Home(){
  const flash=(text:string)=>{setNotice(text);window.setTimeout(()=>setNotice(""),2200)};
  const add=(p:Product)=>{setCart(c=>[...c,p.id]);flash(t.added)};
  const toggleWish=(p:Product)=>{const has=wishlist.includes(p.id);setWishlist(w=>has?w.filter(id=>id!==p.id):[...w,p.id]);flash(has?t.removeWish:t.addedWish)};
- return <main lang={lang}>
+ return <main lang={lang} id="top">
   <div className="announcement"><span>{t.top}</span><span className="announcement-right">NEW YORK · LONDON · EVERYWHERE</span></div>
   <header className="site-header">
    <button className="icon-button mobile-menu" onClick={()=>setDrawer("menu")} aria-label="Open menu"><Menu/></button>
