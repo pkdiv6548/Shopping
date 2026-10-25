@@ -23,10 +23,10 @@
     <a class="wordmark" href="#top" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a>
     <div class="header-actions">
       <button class="language-switch" id="language-switch" type="button">हिंदी <span data-icon="chevron-down"></span></button>
-      <button class="icon-button account-trigger" id="account-trigger" type="button" aria-label="Log in or open account" title="Log in / Account"><span data-icon="user"></span></button>
-      <button class="icon-button search-toggle" id="search-toggle" type="button" aria-label="Search"><span data-icon="search"></span></button>
-      <button class="icon-button desktop-wish" id="wishlist-trigger" type="button" aria-label="Wishlist"><span data-icon="heart"></span><sup id="wishlist-count">0</sup></button>
-      <button class="icon-button bag-trigger" id="cart-trigger" type="button" aria-label="Shopping bag"><span data-icon="bag"></span><sup id="cart-count">0</sup></button>
+      <a class="icon-button account-trigger" id="account-trigger" href="/account.html" aria-label="Log in or open account" title="Log in / Account"><span data-icon="user"></span></a>
+      <a class="icon-button search-toggle" id="search-toggle" href="/search.html" aria-label="Search"><span data-icon="search"></span></a>
+      <a class="icon-button desktop-wish" id="wishlist-trigger" href="/wishlist.html" aria-label="Wishlist"><span data-icon="heart"></span><sup id="wishlist-count">0</sup></a>
+      <a class="icon-button bag-trigger" id="cart-trigger" href="/cart.html" aria-label="Shopping bag"><span data-icon="bag"></span><sup id="cart-count">0</sup></a>
     </div>
   </header>
   <section class="hero">
@@ -64,7 +64,7 @@
     <div class="results-line"><span id="result-category">All pieces</span><span id="result-count">12 PIECES</span></div>
     <div class="product-grid" id="product-grid"></div>
     <div class="empty-state" id="empty-state" hidden><span data-icon="sparkles"></span><p data-copy="empty">No pieces found. Try another search.</p><button class="text-link" id="clear-filters" type="button" data-copy="clear">Clear</button></div>
-    <div class="center-cta"><button class="button button-dark" id="view-all" type="button"><span data-copy="all">VIEW ALL</span><span data-icon="arrow-right"></span></button></div>
+    <div class="center-cta"><a class="button button-dark" id="view-all" href="/collection.html"><span data-copy="all">VIEW ALL</span><span data-icon="arrow-right"></span></a></div>
   </section>
   <section class="manifesto" id="about">
     <div class="manifesto-photo"><img src="/images/editorial-detail.svg" alt="Fashion editorial showcasing contemporary everyday outfits" loading="lazy"></div>
