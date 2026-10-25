@@ -314,9 +314,15 @@ async function restoreUser(user) {
       if(!variant||variant.stock_quantity<=0)return;
       addQuantity(localId,row.variant_id,Math.min(variant.stock_quantity,Math.max(1,Number(row.quantity)||1)),variant.size_label);
     });
-    [...guestCart,...recoveryCart].forEach(item=>{
+    guestCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
       if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
+    });
+    recoveryCart.forEach(item=>{
+      const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
+      if(!state.dbIds[item.id]||!variant||variant.stock_quantity<=0)return;
+      const key=item.id+":"+variant.id,existing=quantities.get(key),qty=Math.min(item.qty,variant.stock_quantity);
+      if(!existing||qty>existing.qty)quantities.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty});
     });
     const cartChangedDuringRestore = state.cartRevision !== cartRevisionAtStart;
     if (!cartChangedDuringRestore) state.cart=[...quantities.values()];
