@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f7f6f2">
+  <meta name="description" content="Thoughtful fashion pieces, better everyday dressing. Shop the Shopping Mart edit.">
+  <title>Shopping Mart — The Everyday Edit</title>
+  <link rel="icon" type="image/svg+xml" href="/public/favicon.svg">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<main lang="en" id="top">
+  <div class="announcement"><span data-copy="top">COMPLIMENTARY SHIPPING ON ORDERS OVER ₹2,999</span><span class="announcement-right">NEW YORK · LONDON · EVERYWHERE</span></div>
+  <header class="site-header">
+    <button class="icon-button mobile-menu" id="mobile-menu" type="button" aria-label="Open menu"><span data-icon="menu"></span></button>
+    <nav class="main-nav" aria-label="Main navigation">
+      <button type="button" data-category="Clothing" data-copy="women">WOMEN</button>
+      <button type="button" data-category="Clothing" data-copy="men">MEN</button>
+      <button type="button" data-category="New in" data-copy="studio">STUDIO</button>
+    </nav>
+    <a class="wordmark" href="#top" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a>
+    <div class="header-actions">
+      <button class="language-switch" id="language-switch" type="button">हिंदी <span data-icon="chevron-down"></span></button>
+      <button class="icon-button account-trigger" id="account-trigger" type="button" aria-label="Log in or open account" title="Log in / Account"><span data-icon="user"></span></button>
+      <button class="icon-button search-toggle" id="search-toggle" type="button" aria-label="Search"><span data-icon="search"></span></button>
+      <button class="icon-button desktop-wish" id="wishlist-trigger" type="button" aria-label="Wishlist"><span data-icon="heart"></span><sup id="wishlist-count">0</sup></button>
+      <button class="icon-button bag-trigger" id="cart-trigger" type="button" aria-label="Shopping bag"><span data-icon="bag"></span><sup id="cart-count">0</sup></button>
+    </div>
+  </header>
+  <section class="hero">
+    <div class="hero-image"><img src="https://images.unsplash.com/photo-1539109136881-3be0616acf4b?auto=format&fit=crop&w=2200&q=90" alt="Editorial fashion model in a contemporary outfit"></div>
+    <div class="hero-shade"></div>
+    <div class="hero-copy">
+      <p class="eyebrow" data-copy="new">NEW SEASON / 2026</p>
+      <h1 id="hero-title"><span>A little less,</span><span>a lot more.</span></h1>
+      <p class="hero-subtitle" data-copy="subtitle">Thoughtful pieces. Better everyday dressing. Find your next forever favourite.</p>
+      <button class="button button-light" type="button" id="hero-shop"><span data-copy="shop">EXPLORE THE EDIT</span><span data-icon="arrow-right"></span></button>
+      <span class="hero-index">01 — 03</span>
+    </div>
+    <div class="hero-caption"><span>FORM / FUNCTION / FEELING</span><span>VOL. 01 — THE EVERYDAY EDIT</span></div>
+  </section>
+  <section class="category-strip">
+    <span>DESIGNED FOR REAL LIFE</span>
+    <div>
+      <button type="button" data-category="New in">New arrivals <span data-icon="arrow-up-right"></span></button>
+      <button type="button" data-category="Clothing">Everyday essentials <span data-icon="arrow-up-right"></span></button>
+      <button type="button" data-category="Accessories">Finishing touches <span data-icon="arrow-up-right"></span></button>
+    </div>
+  </section>
+  <section class="shop-section" id="shop">
+    <div class="section-heading">
+      <div><p class="eyebrow" data-copy="discover">THE NEW EDIT</p><h2 data-copy="featured">MADE FOR YOUR EVERYDAY</h2><p data-copy="discoverSub">Fresh silhouettes, easy layers and pieces made to live in.</p></div>
+      <a href="#products"><span data-copy="all">VIEW ALL</span><span data-icon="arrow-right"></span></a>
+    </div>
+    <div class="shop-toolbar">
+      <div class="category-tabs" id="category-tabs" aria-label="Product categories"></div>
+      <div class="shop-controls">
+        <label class="search-field"><span data-icon="search"></span><input id="product-search" type="search" placeholder="Search pieces, categories..." autocomplete="off" aria-label="Search products"><button id="clear-search" type="button" aria-label="Clear search" hidden><span data-icon="x"></span></button></label>
+        <label class="sort-control"><span data-icon="sliders"></span><select id="sort-select" aria-label="Sort products"><option value="recommended">Recommended</option><option value="low">Price: low to high</option><option value="high">Price: high to low</option></select></label>
+      </div>
+    </div>
+    <div class="results-line"><span id="result-category">All pieces</span><span id="result-count">12 PIECES</span></div>
+    <div class="product-grid" id="product-grid"></div>
+    <div class="empty-state" id="empty-state" hidden><span data-icon="sparkles"></span><p data-copy="empty">No pieces found. Try another search.</p><button class="text-link" id="clear-filters" type="button" data-copy="clear">Clear</button></div>
+    <div class="center-cta"><button class="button button-dark" id="view-all" type="button"><span data-copy="all">VIEW ALL</span><span data-icon="arrow-right"></span></button></div>
+  </section>
+  <section class="manifesto" id="about">
+    <div class="manifesto-photo"><img src="https://images.unsplash.com/photo-1483985988355-763728e1935b?auto=format&fit=crop&w=1400&q=85" alt="Fashion editorial showcasing contemporary everyday outfits" loading="lazy"></div>
+    <div class="manifesto-copy"><p class="eyebrow">THE SHOPPING MART POINT OF VIEW</p><h2>Less noise.<br><em>More meaning.</em></h2><p>We believe getting dressed should feel simple. Pieces with considered details, easy combinations and a place in your wardrobe beyond one season.</p><button class="text-link" id="manifesto-shop" type="button"><span data-copy="shopNow">SHOP THE COLLECTION</span><span data-icon="arrow-right"></span></button><span class="manifesto-mark">SM / 001</span></div>
+  </section>
+  <section class="newsletter" id="newsletter">
+    <div><p class="eyebrow">A NOTE FROM US</p><h2 data-copy="newsletter">Good things, occasionally.</h2><p data-copy="newsletterSub">A little inspiration, new arrivals and notes from our world.</p></div>
+    <form id="newsletter-form"><input type="email" id="newsletter-email" required placeholder="Your email address" aria-label="Email address"><button type="submit" aria-label="Sign me up"><span data-icon="arrow-right"></span></button><small id="newsletter-status" hidden></small></form>
+  </section>
+  <footer class="site-footer" id="footer">
+    <div class="footer-main">
+      <div class="footer-brand"><a class="wordmark footer-logo" href="#top" aria-label="Shopping Mart home">SHOPPING<span> MART</span><i>®</i></a><p class="footer-tagline" data-copy="footer">Style that feels like you.</p><p class="footer-intro" data-copy="footerIntro">Considered essentials and modern silhouettes for everyday life.</p></div>
+      <div class="footer-column"><h3 data-copy="footerShop">SHOP</h3><a href="#shop" data-category-link="All" data-copy="allProducts">All pieces</a><a href="#shop" data-category-link="New in" data-copy="newArrivals">New arrivals</a><a href="#shop" data-category-link="Shirts" data-copy="shirts">Shirts</a><a href="#shop" data-category-link="Trousers" data-copy="trousers">Trousers</a><a href="#shop" data-category-link="Dresses" data-copy="dresses">Dresses</a><a href="#shop" data-category-link="Accessories" data-copy="accessories">Accessories</a></div>
+      <div class="footer-column"><h3 data-copy="footerDiscover">DISCOVER</h3><a href="#about" data-copy="ourView">Our point of view</a><a href="#about" data-copy="everydayEdit">The everyday edit</a><a href="#newsletter" data-copy="newsletterLink">Newsletter</a><a href="#shop" data-category-link="New in" data-copy="newSeason">New season</a></div>
+      <div class="footer-column footer-help"><h3 data-copy="footerHelp">HELP &amp; INFORMATION</h3><a href="#newsletter" data-copy="contact">Contact &amp; updates</a><button id="demo-info" type="button" data-copy="demoInfo">Demo store information</button><span class="footer-demo-note" data-copy="demoNote">Demo checkout · no real payments</span></div>
+    </div>
+    <div class="footer-bottom"><small>© 2026 SHOPPING MART</small><span data-copy="footer">STYLE THAT FEELS LIKE YOU.</span><small data-copy="demoDisclaimer">DEMO STORE · PAYMENTS NOT ENABLED</small></div>
+  </footer>
+</main>
+<div id="auth-root"></div>
+<div id="overlay-root"></div>
+<div class="toast" id="toast" hidden><span data-icon="check"></span><span id="toast-message"></span></div>
+<script type="module" src="/js/app.mjs"></script>
+</body>
+</html>
