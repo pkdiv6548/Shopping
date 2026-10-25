@@ -7,7 +7,23 @@ const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
 const $ = (s, root = document) => root.querySelector(s);
 const $$ = (s, root = document) => [...root.querySelectorAll(s)];
 const fallbackProducts = PRODUCTS.map((product) => ({ ...product }));
-const state = { lang: "en", category: "All", query: "", sort: "recommended", user: null, cart: [], wishlist: [], dbIds: {}, products: fallbackProducts };
+function readGuest(key, fallback) {
+  try { const value = JSON.parse(localStorage.getItem(key) || "null"); return value ?? fallback; }
+  catch { return fallback; }
+}
+function saveGuest(key, value) {
+  try { localStorage.setItem(key, JSON.stringify(value)); } catch (error) { console.warn("Local cart storage is unavailable", error); }
+}
+function loadGuestCart() {
+  const value = readGuest("sm_guest_cart", []);
+  return Array.isArray(value) ? value.filter(item => Number.isInteger(item?.id) && Number.isInteger(item?.qty) && item.qty > 0).map(item => ({id:item.id,qty:Math.min(99,item.qty)})) : [];
+}
+function loadGuestWishlist() {
+  const value = readGuest("sm_guest_wishlist", []);
+  return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
+}
+
+const state = { lang: "en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
 
 const words = {
   en: {
@@ -120,8 +136,9 @@ function renderProducts() {
     (product.badge ? '<span class="badge">' + esc(product.badge) + "</span>" : "") +
     '<button class="wish-button ' + (state.wishlist.includes(product.id) ? "is-wished" : "") + '" data-wish="' + product.id + '" type="button" aria-label="Wishlist" title="Wishlist">♥</button>' +
     '<button class="quick-add" data-quick="' + product.id + '" type="button"><span>' + esc(t().quick) + '</span><span>↗</span></button></div>' +
-    '<div class="product-meta"><div><span class="product-category">' + esc(productCategory(product)) + '</span><h3>' + esc(productName(product)) + '</h3><span class="product-color">' + esc(state.lang === "hi" ? (product.colorHi || product.color || "") : (product.color || "")) + '</span></div>' +
-    '<div class="product-prices"><b>' + money(product.price) + '</b>' + (product.oldPrice ? '<del>' + money(product.oldPrice) + '</del>' : "") + '</div></div></article>'
+    '<div class="product-meta"><div><span class="product-category">' + esc(productCategory(product)) + '</span><a class="product-name-link" href="/product.html?slug=' + encodeURIComponent(product.slug) + '"><h3>' + esc(productName(product)) + '</h3></a><span class="product-color">' + esc(state.lang === "hi" ? (product.colorHi || product.color || "") : (product.color || "")) + '</span></div>' +
+    '<div class="product-prices"><b>' + money(product.price) + '</b>' + (product.oldPrice ? '<del>' + money(product.oldPrice) + '</del>' : "") + '</div></div>' +
+    '<button class="product-add" data-add="' + product.id + '" type="button"><span>' + esc(t().add) + '</span><span>＋</span></button></article>'
   ).join("");
   $("#empty-state").hidden = products.length > 0;
   $("#result-count").textContent = products.length + " " + t().count.toUpperCase();
@@ -221,7 +238,7 @@ async function loadCatalogue() {
         colorHi: row.colour_hi || fallback.color || "",
         tag: fallback.tag || (row.featured ? "new" : "popular"),
         tone: fallback.tone || "#e9e5dd",
-        image: fallback.image || "/public/images/placeholder.svg",
+        image: fallback.image || "/public/images/editorial-detail.svg",
         category: fallback.category || "Clothing",
         categoryHi: fallback.categoryHi || "कपड़े",
         badge: fallback.badge
@@ -235,8 +252,8 @@ async function loadCatalogue() {
 async function restoreUser(user) {
   state.user = user || null;
   if (!user) {
-    state.cart = [];
-    state.wishlist = [];
+    state.cart = loadGuestCart();
+    state.wishlist = loadGuestWishlist();
     state.dbIds = {};
     renderProducts();
     return;
@@ -255,15 +272,26 @@ async function restoreUser(user) {
     state.dbIds = Object.fromEntries((productsResult.data || [])
       .map(row => [idBySlug[row.slug], row.id])
       .filter(([localId]) => Number.isInteger(localId)));
-    state.wishlist = (wishesResult.data || [])
-      .map(row => idBySlug[slugByDatabaseId[row.product_id]])
-      .filter(Number.isInteger);
+    const guestWishlist = loadGuestWishlist();
+    const guestCart = loadGuestCart();
+    state.wishlist = [...new Set([
+      ...(wishesResult.data || []).map(row => idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),
+      ...guestWishlist
+    ])];
     const quantities = new Map();
     (cartResult.data || []).forEach(row => {
       const localId = idBySlug[slugByDatabaseId[row.product_id]];
       if (Number.isInteger(localId)) quantities.set(localId, Math.min(99, Math.max(1, Number(row.quantity) || 1)));
     });
+    guestCart.forEach(item => {
+      if (state.dbIds[item.id]) quantities.set(item.id, Math.min(99, (quantities.get(item.id) || 0) + item.qty));
+    });
     state.cart = [...quantities].map(([id, qty]) => ({ id, qty }));
+    if (guestCart.length || guestWishlist.length) {
+      await Promise.all([persistCart(), persistWishlist()]);
+      saveGuest("sm_guest_cart", []);
+      saveGuest("sm_guest_wishlist", []);
+    }
     renderProducts();
   } catch (error) {
     console.error("Unable to restore account shopping data", error);
@@ -272,7 +300,7 @@ async function restoreUser(user) {
 }
 
 async function persistCart() {
-  if (!state.user) return;
+  if (!state.user) { saveGuest("sm_guest_cart", state.cart); return; }
   const rows = state.cart.map(item => ({
     user_id: state.user.id,
     product_id: state.dbIds[item.id],
@@ -293,7 +321,7 @@ async function persistCart() {
   }
 }
 async function persistWishlist() {
-  if (!state.user) return;
+  if (!state.user) { saveGuest("sm_guest_wishlist", state.wishlist); return; }
   const rows = state.wishlist.map(id => ({ user_id: state.user.id, product_id: state.dbIds[id] })).filter(row => row.product_id);
   const { data: existing, error: readError } = await supabase.from("sm_wishlists").select("product_id").eq("user_id", state.user.id);
   if (readError) throw readError;
@@ -324,7 +352,6 @@ function openOverlay(title, body, panelClass = "drawer") {
   $("#overlay-root").innerHTML = '<div class="overlay" role="presentation"><aside class="' + panelClass + '" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' + body + "</aside></div>";
 }
 function openCart() {
-  if (!state.user) { toast(t().needLogin); openAuth(); return; }
   const items = state.cart.map(item => ({ item, product: state.products.find(product => product.id === item.id) })).filter(entry => entry.product);
   const total = items.reduce((sum, entry) => sum + entry.product.price * entry.item.qty, 0);
   const header = '<div class="drawer-head"><h2>' + esc(t().bag) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
@@ -335,7 +362,6 @@ function openCart() {
   openOverlay(t().bag, header + list + bottom);
 }
 function openWishlist() {
-  if (!state.user) { toast(t().needLogin); openAuth(); return; }
   const products = state.wishlist.map(id => state.products.find(product => product.id === id)).filter(Boolean);
   const header = '<div class="drawer-head"><h2>' + esc(t().saved) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
   const list = products.length ? '<div class="drawer-items">' + products.map(product =>
@@ -413,7 +439,6 @@ document.addEventListener("click", async event => {
   }
   if (button.dataset.wish !== undefined) {
     const id = Number(button.dataset.wish);
-    if (!state.user) { toast(t().needLogin); openAuth(); return; }
     const wasSaved = state.wishlist.includes(id);
     state.wishlist = wasSaved ? state.wishlist.filter(item => item !== id) : [...state.wishlist, id];
     renderProducts();
@@ -424,7 +449,6 @@ document.addEventListener("click", async event => {
   }
   if (button.dataset.add !== undefined) {
     const id = Number(button.dataset.add);
-    if (!state.user) { toast(t().needLogin); openAuth(); return; }
     const existing = state.cart.find(item => item.id === id);
     if (existing) existing.qty = Math.min(99, existing.qty + 1);
     else state.cart.push({ id, qty:1 });
