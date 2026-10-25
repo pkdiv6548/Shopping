@@ -338,7 +338,7 @@ function openWishlist() {
   const header = '<div class="drawer-head"><h2>' + esc(t().saved) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
   const list = products.length ? '<div class="drawer-items">' + products.map(product =>
     '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + '</span><button type="button" data-wish="' + product.id + '">' + esc(t().removeWish) + '</button><button type="button" data-add="' + product.id + '">' + esc(t().add) + '</button></div></div>'
-  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyWish) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>");
+  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyWish) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>";
   openOverlay(t().saved, header + list);
 }
 function openQuickView(product) {
