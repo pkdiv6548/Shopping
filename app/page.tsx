@@ -81,7 +81,7 @@ export default function Home(){
    }catch(error){
     if(!active||requestRevision!==revision)return;
     setAccountItemsReady(true);
-    setNotice(lang==="hi"?"आपकी सेव की गई कार्ट/फेवरेट सूची लोड नहीं हो सकी। कृपया फिर प्रयास करें।":"Could not load your saved bag and favourites. Please try again.");
+    setNotice("Could not load your saved bag and favourites. Please try again.");
     console.error("Could not restore Shopping Mart account items",error);
    }
   };
@@ -93,7 +93,7 @@ export default function Home(){
    if(!error&&active)void restoreAccountItems(data.session?.user?.id??null);
   });
   return()=>{active=false;subscription.unsubscribe()};
- },[supabase,lang]);
+ },[supabase]);
  const persistCart=async(nextCart:number[])=>{
   if(!supabase||!authUserId)return;
   if(!accountItemsReady)throw new Error("Account items are still loading");
