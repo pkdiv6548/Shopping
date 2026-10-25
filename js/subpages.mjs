@@ -89,6 +89,7 @@ async function loadCatalogue(){
 }
 async function persistCart(){
  if(!state.user){writeStorage("sm_guest_cart",state.cart);return;}
+ writeStorage("sm_user_cart_"+state.user.id,state.cart);
  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
   .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
@@ -118,14 +119,15 @@ async function restoreUser(user){
  ]);
  if(wishResult.error)throw wishResult.error;if(cartResult.error)throw cartResult.error;
  if(sequence!==restoreSequence||state.user?.id!==user.id)return;
- const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),cartByKey=new Map();
+ const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),accountCache=readStorage("sm_user_cart_"+user.id,[]),cartByKey=new Map();
+ const recoveryCart=Array.isArray(accountCache)?accountCache.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
  (cartResult.data||[]).forEach(row=>{
   const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
   if(!product||!variant||variant.stock_quantity<=0)return;
   const key=product.id+":"+variant.id;
   cartByKey.set(key,{id:product.id,variantId:variant.id,size:variant.size_label,qty:Math.min(variant.stock_quantity,99,Math.max(1,Number(row.quantity)||1))});
  });
- oldGuestCart.forEach(item=>{
+ [...oldGuestCart,...recoveryCart].forEach(item=>{
   const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant||variant.stock_quantity<=0)return;
   const key=item.id+":"+variant.id,existing=cartByKey.get(key);
   cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(variant.stock_quantity,99,(existing?.qty||0)+item.qty)});
@@ -134,7 +136,7 @@ async function restoreUser(user){
  if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
  state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist])];
- if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
  else if(cartChangedDuringRestore){await persistCart();}
 }
 function card(product){
