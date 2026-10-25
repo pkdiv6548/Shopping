@@ -165,3 +165,166 @@
   .site-footer .footer-bottom span{text-align:left;font-size:8px;order:3}
   .site-footer .footer-bottom small:last-child{text-align:left}
 }
+
+
+/* Hard override: ensure footer layout survives older generic footer selectors */
+main[lang] footer.site-footer { display:block !important; width:100% !important; min-height:0 !important; height:auto !important; margin:0 !important; padding:0 !important; overflow:hidden; background:#252620 !important; color:#f7f6f2 !important; }
+main[lang] footer.site-footer .footer-main {
+  box-sizing:border-box !important;
+  display:grid !important;
+  width:100% !important;
+  grid-template-columns:minmax(240px,1.4fr) repeat(3,minmax(150px,1fr)) !important;
+  align-items:start !important;
+  justify-content:stretch !important;
+  gap:clamp(24px,4vw,64px) !important;
+  padding:58px clamp(28px,6vw,100px) 50px !important;
+  border:0 !important;
+  border-bottom:1px solid #4b4c43 !important;
+}
+main[lang] footer.site-footer .footer-brand {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:flex-start !important;
+  gap:0 !important;
+  min-width:0 !important;
+}
+main[lang] footer.site-footer .footer-logo {
+  display:inline-block !important;
+  width:auto !important;
+  margin:0 0 20px !important;
+  color:#f7f6f2 !important;
+  font-size:23px !important;
+  line-height:1.3 !important;
+}
+main[lang] footer.site-footer .footer-tagline {
+  display:block !important;
+  margin:0 0 12px !important;
+  color:#f7f6f2 !important;
+  text-align:left !important;
+  font:italic 22px/1.35 var(--serif) !important;
+}
+main[lang] footer.site-footer .footer-intro {
+  display:block !important;
+  max-width:290px !important;
+  margin:0 !important;
+  color:#b9b9ae !important;
+  font-size:12px !important;
+  line-height:1.8 !important;
+}
+main[lang] footer.site-footer .footer-column {
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:flex-start !important;
+  justify-content:flex-start !important;
+  gap:12px !important;
+  min-width:0 !important;
+  width:100% !important;
+}
+main[lang] footer.site-footer .footer-column h3 {
+  display:block !important;
+  margin:0 0 7px !important;
+  padding:0 !important;
+  color:#b9b9ae !important;
+  font-size:10px !important;
+  line-height:1.6 !important;
+  font-weight:700 !important;
+  letter-spacing:.14em !important;
+}
+main[lang] footer.site-footer .footer-column a,
+main[lang] footer.site-footer .footer-column button {
+  display:block !important;
+  flex:none !important;
+  width:auto !important;
+  max-width:100% !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  background:transparent !important;
+  color:#f7f6f2 !important;
+  text-align:left !important;
+  font-family:var(--sans) !important;
+  font-size:12px !important;
+  font-weight:400 !important;
+  line-height:1.65 !important;
+  letter-spacing:0 !important;
+  text-decoration:none !important;
+  white-space:normal !important;
+  box-shadow:none !important;
+}
+main[lang] footer.site-footer .footer-column a:hover,
+main[lang] footer.site-footer .footer-column button:hover { color:#c9a58e !important; }
+main[lang] footer.site-footer .footer-demo-note {
+  display:block !important;
+  margin:4px 0 0 !important;
+  color:#a9aa9f !important;
+  font-size:10px !important;
+  line-height:1.7 !important;
+}
+main[lang] footer.site-footer .footer-bottom {
+  box-sizing:border-box !important;
+  display:grid !important;
+  grid-template-columns:1fr 1fr 1fr !important;
+  align-items:center !important;
+  justify-content:stretch !important;
+  gap:20px !important;
+  width:100% !important;
+  margin:0 !important;
+  padding:20px clamp(28px,6vw,100px) 24px !important;
+  border:0 !important;
+}
+main[lang] footer.site-footer .footer-bottom small {
+  display:block !important;
+  margin:0 !important;
+  padding:0 !important;
+  border:0 !important;
+  color:#aaa99f !important;
+  font-size:9px !important;
+  line-height:1.7 !important;
+  letter-spacing:.1em !important;
+}
+main[lang] footer.site-footer .footer-bottom span {
+  display:block !important;
+  color:#b9b9ae !important;
+  text-align:center !important;
+  font-size:9px !important;
+  line-height:1.7 !important;
+  letter-spacing:.12em !important;
+}
+main[lang] footer.site-footer .footer-bottom small:last-child { text-align:right !important; }
+@media(max-width:1000px) {
+  main[lang] footer.site-footer .footer-main {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:34px 28px !important;
+    padding:46px 5% 40px !important;
+  }
+  main[lang] footer.site-footer .footer-brand { grid-column:1/-1 !important; }
+  main[lang] footer.site-footer .footer-intro { max-width:450px !important; }
+  main[lang] footer.site-footer .footer-bottom { padding:18px 5% 22px !important; }
+}
+@media(max-width:680px) {
+  main[lang] footer.site-footer .footer-main {
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:30px 18px !important;
+    padding:40px 6% 34px !important;
+  }
+  main[lang] footer.site-footer .footer-brand { grid-column:1/-1 !important; }
+  main[lang] footer.site-footer .footer-logo { font-size:21px !important; margin-bottom:17px !important; }
+  main[lang] footer.site-footer .footer-tagline { font-size:21px !important; }
+  main[lang] footer.site-footer .footer-intro { font-size:11px !important; }
+  main[lang] footer.site-footer .footer-column { gap:11px !important; }
+  main[lang] footer.site-footer .footer-column h3 { font-size:9px !important; letter-spacing:.1em !important; }
+  main[lang] footer.site-footer .footer-column a,
+  main[lang] footer.site-footer .footer-column button { font-size:11px !important; }
+  main[lang] footer.site-footer .footer-bottom {
+    grid-template-columns:1fr !important;
+    justify-items:start !important;
+    gap:9px !important;
+    padding:18px 6% 22px !important;
+  }
+  main[lang] footer.site-footer .footer-bottom span {
+    text-align:left !important;
+    order:3 !important;
+  }
+  main[lang] footer.site-footer .footer-bottom small:last-child { text-align:left !important; }
+}
