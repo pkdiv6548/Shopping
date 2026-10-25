@@ -328,7 +328,7 @@ function openCart() {
   const header = '<div class="drawer-head"><h2>' + esc(t().bag) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
   const list = items.length ? '<div class="drawer-items">' + items.map(({item, product}) =>
     '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + " · Qty " + item.qty + '</span><strong>' + money(product.price * item.qty) + '</strong><button type="button" data-remove-cart="' + product.id + '">' + esc(t().remove) + "</button></div></div>"
-  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyCart) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>");
+  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyCart) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>";
   const bottom = '<div class="drawer-bottom"><div><span>' + esc(t().subtotal) + '</span><strong>' + money(total) + '</strong></div><p>' + esc(t().demo) + '</p><button class="button button-dark full" data-checkout type="button">' + esc(t().checkout) + "</button></div>";
   openOverlay(t().bag, header + list + bottom);
 }
