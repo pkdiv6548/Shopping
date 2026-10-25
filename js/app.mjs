@@ -16,7 +16,10 @@ function saveGuest(key, value) {
 }
 function loadGuestCart() {
   const value = readGuest("sm_guest_cart", []);
-  return Array.isArray(value) ? value.filter(item => Number.isInteger(item?.id) && Number.isInteger(item?.qty) && item.qty > 0).map(item => ({id:item.id,qty:Math.min(99,item.qty)})) : [];
+  return Array.isArray(value)
+    ? value.filter(item => Number.isInteger(item?.id) && Number.isInteger(item?.qty) && item.qty > 0)
+      .map(item => ({ id:item.id, qty:Math.min(99,item.qty), variantId:String(item.variantId || ""), size:String(item.size || "") }))
+    : [];
 }
 function loadGuestWishlist() {
   const value = readGuest("sm_guest_wishlist", []);
@@ -94,6 +97,10 @@ const words = {
   }
 };
 const t = () => words[state.lang];
+function defaultVariant(productId) {
+  const product=state.products.find(item=>item.id===Number(productId));
+  return product?.variants?.find(variant=>variant.stock_quantity>0)||product?.variants?.[0]||null;
+}
 const money = value => new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", maximumFractionDigits:0 }).format(Number(value || 0));
 const esc = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
 
@@ -127,27 +134,24 @@ function visibleProducts() {
   return filtered;
 }
 function renderProducts() {
-  const products = visibleProducts();
-  const grid = $("#product-grid");
-  if (!grid) return;
-  grid.innerHTML = products.map(product =>
-    '<article class="product-card reveal"><div class="product-image" style="background-color:' + esc(product.tone || "#e9e5dd") + '">' +
-    '<img loading="lazy" src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '">' +
-    (product.badge ? '<span class="badge">' + esc(product.badge) + "</span>" : "") +
-    '<button class="wish-button ' + (state.wishlist.includes(product.id) ? "is-wished" : "") + '" data-wish="' + product.id + '" type="button" aria-label="Wishlist" title="Wishlist">♥</button>' +
-    '<button class="quick-add" data-quick="' + product.id + '" type="button"><span>' + esc(t().quick) + '</span><span>↗</span></button></div>' +
-    '<div class="product-meta"><div><span class="product-category">' + esc(productCategory(product)) + '</span><a class="product-name-link" href="/product.html?slug=' + encodeURIComponent(product.slug) + '"><h3>' + esc(productName(product)) + '</h3></a><span class="product-color">' + esc(state.lang === "hi" ? (product.colorHi || product.color || "") : (product.color || "")) + '</span></div>' +
-    '<div class="product-prices"><b>' + money(product.price) + '</b>' + (product.oldPrice ? '<del>' + money(product.oldPrice) + '</del>' : "") + '</div></div>' +
-    '<button class="product-add" data-add="' + product.id + '" type="button"><span>' + esc(t().add) + '</span><span>＋</span></button></article>'
+  const products=visibleProducts(),grid=$("#product-grid");if(!grid)return;
+  grid.innerHTML=products.map(product=>
+    '<article class="product-card reveal"><div class="product-image" style="background-color:'+esc(product.tone||"#e9e5dd")+'">'+
+    '<a class="product-image-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'" aria-label="'+esc(t().view+" "+productName(product))+'"><img loading="lazy" src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"></a>'+
+    (product.badge?'<span class="badge">'+esc(product.badge)+"</span>":"")+
+    '<button class="wish-button '+(state.wishlist.includes(product.id)?"is-wished":"")+'" data-wish="'+product.id+'" type="button" aria-label="Wishlist" title="Wishlist">♥</button>'+
+    '<button class="quick-add" data-quick="'+product.id+'" type="button"><span>'+esc(t().quick)+'</span><span>↗</span></button></div>'+
+    '<div class="product-meta"><div><span class="product-category">'+esc(productCategory(product))+'</span><a class="product-name-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'"><h3>'+esc(productName(product))+'</h3></a><span class="product-color">'+esc(state.lang==="hi"?(product.colorHi||product.color||""):(product.color||""))+'</span></div>'+
+    '<div class="product-prices"><b>'+money(product.price)+'</b>'+(product.oldPrice?'<del>'+money(product.oldPrice)+'</del>':"")+'</div></div>'+
+    '<button class="product-add" data-add="'+product.id+'" type="button"><span>'+esc(t().add)+'</span><span>＋</span></button></article>'
   ).join("");
-  $("#empty-state").hidden = products.length > 0;
-  $("#result-count").textContent = products.length + " " + t().count.toUpperCase();
-  $("#result-category").textContent = state.lang === "hi" ? (CATEGORY_HI[state.category] || state.category) : (state.category === "All" ? t().categoryAll : state.category);
-  $("#cart-count").textContent = state.cart.reduce((sum, row) => sum + row.qty, 0);
-  $("#wishlist-count").textContent = state.wishlist.length;
-  $("#clear-search").hidden = !state.query;
+  $("#empty-state").hidden=products.length>0;
+  $("#result-count").textContent=products.length+" "+t().count.toUpperCase();
+  $("#result-category").textContent=state.lang==="hi"?(CATEGORY_HI[state.category]||state.category):(state.category==="All"?t().categoryAll:state.category);
+  $("#cart-count").textContent=state.cart.reduce((sum,row)=>sum+row.qty,0);
+  $("#wishlist-count").textContent=state.wishlist.length;
+  $("#clear-search").hidden=!state.query;
 }
-
 function setLanguage() {
   document.documentElement.lang = state.lang;
   const main = $("main[lang]");
@@ -217,107 +221,106 @@ function refreshIcons() {
 
 async function loadCatalogue() {
   try {
-    const { data, error } = await supabase.from("sm_products")
+    const {data,error}=await supabase.from("sm_products")
       .select("id,slug,name_en,name_hi,price_inr,compare_at_price_inr,colour_en,colour_hi,status,featured")
-      .eq("status", "active");
-    if (error) throw error;
-    if (!Array.isArray(data) || data.length === 0) return;
-    const localBySlug = Object.fromEntries(fallbackProducts.map(product => [product.slug, product]));
-    state.products = data.map((row, index) => {
-      const fallback = localBySlug[row.slug] || {};
-      return {
-        ...fallback,
-        id: Number.isInteger(fallback.id) ? fallback.id : index + 100,
-        dbId: row.id,
-        slug: row.slug,
-        name: row.name_en || fallback.name || row.slug,
-        hi: row.name_hi || fallback.hi || row.name_en || row.slug,
-        price: Number(row.price_inr ?? fallback.price ?? 0),
-        oldPrice: row.compare_at_price_inr ?? fallback.oldPrice,
-        color: row.colour_en || fallback.color || "",
-        colorHi: row.colour_hi || fallback.color || "",
-        tag: fallback.tag || (row.featured ? "new" : "popular"),
-        tone: fallback.tone || "#e9e5dd",
-        image: fallback.image || "/public/images/editorial-detail.svg",
-        category: fallback.category || "Clothing",
-        categoryHi: fallback.categoryHi || "कपड़े",
-        badge: fallback.badge
-      };
+      .eq("status","active");
+    if(error)throw error;
+    if(!Array.isArray(data)||!data.length)return;
+    const localBySlug=Object.fromEntries(fallbackProducts.map(product=>[product.slug,product]));
+    state.products=data.map((row,index)=>{
+      const fallback=localBySlug[row.slug]||{};
+      return {...fallback,id:Number.isInteger(fallback.id)?fallback.id:index+100,dbId:row.id,slug:row.slug,
+        name:row.name_en||fallback.name||row.slug,hi:row.name_hi||fallback.hi||row.name_en||row.slug,
+        price:Number(row.price_inr??fallback.price??0),oldPrice:row.compare_at_price_inr??fallback.oldPrice,
+        color:row.colour_en||fallback.color||"",colorHi:row.colour_hi||fallback.color||"",
+        tag:fallback.tag||(row.featured?"new":"popular"),tone:fallback.tone||"#e9e5dd",
+        image:fallback.image||"/images/editorial-detail.svg",category:fallback.category||"Clothing",
+        categoryHi:fallback.categoryHi||"कपड़े",badge:fallback.badge,variants:[]};
     });
-  } catch (error) {
-    console.error("Catalogue fallback active; Supabase product read failed", error);
+    const {data:variants,error:variantError}=await supabase.from("sm_variants").select("id,product_id,size_label,stock_quantity,sku");
+    if(variantError)throw variantError;
+    const byProduct=new Map();
+    (variants||[]).forEach(variant=>{
+      if(!byProduct.has(variant.product_id))byProduct.set(variant.product_id,[]);
+      byProduct.get(variant.product_id).push({id:variant.id,size_label:variant.size_label,stock_quantity:Number(variant.stock_quantity)||0,sku:variant.sku});
+    });
+    const order=["XS","S","M","L","XL","XXL","One size"];
+    state.products.forEach(product=>{
+      product.variants=(byProduct.get(product.dbId)||[]).sort((a,b)=>order.indexOf(a.size_label)-order.indexOf(b.size_label));
+    });
+    state.cart=state.cart.map(item=>{
+      const variant=(item.variantId&&state.products.find(p=>p.id===item.id)?.variants?.find(v=>v.id===item.variantId))||defaultVariant(item.id);
+      return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};
+    });
+    if(!state.user)saveGuest("sm_guest_cart",state.cart);
+  } catch(error) {
+    console.error("Catalogue fallback active; Supabase product/variant read failed",error);
   }
 }
 
 async function restoreUser(user) {
-  state.user = user || null;
-  if (!user) {
-    state.cart = loadGuestCart();
-    state.wishlist = loadGuestWishlist();
-    state.dbIds = {};
-    renderProducts();
-    return;
+  state.user=user||null;
+  if(!user){
+    state.cart=loadGuestCart().map(item=>{
+      const variant=(item.variantId&&state.products.find(p=>p.id===item.id)?.variants?.find(v=>v.id===item.variantId))||defaultVariant(item.id);
+      return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};
+    });
+    state.wishlist=loadGuestWishlist();state.dbIds={};renderProducts();return;
   }
-  try {
-    const [productsResult, wishesResult, cartResult] = await Promise.all([
-      supabase.from("sm_products").select("id,slug").eq("status", "active"),
-      supabase.from("sm_wishlists").select("product_id").eq("user_id", user.id),
-      supabase.from("sm_cart_items").select("product_id,quantity").eq("user_id", user.id)
+  try{
+    const [productsResult,wishesResult,cartResult]=await Promise.all([
+      supabase.from("sm_products").select("id,slug").eq("status","active"),
+      supabase.from("sm_wishlists").select("product_id").eq("user_id",user.id),
+      supabase.from("sm_cart_items").select("product_id,variant_id,quantity").eq("user_id",user.id)
     ]);
-    if (productsResult.error) throw productsResult.error;
-    if (wishesResult.error) throw wishesResult.error;
-    if (cartResult.error) throw cartResult.error;
-    const idBySlug = Object.fromEntries(state.products.map(product => [product.slug, product.id]));
-    const slugByDatabaseId = Object.fromEntries((productsResult.data || []).map(row => [row.id, row.slug]));
-    state.dbIds = Object.fromEntries((productsResult.data || [])
-      .map(row => [idBySlug[row.slug], row.id])
-      .filter(([localId]) => Number.isInteger(localId)));
-    const guestWishlist = loadGuestWishlist();
-    const guestCart = loadGuestCart();
-    state.wishlist = [...new Set([
-      ...(wishesResult.data || []).map(row => idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),
-      ...guestWishlist
-    ])];
-    const quantities = new Map();
-    (cartResult.data || []).forEach(row => {
-      const localId = idBySlug[slugByDatabaseId[row.product_id]];
-      if (Number.isInteger(localId)) quantities.set(localId, Math.min(99, Math.max(1, Number(row.quantity) || 1)));
+    if(productsResult.error)throw productsResult.error;
+    if(wishesResult.error)throw wishesResult.error;
+    if(cartResult.error)throw cartResult.error;
+    const idBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p.id]));
+    const slugByDatabaseId=Object.fromEntries((productsResult.data||[]).map(row=>[row.id,row.slug]));
+    state.dbIds=Object.fromEntries((productsResult.data||[]).map(row=>[idBySlug[row.slug],row.id]).filter(([localId])=>Number.isInteger(localId)));
+    const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart();
+    state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist])];
+    const variantById=Object.fromEntries(state.products.flatMap(product=>(product.variants||[]).map(variant=>[variant.id,{...variant,productId:product.id}])));
+    const quantities=new Map();
+    const addQuantity=(localId,variantId,qty,size)=>{
+      if(!Number.isInteger(localId))return;
+      const variant=variantById[variantId]||defaultVariant(localId);if(!variant)return;
+      const key=localId+":"+variant.id,previous=quantities.get(key);
+      quantities.set(key,{id:localId,variantId:variant.id,size:size||variant.size_label,qty:Math.min(99,(previous?.qty||0)+qty)});
+    };
+    (cartResult.data||[]).forEach(row=>{
+      const localId=idBySlug[slugByDatabaseId[row.product_id]];
+      addQuantity(localId,row.variant_id,Math.max(1,Number(row.quantity)||1),variantById[row.variant_id]?.size_label);
     });
-    guestCart.forEach(item => {
-      if (state.dbIds[item.id]) quantities.set(item.id, Math.min(99, (quantities.get(item.id) || 0) + item.qty));
+    guestCart.forEach(item=>{
+      const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
+      if(state.dbIds[item.id]&&variant)addQuantity(item.id,variant.id,item.qty,item.size||variant.size_label);
     });
-    state.cart = [...quantities].map(([id, qty]) => ({ id, qty }));
-    if (guestCart.length || guestWishlist.length) {
-      await Promise.all([persistCart(), persistWishlist()]);
-      saveGuest("sm_guest_cart", []);
-      saveGuest("sm_guest_wishlist", []);
+    state.cart=[...quantities.values()];
+    if(guestCart.length||guestWishlist.length){
+      await Promise.all([persistCart(),persistWishlist()]);
+      saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
     }
     renderProducts();
-  } catch (error) {
-    console.error("Unable to restore account shopping data", error);
-    toast(state.lang === "hi" ? "सेव किया हुआ बैग या फेवरेट लोड नहीं हुआ। Supabase policies जाँचें।" : "Could not load your saved bag/favourites. Check Supabase permissions.");
+  }catch(error){
+    console.error("Unable to restore account shopping data",error);
+    toast(state.lang==="hi"?"सेव किया हुआ बैग या फेवरेट लोड नहीं हुआ। Supabase permissions जाँचें।":"Could not load your saved bag/favourites. Check Supabase permissions.");
   }
 }
 
 async function persistCart() {
-  if (!state.user) { saveGuest("sm_guest_cart", state.cart); return; }
-  const rows = state.cart.map(item => ({
-    user_id: state.user.id,
-    product_id: state.dbIds[item.id],
-    quantity: item.qty,
-    updated_at: new Date().toISOString()
-  })).filter(row => row.product_id);
-  const { data: existing, error: readError } = await supabase.from("sm_cart_items").select("product_id").eq("user_id", state.user.id);
-  if (readError) throw readError;
-  if (rows.length) {
-    const { error } = await supabase.from("sm_cart_items").upsert(rows, { onConflict: "user_id,product_id" });
-    if (error) throw error;
-  }
-  const activeIds = new Set(rows.map(row => row.product_id));
-  const staleIds = (existing || []).map(row => row.product_id).filter(id => !activeIds.has(id));
-  if (staleIds.length) {
-    const { error } = await supabase.from("sm_cart_items").delete().eq("user_id", state.user.id).in("product_id", staleIds);
-    if (error) throw error;
+  if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
+  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
+    .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
+  if(readError)throw readError;
+  if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
+  const activeKeys=new Set(rows.map(row=>row.product_id+":"+row.variant_id));
+  const stale=(existing||[]).filter(row=>!activeKeys.has(row.product_id+":"+row.variant_id));
+  for(const row of stale){
+    const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",state.user.id).eq("product_id",row.product_id).eq("variant_id",row.variant_id);
+    if(error)throw error;
   }
 }
 async function persistWishlist() {
@@ -352,14 +355,14 @@ function openOverlay(title, body, panelClass = "drawer") {
   $("#overlay-root").innerHTML = '<div class="overlay" role="presentation"><aside class="' + panelClass + '" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' + body + "</aside></div>";
 }
 function openCart() {
-  const items = state.cart.map(item => ({ item, product: state.products.find(product => product.id === item.id) })).filter(entry => entry.product);
-  const total = items.reduce((sum, entry) => sum + entry.product.price * entry.item.qty, 0);
-  const header = '<div class="drawer-head"><h2>' + esc(t().bag) + '</h2><button class="icon-button" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button></div>';
-  const list = items.length ? '<div class="drawer-items">' + items.map(({item, product}) =>
-    '<div class="drawer-item"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"><div><b>' + esc(productName(product)) + '</b><span>' + money(product.price) + " · Qty " + item.qty + '</span><strong>' + money(product.price * item.qty) + '</strong><button type="button" data-remove-cart="' + product.id + '">' + esc(t().remove) + "</button></div></div>"
-  ).join("") + "</div>" : '<div class="drawer-empty"><p>' + esc(t().emptyCart) + '</p><button class="button button-dark" data-close-overlay type="button">' + esc(t().shop) + "</button></div>";
-  const bottom = '<div class="drawer-bottom"><div><span>' + esc(t().subtotal) + '</span><strong>' + money(total) + '</strong></div><p>' + esc(t().demo) + '</p><button class="button button-dark full" data-checkout type="button">' + esc(t().checkout) + "</button></div>";
-  openOverlay(t().bag, header + list + bottom);
+  const items=state.cart.map(item=>({item,product:state.products.find(product=>product.id===item.id)})).filter(entry=>entry.product);
+  const total=items.reduce((sum,entry)=>sum+entry.product.price*entry.item.qty,0);
+  const header='<div class="drawer-head"><h2>'+esc(t().bag)+'</h2><button class="icon-button" data-close-overlay type="button" aria-label="'+esc(t().close)+'">×</button></div>';
+  const list=items.length?'<div class="drawer-items">'+items.map(({item,product})=>
+    '<div class="drawer-item"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"><div><b>'+esc(productName(product))+'</b><span>'+esc(item.size||"One size")+' · '+money(product.price)+' · Qty '+item.qty+'</span><strong>'+money(product.price*item.qty)+'</strong><button type="button" data-remove-cart="'+product.id+'" data-remove-variant="'+esc(item.variantId||"")+'">'+esc(t().remove)+'</button></div></div>'
+  ).join("")+'</div>':'<div class="drawer-empty"><p>'+esc(t().emptyCart)+'</p><button class="button button-dark" data-close-overlay type="button">'+esc(t().shop)+'</button></div>';
+  const bottom='<div class="drawer-bottom"><div><span>'+esc(t().subtotal)+'</span><strong>'+money(total)+'</strong></div><p>'+esc(t().demo)+'</p><a class="text-link" href="/cart.html">VIEW FULL BAG ↗</a><button class="button button-dark full" data-checkout type="button">'+esc(t().checkout)+'</button></div>';
+  openOverlay(t().bag,header+list+bottom);
 }
 function openWishlist() {
   const products = state.wishlist.map(id => state.products.find(product => product.id === id)).filter(Boolean);
@@ -370,12 +373,18 @@ function openWishlist() {
   openOverlay(t().saved, header + list);
 }
 function openQuickView(product) {
-  if (!product) return;
-  const body = '<button class="icon-button modal-close" data-close-overlay type="button" aria-label="' + esc(t().close) + '">×</button>' +
-    '<div class="quick-image"><img src="' + esc(product.image) + '" alt="' + esc(productName(product)) + '"></div>' +
-    '<div class="quick-info"><p class="eyebrow">' + esc(productCategory(product)) + " / " + esc(product.color || "") + '</p><h2>' + esc(productName(product)) + '</h2><strong>' + money(product.price) + '</strong><p>' + esc(state.lang === "hi" ? "रोज़ पहनने के लिए सोच-समझकर चुना गया स्टाइल।" : "A considered everyday piece designed to work with the rest of your wardrobe.") + '</p><button class="button button-dark" data-add="' + product.id + '" type="button">' + esc(t().add) + "</button></div>";
-  openOverlay(productName(product), body, "quick-view");
+  if(!product)return;
+  const choices=(product.variants||[]).filter(variant=>variant.stock_quantity>0);
+  const sizes=choices.length?'<label class="size-select">'+esc(t().size)+'<select id="quick-size" aria-label="'+esc(t().size)+'">'+choices.map((variant,index)=>'<option value="'+esc(variant.id)+'"'+(index===0?" selected":"")+'>'+esc(variant.size_label)+'</option>').join("")+'</select></label>':'';
+  const body='<button class="icon-button modal-close" data-close-overlay type="button" aria-label="'+esc(t().close)+'">×</button>'+
+    '<div class="quick-image"><img src="'+esc(product.image)+'" alt="'+esc(productName(product))+'"></div>'+
+    '<div class="quick-info"><p class="eyebrow">'+esc(productCategory(product))+" / "+esc(product.color||"")+'</p><h2>'+esc(productName(product))+'</h2><strong>'+money(product.price)+'</strong>'+
+    '<p>'+esc(state.lang==="hi"?"रोज़ पहनने के लिए सोच-समझकर चुना गया स्टाइल।":"A considered everyday piece designed to work with the rest of your wardrobe.")+'</p>'+
+    sizes+'<a class="text-link" href="/product.html?slug='+encodeURIComponent(product.slug)+'">'+esc(t().view)+' ↗</a>'+
+    '<button class="button button-dark" data-add="'+product.id+'" type="button">'+esc(t().add)+'</button></div>';
+  openOverlay(productName(product),body,"quick-view");
 }
+
 let authMode = "signin";
 function openAuth() {
   const root = $("#auth-root");
@@ -448,18 +457,22 @@ document.addEventListener("click", async event => {
     return;
   }
   if (button.dataset.add !== undefined) {
-    const id = Number(button.dataset.add);
-    const existing = state.cart.find(item => item.id === id);
-    if (existing) existing.qty = Math.min(99, existing.qty + 1);
-    else state.cart.push({ id, qty:1 });
+    const id=Number(button.dataset.add);
+    const product=state.products.find(item=>item.id===id);
+    const selectedId=$("#quick-size")?.value||defaultVariant(id)?.id;
+    const variant=product?.variants?.find(item=>item.id===selectedId)||defaultVariant(id);
+    if(!variant&&!selectedId){toast(state.lang==="hi"?"इस प्रोडक्ट का साइज़ उपलब्ध नहीं है।":"No size is currently available.");return;}
+    const variantId=variant?.id||"local-default",size=variant?.size_label||"One size";
+    const existing=state.cart.find(item=>item.id===id&&item.variantId===variantId);
+    if(existing)existing.qty=Math.min(99,existing.qty+1);
+    else state.cart.push({id,qty:1,variantId,size});
     renderProducts();
-    try { await saveCart(); toast(t().added); }
-    catch (error) { console.error(error); toast(state.lang === "hi" ? "बैग सेव नहीं हुआ। दोबारा कोशिश करें।" : "Could not save bag. Please retry."); }
-    if ($("#overlay-root").innerHTML) openCart();
+    try{await saveCart();toast(t().added);}catch(error){console.error(error);toast(state.lang==="hi"?"बैग सेव नहीं हुआ। दोबारा कोशिश करें।":"Could not save bag. Please retry.");}
+    if($("#overlay-root").innerHTML)openCart();
     return;
   }
   if (button.dataset.removeCart !== undefined) {
-    state.cart = state.cart.filter(item => item.id !== Number(button.dataset.removeCart));
+    state.cart = state.cart.filter(item => !(item.id === Number(button.dataset.removeCart) && item.variantId === button.dataset.removeVariant));
     renderProducts();
     try { await saveCart(); openCart(); }
     catch (error) { console.error(error); toast(state.lang === "hi" ? "बैग अपडेट नहीं हुआ।" : "Could not update bag."); }
