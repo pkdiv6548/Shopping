@@ -11,7 +11,13 @@
 .page-header nav a { display:flex; align-items:center; gap:6px; font-size:9px; letter-spacing:.1em; font-weight:700; white-space:nowrap; }
 .page-header nav a:hover,.page-footer a:hover { color:var(--accent); }
 .page-count { display:inline-grid; place-items:center; min-width:17px; height:17px; padding:0 4px; background:var(--ink); color:var(--paper); border-radius:20px; font-size:8px; }
-.page-header .language-switch { justify-self:end; min-width:54px; padding:10px 0; }
+.page-header .language-switch {
+  justify-self:end; min-width:54px; padding:10px 0;
+  border:0; background:transparent; color:var(--ink); cursor:pointer;
+  font:inherit; font-size:10px; line-height:1.4; appearance:none;
+}
+.page-header .language-switch:hover { color:var(--accent); }
+.page-header .language-switch:focus-visible { outline:2px solid var(--accent); outline-offset:4px; }
 .page-main { width:min(100%,1440px); min-height:60vh; margin:0 auto; padding:0 clamp(24px,5.3vw,82px) 90px; }
 .page-breadcrumb { display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:34px 0 27px; font-size:10px; color:var(--muted); }
 .page-breadcrumb a:hover { color:var(--accent); }
