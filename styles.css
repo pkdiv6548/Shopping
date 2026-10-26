@@ -678,3 +678,16 @@ img { color:var(--muted); }
 /* Keep the added all-products navigation visually consistent with category buttons. */
 .main-nav a.nav-page-link { padding:10px 0; font-size:10px; letter-spacing:.1em; font-weight:600; color:var(--ink); white-space:nowrap; }
 .main-nav a.nav-page-link:hover { color:var(--accent); }
+
+/* Accessibility: honour the visitor's reduced-motion system preference. */
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
