@@ -342,18 +342,37 @@ async function restoreUser(user) {
 }
 
 async function persistCart() {
-  if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
-  saveGuest("sm_user_cart_"+state.user.id,state.cart);
-  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
-    .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
-  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
-  if(readError)throw readError;
-  if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
-  const activeKeys=new Set(rows.map(row=>row.product_id+":"+row.variant_id));
-  const stale=(existing||[]).filter(row=>!activeKeys.has(row.product_id+":"+row.variant_id));
-  for(const row of stale){
-    const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",state.user.id).eq("product_id",row.product_id).eq("variant_id",row.variant_id);
-    if(error)throw error;
+  const user = state.user;
+  const cartSnapshot = state.cart.map(item => ({ ...item }));
+  if (!user) { saveGuest("sm_guest_cart", cartSnapshot); return; }
+
+  // Persist a stable snapshot for the account that initiated this save. Auth can
+  // change while Supabase requests are in flight; never write/delete another user's rows.
+  const userId = user.id;
+  saveGuest("sm_user_cart_" + userId, cartSnapshot);
+  const rows = cartSnapshot.map(item => ({
+    user_id: userId,
+    product_id: state.dbIds[item.id],
+    variant_id: item.variantId,
+    quantity: item.qty,
+    updated_at: new Date().toISOString()
+  })).filter(row => row.product_id && row.variant_id && row.variant_id !== "local-default");
+
+  const { data: existing, error: readError } = await supabase
+    .from("sm_cart_items").select("product_id,variant_id").eq("user_id", userId);
+  if (readError) throw readError;
+
+  if (rows.length) {
+    const { error } = await supabase.from("sm_cart_items")
+      .upsert(rows, { onConflict: "user_id,product_id,variant_id" });
+    if (error) throw error;
+  }
+  const activeKeys = new Set(rows.map(row => row.product_id + ":" + row.variant_id));
+  const stale = (existing || []).filter(row => !activeKeys.has(row.product_id + ":" + row.variant_id));
+  for (const row of stale) {
+    const { error } = await supabase.from("sm_cart_items").delete()
+      .eq("user_id", userId).eq("product_id", row.product_id).eq("variant_id", row.variant_id);
+    if (error) throw error;
   }
 }
 async function persistWishlist() {
