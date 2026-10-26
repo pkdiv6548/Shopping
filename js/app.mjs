@@ -445,19 +445,19 @@ function openAuth() {
 document.addEventListener("click", async event => {
   if (event.target.matches(".overlay")) { closeOverlay(); return; }
   if (event.target.matches(".auth-overlay")) { $("#auth-root").innerHTML = ""; return; }
-  const button = event.target.closest("button");
+  const button = event.target.closest("button, a");
   if (!button) return;
 
   if (button.id === "language-switch") { state.lang = state.lang === "en" ? "hi" : "en"; setLanguage(); return; }
   if (button.dataset.pickCategory) { state.category = button.dataset.pickCategory; renderCategories(); renderProducts(); return; }
-  if (button.dataset.category) { state.category = button.dataset.category; closeOverlay(); renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
-  if (button.dataset.categoryLink) { state.category = button.dataset.categoryLink; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.dataset.category) { if (button.tagName === "A") event.preventDefault(); state.category = button.dataset.category; closeOverlay(); renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.dataset.categoryLink) { event.preventDefault(); state.category = button.dataset.categoryLink; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
   if (["hero-shop", "view-all", "manifesto-shop"].includes(button.id)) { state.category = "All"; renderCategories(); renderProducts(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
-  if (button.id === "account-trigger") { openAuth(); return; }
-  if (button.id === "cart-trigger") { openCart(); return; }
-  if (button.id === "wishlist-trigger") { openWishlist(); return; }
+  if (button.id === "account-trigger") { event.preventDefault(); openAuth(); return; }
+  if (button.id === "cart-trigger") { event.preventDefault(); openCart(); return; }
+  if (button.id === "wishlist-trigger") { event.preventDefault(); openWishlist(); return; }
   if (button.id === "mobile-menu") { openMenu(); return; }
-  if (button.id === "search-toggle") { $("#product-search")?.focus(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
+  if (button.id === "search-toggle") { event.preventDefault(); $("#product-search")?.focus(); $("#shop")?.scrollIntoView({ behavior:"smooth" }); return; }
   if (button.dataset.closeOverlay !== undefined) { closeOverlay(); return; }
   if (button.dataset.closeAuth !== undefined) { $("#auth-root").innerHTML = ""; return; }
   if (button.id === "demo-info") { toast(t().demoCheckout); return; }
