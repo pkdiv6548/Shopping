@@ -25,8 +25,8 @@ for (const file of required.filter(file => file.endsWith(".html") && existsSync(
     if (count > 1) errors.push(file + ": duplicate id attribute #" + id);
   }
   const ids = new Set(idList);
-  for (const match of html.matchAll(/<img\\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi)) {
-    if (!/\\balt\\s*=/i.test(match[0])) errors.push(file + ": image missing alt attribute");
+  for (const match of html.matchAll(/<img\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi)) {
+    if (!/\balt\s*=/i.test(match[0])) errors.push(file + ": image missing alt attribute");
   }
   for (const match of html.matchAll(/\b(?:href|src)=["']([^"']+)["']/g)) {
     let target = match[1].trim();
@@ -53,8 +53,8 @@ for (const match of productRows) {
   const file = match[3].replace(/^\/+/, "");
   if (!existsSync(path.join(root, file))) errors.push("Missing local product image: " + file);
 }
-const sourceFiles = required.filter(file => /\\.(?:html|css|mjs)$/.test(file));
-const combinedSource = sourceFiles.map(read).join("\\n");
+const sourceFiles = required.filter(file => /\.(?:html|css|mjs)$/.test(file));
+const combinedSource = sourceFiles.map(read).join("\n");
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
   if (combinedSource.includes(blocked)) errors.push("External asset dependency found: " + blocked);
 }
