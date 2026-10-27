@@ -103,6 +103,7 @@ Checkout is a local demo flow only. These checks must not use real payment crede
 - [ ] A successful demo checkout creates a clearly labeled `demo-only` order, stores it in the current guest/account-specific browser storage, clears the cart, and shows a matching confirmation ID and total.
 - [ ] Confirm the UI clearly states that real payments and production order placement are not enabled; verify no payment gateway or production order-write endpoint is called.
 - [ ] Simulate browser storage being unavailable/full; checkout reports that the demo order could not be saved and does not silently clear the cart.
+- [ ] Specifically force the demo-order `localStorage.setItem` write to throw (for example, a quota/security error); verify checkout shows the save error, does not navigate to a success confirmation, does not clear the in-memory cart or persisted cart, and creates no partial order entry. Restore storage and retry; exactly one demo order should then be saved and confirmed.
 - [ ] Simulate remote cart persistence failing after local demo-order creation; document whether the cart reappears on refresh and ensure the local confirmation remains understandable. This is a known manual edge case until verified.
 - [ ] Confirm order history is isolated by guest vs signed-in account storage keys, and that malformed/stale local demo-order entries do not break checkout or confirmation rendering.
 
