@@ -211,6 +211,7 @@ function setLanguage() {
     if (textNode) textNode.textContent = label + " ";
     else language.prepend(document.createTextNode(label + " "));
     language.setAttribute("aria-label", state.lang === "en" ? "Switch language to Hindi" : "Switch language to English");
+    language.setAttribute("aria-pressed", String(state.lang === "hi"));
   }
   const heroTitle = $("#hero-title");
   if (heroTitle) heroTitle.innerHTML = "<span>" + esc(t().title1) + "</span><span>" + esc(t().title2) + "</span>";
