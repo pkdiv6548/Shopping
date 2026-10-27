@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
-import { isValidCartQuantity } from "./cart-rules.mjs";
+import { isValidCartQuantity, reconcileCartWithStock } from "./cart-rules.mjs";
 
 const supabase = createClient(
   "https://dbenwifjhdqhiznowncs.supabase.co",
@@ -368,13 +368,9 @@ document.addEventListener("click",async event=>{
     button.disabled=true;
     try {
     let cartAdjusted=false;
-    state.cart=state.cart.filter(item=>{
-     const variant=variantById[item.variantId];
-     if(!variant||variant.stock_quantity<=0){cartAdjusted=true;return false;}
-     const available=Math.min(99,Number(variant.stock_quantity)||0);
-     if(item.qty>available){item.qty=available;cartAdjusted=true;}
-     return true;
-    });
+    const reconciledCart=reconcileCartWithStock(state.cart,variantById);
+    state.cart=reconciledCart.cart;
+    cartAdjusted=reconciledCart.changed;
     if(cartAdjusted){
      state.cartRevision++;
      try{await saveCart();}catch(error){console.warn("Could not persist stock-adjusted cart",error);}
