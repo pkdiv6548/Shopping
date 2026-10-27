@@ -6,11 +6,16 @@ export function isValidCartQuantity(value) {
   return Number.isInteger(quantity) && quantity >= 1 && quantity <= 99;
 }
 
-export function reconcileCartWithStock(cart, variantById) {
+export function reconcileCartWithStock(cart, variantById, validProductIds) {
   let changed = false;
   const nextCart = [];
 
   for (const item of Array.isArray(cart) ? cart : []) {
+    if (validProductIds && !validProductIds.has(item?.id)) {
+      changed = true;
+      continue;
+    }
+
     const variant = variantById?.[item?.variantId];
     const stock = Number(variant?.stock_quantity);
     const available = Number.isFinite(stock) ? Math.min(99, Math.floor(stock)) : 0;
@@ -30,4 +35,18 @@ export function reconcileCartWithStock(cart, variantById) {
   }
 
   return { cart: nextCart, changed };
+}
+
+
+// Do not silently replace an unknown persisted variant with a local fallback.
+// Only legacy carts with no variant ID (or the old local-default marker) may resolve
+// to a product's current default variant.
+export function resolveCartVariant(item, variantById, defaultVariantForProduct) {
+  const variantId = String(item?.variantId || "");
+  if (variantId && variantId !== "local-default") {
+    return variantById?.[variantId] || null;
+  }
+  return typeof defaultVariantForProduct === "function"
+    ? defaultVariantForProduct(item?.id) || null
+    : null;
 }

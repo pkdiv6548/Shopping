@@ -77,3 +77,36 @@ test("normalizes invalid quantities to one and flags the cart for review", () =>
     changed: true
   });
 });
+
+test("removes stale cart items whose products are no longer in the catalog", () => {
+  const cart = [
+    { id: "removed-product", variantId: "v1", qty: 1 },
+    { id: "active-product", variantId: "v2", qty: 2 }
+  ];
+  const result = reconcileCartWithStock(cart, {
+    v1: { stock_quantity: 5 },
+    v2: { stock_quantity: 5 }
+  }, new Set(["active-product"]));
+
+  assert.deepEqual(result, {
+    cart: [{ id: "active-product", variantId: "v2", qty: 2 }],
+    changed: true
+  });
+});
+
+
+test("does not remap an unknown persisted variant to a fallback variant", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  const fallback = { id: "local-4-s", stock_quantity: 10 };
+  assert.equal(resolveCartVariant(
+    { id: 4, variantId: "removed-db-variant-uuid" },
+    { [fallback.id]: fallback },
+    () => fallback
+  ), null);
+});
+
+test("allows legacy carts without a variant ID to use the current default", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  const fallback = { id: "local-4-s", stock_quantity: 10 };
+  assert.equal(resolveCartVariant({ id: 4, variantId: "" }, {}, () => fallback), fallback);
+});
