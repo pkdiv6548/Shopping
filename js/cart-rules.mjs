@@ -105,3 +105,14 @@ export function validateDemoOrders(value) {
     );
   });
 }
+
+
+// Safely persist JSON to a Storage-compatible object and report whether it succeeded.
+export function safeWriteStorage(storage, key, value) {
+  try {
+    storage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    return false;
+  }
+}
