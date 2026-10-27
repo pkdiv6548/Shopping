@@ -62,3 +62,22 @@ export function resolveCartVariant(item, variantById, defaultVariantForProduct) 
     ? defaultVariantForProduct(item?.id) || null
     : null;
 }
+
+
+// Stable cart fingerprint supports short-window demo checkout idempotency.
+export function createCartFingerprint(cart) {
+  return JSON.stringify((Array.isArray(cart) ? cart : [])
+    .filter(item => item && item.id != null && item.variantId != null)
+    .map(item => [String(item.id), String(item.variantId), Number(item.qty)])
+    .sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b))));
+}
+
+export function findRecentMatchingDemoOrder(orders, fingerprint, now = Date.now(), windowMs = 120000) {
+  if (!Array.isArray(orders) || typeof fingerprint !== "string" || !fingerprint) return null;
+  return orders.find(order => {
+    if (order?.checkoutFingerprint !== fingerprint || typeof order.createdAt !== "string") return false;
+    const createdAt = Date.parse(order.createdAt);
+    const age = now - createdAt;
+    return Number.isFinite(createdAt) && age >= 0 && age <= windowMs;
+  }) || null;
+}
