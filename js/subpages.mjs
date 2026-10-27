@@ -59,7 +59,7 @@ function renderPageTranslations(){
   if(count&&node.firstChild?.nodeType===3)node.firstChild.textContent=translate(key)+" ";
   else node.textContent=translate(key);
  });
- const language=$("#page-language");if(language){language.textContent=state.lang==="en"?"हिंदी में देखें":"View in English";language.setAttribute("aria-label",state.lang==="en"?"पेज हिंदी में बदलें":"Switch page to English");}
+ const language=$("#page-language");if(language){language.textContent=state.lang==="en"?"हिंदी में देखें":"View in English";language.setAttribute("aria-label",state.lang==="en"?"पेज हिंदी में बदलें":"Switch page to English");language.setAttribute("aria-pressed",String(state.lang==="hi"));}
  const count=$("#page-cart-count");if(count)count.textContent=String(state.cart.reduce((sum,item)=>sum+item.qty,0));
 }
 async function loadCatalogue(){

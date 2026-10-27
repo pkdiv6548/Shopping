@@ -205,7 +205,13 @@ function setLanguage() {
   const signup = $("#newsletter-form button[type=submit]");
   if (signup) signup.setAttribute("aria-label", t().join);
   const language = $("#language-switch");
-  if (language) language.innerHTML = (state.lang === "en" ? "हिंदी" : "English") + ' <span data-icon="chevron-down"></span>';
+  if (language) {
+    const label = state.lang === "en" ? "हिंदी" : "English";
+    const textNode = [...language.childNodes].find(node => node.nodeType === Node.TEXT_NODE);
+    if (textNode) textNode.textContent = label + " ";
+    else language.prepend(document.createTextNode(label + " "));
+    language.setAttribute("aria-label", state.lang === "en" ? "Switch language to Hindi" : "Switch language to English");
+  }
   const heroTitle = $("#hero-title");
   if (heroTitle) heroTitle.innerHTML = "<span>" + esc(t().title1) + "</span><span>" + esc(t().title2) + "</span>";
   const sort = $("#sort-select");
