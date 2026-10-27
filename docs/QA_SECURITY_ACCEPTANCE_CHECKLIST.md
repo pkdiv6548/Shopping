@@ -13,8 +13,8 @@ This checklist turns the Shopping WebApp research priorities into repeatable rel
 ## Release gate A — automated checks
 
 - [ ] Run `npm run build`; require all Node tests, JavaScript syntax checks, and static-site validation to pass.
-- [ ] Require both Vercel checks (`shopping-5xse` and `shopping-dz1q`) to pass for the proposed PR before merge.
-- [ ] Confirm post-merge production deployment checks pass.
+- [ ] Review required GitHub Actions checks for the proposed PR and require the repository Build check to pass before merge.
+- [ ] Production deployment/browser verification is a separate release activity. Do not access or modify Vercel accounts, settings, deployments, or integrations from this workflow; if deployment status is unavailable or reports an account/quota issue, record it as unverified and do not treat it as a code-build result.
 - [ ] Record commit SHA, PR link, test result, and any unresolved warnings.
 
 ## Release gate B — storefront and responsive UI
@@ -79,7 +79,7 @@ Measure with an agreed production-like run; these are targets, not currently mea
 - Cross-user RLS negative tests using two authenticated sessions have not been run.
 - Responsive and accessibility audit results have not been measured.
 - Leaked Password Protection remains disabled per the latest Security Advisor result.
-- Vercel deployment inspection API access is restricted for the currently connected account; GitHub status checks are available, but that is not equivalent to interactive browser testing.
+- Vercel is explicitly out of scope for this workflow because the connected integration may belong to a different account. Do not interact with Vercel; its status is not a substitute for GitHub Actions build validation or live browser testing.
 
 
 ### Read-only Supabase policy inventory (2026-10-27)
