@@ -9,6 +9,7 @@ export function isValidCartQuantity(value) {
 export function reconcileCartWithStock(cart, variantById, validProductIds) {
   let changed = false;
   const nextCart = [];
+  const indexByKey = new Map();
 
   for (const item of Array.isArray(cart) ? cart : []) {
     if (validProductIds && !validProductIds.has(item?.id)) {
@@ -31,6 +32,17 @@ export function reconcileCartWithStock(cart, variantById, validProductIds) {
       : 1;
 
     if (quantity !== item.qty) changed = true;
+    const key = `${String(item.id)}:${String(item.variantId)}`;
+    const existingIndex = indexByKey.get(key);
+
+    if (existingIndex !== undefined) {
+      changed = true;
+      const existing = nextCart[existingIndex];
+      existing.qty = Math.min(available, existing.qty + quantity);
+      continue;
+    }
+
+    indexByKey.set(key, nextCart.length);
     nextCart.push({ ...item, qty: quantity });
   }
 
