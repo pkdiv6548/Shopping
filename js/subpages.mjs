@@ -164,7 +164,7 @@ async function restoreUser(user){
   cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(variant.stock_quantity,99,(existing?.qty||0)+item.qty)});
  });
  recoveryCart.forEach(item=>{
-  const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant||variant.stock_quantity<=0)return;
+  const variant=resolveCartVariant(item,variantById,defaultVariant);if(!variant||variant.stock_quantity<=0)return;
   const key=item.id+":"+variant.id,existing=cartByKey.get(key),qty=Math.min(variant.stock_quantity,99,item.qty);
   if(!existing||qty>existing.qty)cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty});
  });
