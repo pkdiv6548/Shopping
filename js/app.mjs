@@ -102,6 +102,30 @@ function defaultVariant(productId) {
   const product=state.products.find(item=>item.id===Number(productId));
   return product?.variants?.find(variant=>variant.stock_quantity>0)||product?.variants?.[0]||null;
 }
+function localVariants(product) {
+  const sizes = product.category === "Shoes"
+    ? ["6","7","8","9","10"]
+    : product.category === "Accessories"
+      ? ["One size"]
+      : ["XS","S","M","L","XL"];
+  return sizes.map(size => ({
+    id: "local-" + product.id + "-" + size.toLowerCase().replace(/[^a-z0-9]+/g,"-"),
+    size_label: size,
+    stock_quantity: 10,
+    sku: "DEMO-" + product.slug + "-" + size
+  }));
+}
+function useLocalCatalogue() {
+  state.products = fallbackProducts.map(product => ({...product, variants:localVariants(product)}));
+  state.dbIds = {};
+  state.cart = state.cart.map(item => {
+    const product = state.products.find(candidate => candidate.id === item.id);
+    const variant = product?.variants.find(candidate => candidate.id === item.variantId || candidate.size_label === item.size) || defaultVariant(item.id);
+    if (!product || !variant) return null;
+    return {...item, variantId:variant.id, size:item.size || variant.size_label, qty:Math.min(99,variant.stock_quantity,Math.max(1,Number(item.qty)||1))};
+  }).filter(Boolean);
+  if (!state.user) saveGuest("sm_guest_cart",state.cart);
+}
 const money = value => new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", maximumFractionDigits:0 }).format(Number(value || 0));
 const esc = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
 
@@ -235,7 +259,7 @@ async function loadCatalogue() {
       .select("id,slug,name_en,name_hi,price_inr,compare_at_price_inr,colour_en,colour_hi,status,featured")
       .eq("status","active");
     if(error)throw error;
-    if(!Array.isArray(data)||!data.length)return;
+    if(!Array.isArray(data)||!data.length){useLocalCatalogue();return;}
     const localBySlug=Object.fromEntries(fallbackProducts.map(product=>[product.slug,product]));
     state.products=data.map((row,index)=>{
       const fallback=localBySlug[row.slug]||{};
@@ -267,6 +291,7 @@ async function loadCatalogue() {
     if(!state.user)saveGuest("sm_guest_cart",state.cart);
   } catch(error) {
     console.error("Catalogue fallback active; Supabase product/variant read failed",error);
+    useLocalCatalogue();
   }
 }
 
@@ -345,7 +370,7 @@ async function persistCart() {
   if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
   saveGuest("sm_user_cart_"+state.user.id,state.cart);
   const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
-    .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+    .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
   const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
   if(readError)throw readError;
   if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
@@ -519,7 +544,11 @@ document.addEventListener("click", async event => {
     return;
   }
   if (button.dataset.quick !== undefined) { openQuickView(state.products.find(product => product.id === Number(button.dataset.quick))); return; }
-  if (button.dataset.checkout !== undefined) { toast(t().demoCheckout); return; }
+  if (button.dataset.checkout !== undefined) {
+    if (!state.cart.length) { toast(t().emptyCart); return; }
+    location.href = "/checkout.html";
+    return;
+  }
   if (button.id === "clear-filters") {
     state.query = ""; state.category = "All";
     if ($("#product-search")) $("#product-search").value = "";
