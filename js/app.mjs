@@ -373,12 +373,8 @@ async function restoreUser(user) {
   }
 }
 
-async function persistCart() {
-  const userId=state.user?.id;
-  if(!userId){saveGuest("sm_guest_cart",state.cart.map(item=>({...item})));return;}
-  const cartSnapshot=state.cart.map(item=>({...item}));
-  const databaseIds={...state.dbIds};
-  saveGuest("sm_user_cart_"+userId,cartSnapshot);
+async function persistCart(userId,cartSnapshot,databaseIds) {
+  if(!userId||state.user?.id!==userId)return;
   const rows=cartSnapshot.map(item=>({user_id:userId,product_id:databaseIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
     .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
   const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",userId);
@@ -394,12 +390,8 @@ async function persistCart() {
     if(error)throw error;
   }
 }
-async function persistWishlist() {
-  const userId=state.user?.id;
-  if(!userId){saveGuest("sm_guest_wishlist",[...state.wishlist]);return;}
-  const wishlistSnapshot=[...state.wishlist];
-  const databaseIds={...state.dbIds};
-  saveGuest("sm_user_wishlist_"+userId,wishlistSnapshot);
+async function persistWishlist(userId,wishlistSnapshot,databaseIds) {
+  if(!userId||state.user?.id!==userId)return;
   const rows=wishlistSnapshot.map(id=>({user_id:userId,product_id:databaseIds[id]})).filter(row=>row.product_id);
   const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",userId);
   if(readError)throw readError;
@@ -414,17 +406,26 @@ async function persistWishlist() {
     if(error)throw error;
   }
 }
-let cartSaveQueue = Promise.resolve();
-let wishlistSaveQueue = Promise.resolve();
+let cartSaveQueue=Promise.resolve();
+let wishlistSaveQueue=Promise.resolve();
 function saveCart() {
-  cartSaveQueue = cartSaveQueue.catch(() => {}).then(() => persistCart());
+  const userId=state.user?.id||null;
+  const cartSnapshot=state.cart.map(item=>({...item}));
+  const databaseIds={...state.dbIds};
+  if(!userId){saveGuest("sm_guest_cart",cartSnapshot);return Promise.resolve();}
+  saveGuest("sm_user_cart_"+userId,cartSnapshot);
+  cartSaveQueue=cartSaveQueue.catch(()=>{}).then(()=>persistCart(userId,cartSnapshot,databaseIds));
   return cartSaveQueue;
 }
 function saveWishlist() {
-  wishlistSaveQueue = wishlistSaveQueue.catch(() => {}).then(() => persistWishlist());
+  const userId=state.user?.id||null;
+  const wishlistSnapshot=[...state.wishlist];
+  const databaseIds={...state.dbIds};
+  if(!userId){saveGuest("sm_guest_wishlist",wishlistSnapshot);return Promise.resolve();}
+  saveGuest("sm_user_wishlist_"+userId,wishlistSnapshot);
+  wishlistSaveQueue=wishlistSaveQueue.catch(()=>{}).then(()=>persistWishlist(userId,wishlistSnapshot,databaseIds));
   return wishlistSaveQueue;
 }
-
 function closeOverlay() { $("#overlay-root").innerHTML = ""; }
 function openOverlay(title, body, panelClass = "drawer") {
   $("#overlay-root").innerHTML = '<div class="overlay" role="presentation"><aside class="' + panelClass + '" role="dialog" aria-modal="true" aria-label="' + esc(title) + '">' + body + "</aside></div>";
