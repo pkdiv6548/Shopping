@@ -88,7 +88,7 @@ Project ref: `dbenwifjhdqhiznowncs`. The database policy catalog was queried rea
 
 - `sm_cart_items`: one `ALL` policy for `authenticated`; both `USING` and `WITH CHECK` require `auth.uid() = user_id`.
 - `sm_wishlists`: one `ALL` policy for `authenticated`; both `USING` and `WITH CHECK` require `auth.uid() = user_id`.
-- `sm_orders`: authenticated users may `SELECT) only rows with `user_id = auth.uid()`; no client insert/update/delete policy was present.
+- `sm_orders`: authenticated users may `SELECT` only rows with `user_id = auth.uid()`; no client insert/update/delete policy was present.
 - `sm_order_items`: authenticated users may read an item only when its parent order belongs to `auth.uid()`; no client write policy was present.
 - `sm_products`: public catalog reads are restricted to `status = 'active'`.
 - `sm_variants` and `sm_product_images`: public reads are restricted to records whose parent product is active.
