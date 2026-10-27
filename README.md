@@ -26,3 +26,16 @@ See [docs/implementation-plan.md](docs/implementation-plan.md) for the product d
 
 ## Validation
 Run `npm run build` to syntax-check JavaScript and validate local pages/assets and Vercel configuration.
+
+
+## Zero-budget development rules
+
+This is a demo/test storefront. Keep improvements within the existing free-tier limits and review current quotas before adding data-heavy features.
+
+- Keep checkout clearly demo-only until payment, order, inventory, and server-side verification are intentionally implemented and tested.
+- Use only the Supabase publishable key in browser code; never expose service-role or secret keys.
+- Preserve Row Level Security and user-scoped access for cart and wishlist records.
+- Prefer local assets and existing browser APIs before adding new services or dependencies.
+- Run `npm run build` before publishing changes.
+
+See [the zero-budget plan](docs/zero-budget-plan.md) for priorities and release checks.
