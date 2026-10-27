@@ -89,6 +89,21 @@ Measure with an agreed production-like run; these are targets, not currently mea
 - Vercel is explicitly out of scope for this workflow because the connected integration may belong to a different account. Do not interact with Vercel; its status is not a substitute for GitHub Actions build validation or live browser testing.
 
 
+
+## Release gate E — demo checkout and order summary
+
+Checkout is a local demo flow only. These checks must not use real payment credentials or imply that an order was submitted to a production order system.
+
+- [ ] With an empty cart, activating checkout does not create a demo order and presents the empty-cart state.
+- [ ] With valid items, the order summary uses current catalog prices and the selected variant/size and quantity for each line.
+- [ ] If stock is reduced or a variant is unavailable before checkout, the cart is reconciled, the user is asked to review the updated cart, and no demo order is created on that attempt.
+- [ ] A successful demo checkout creates a clearly labeled `demo-only` order, stores it in the current guest/account-specific browser storage, clears the cart, and shows a matching confirmation ID and total.
+- [ ] Confirm the UI clearly states that real payments and production order placement are not enabled; verify no payment gateway or production order-write endpoint is called.
+- [ ] Simulate browser storage being unavailable/full; checkout reports that the demo order could not be saved and does not silently clear the cart.
+- [ ] Simulate remote cart persistence failing after local demo-order creation; document whether the cart reappears on refresh and ensure the local confirmation remains understandable. This is a known manual edge case until verified.
+- [ ] Confirm order history is isolated by guest vs signed-in account storage keys, and that malformed/stale local demo-order entries do not break checkout or confirmation rendering.
+
+
 ### Read-only Supabase policy inventory (2026-10-27)
 
 Project ref: `dbenwifjhdqhiznowncs`. The database policy catalog was queried read-only; no schema, data, or Auth settings were changed.
