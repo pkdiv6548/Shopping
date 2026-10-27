@@ -238,3 +238,27 @@ test("keeps product-variant pairs separate when IDs contain delimiter characters
   });
 });
 
+
+
+test("creates stable fingerprints for the same cart regardless of line order", async () => {
+  const { createCartFingerprint } = await import("../js/cart-rules.mjs");
+  const first = [
+    { id: 2, variantId: "v2", qty: 1 },
+    { id: 1, variantId: "v1", qty: 3 }
+  ];
+  const second = [...first].reverse();
+  assert.equal(createCartFingerprint(first), createCartFingerprint(second));
+  assert.notEqual(createCartFingerprint(first), createCartFingerprint([...first, { id: 1, variantId: "v1", qty: 1 }]));
+});
+
+test("finds only a matching demo order inside the idempotency window", async () => {
+  const { findRecentMatchingDemoOrder } = await import("../js/cart-rules.mjs");
+  const now = Date.parse("2026-10-27T12:00:00.000Z");
+  const recent = { id: "SM-DEMO-RECENT", checkoutFingerprint: "cart-1", createdAt: new Date(now - 60000).toISOString() };
+  const old = { id: "SM-DEMO-OLD", checkoutFingerprint: "cart-1", createdAt: new Date(now - 180000).toISOString() };
+  const future = { id: "SM-DEMO-FUTURE", checkoutFingerprint: "cart-1", createdAt: new Date(now + 1000).toISOString() };
+  assert.equal(findRecentMatchingDemoOrder([old, future, recent], "cart-1", now), recent);
+  assert.equal(findRecentMatchingDemoOrder([recent], "different-cart", now), null);
+  assert.equal(findRecentMatchingDemoOrder([old], "cart-1", now), null);
+  assert.equal(findRecentMatchingDemoOrder([future], "cart-1", now), null);
+});

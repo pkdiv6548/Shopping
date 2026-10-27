@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
-import { isValidCartQuantity, reconcileCartWithStock, resolveCartVariant } from "./cart-rules.mjs";
+import { createCartFingerprint, findRecentMatchingDemoOrder, isValidCartQuantity, reconcileCartWithStock, resolveCartVariant } from "./cart-rules.mjs";
 
 const supabase = createClient(
   "https://dbenwifjhdqhiznowncs.supabase.co",
@@ -415,7 +415,19 @@ document.addEventListener("click",async event=>{
     }
     const rows=state.cart.map(item=>({item,product:state.products.find(product=>product.id===item.id)})).filter(row=>row.product);
     if(!rows.length){toast(translate("checkoutEmpty"));return;}
+    const checkoutFingerprint=createCartFingerprint(state.cart);
+    const recentOrder=findRecentMatchingDemoOrder(loadDemoOrders(),checkoutFingerprint);
+    if(recentOrder){
+     // A failed remote cart clear can restore the same cart after refresh. Reuse
+     // the recent confirmation instead of creating a duplicate demo order.
+     state.cart=[];state.cartRevision++;
+     let cartSyncFailed=false;
+     try{await saveCart();}catch(error){cartSyncFailed=true;console.error("Repeated demo checkout reused an existing order, but the remote cart could not be cleared",error);}
+     location.href="/checkout.html?demo-order="+encodeURIComponent(recentOrder.id)+(cartSyncFailed?"&cart-sync=failed":"");
+     return;
+    }
     const order={
+    checkoutFingerprint,
     id:"SM-DEMO-"+Date.now().toString(36).toUpperCase(),
     createdAt:new Date().toISOString(),
     status:"demo-only",
