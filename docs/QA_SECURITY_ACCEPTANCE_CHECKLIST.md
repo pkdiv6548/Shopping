@@ -49,6 +49,13 @@ Use two separate test accounts (User A and User B) and a logged-out session. Do 
 - [ ] Verify no service-role secret or other privileged key appears in client files, source maps, network responses, or logs.
 - [ ] Re-run Supabase Security Advisor; enable Leaked Password Protection in Supabase Dashboard → Authentication → Settings, then confirm the warning is gone.
 
+## Release gate D — cart persistence and account switching
+
+- [ ] Add distinct cart items and wishlist entries while signed in as User A, then switch directly to User B; User A's cart and wishlist must not remain visible while User B's data loads.
+- [ ] Confirm User B sees only User B's restored cart/wishlist plus any deliberately retained guest items; User A's local cache remains scoped to User A.
+- [ ] Sign out from User B and confirm the guest cart/wishlist is restored rather than either signed-in account's data.
+- [ ] Repeat account switching with delayed network responses; an older restore response must not overwrite the current account's state.
+
 ## Release gate E — demo checkout
 
 - [ ] Clearly label checkout and resulting order as demo-only; do not imply payment was taken.
