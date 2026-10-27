@@ -77,3 +77,19 @@ test("normalizes invalid quantities to one and flags the cart for review", () =>
     changed: true
   });
 });
+
+test("removes stale cart items whose products are no longer in the catalog", () => {
+  const cart = [
+    { id: "removed-product", variantId: "v1", qty: 1 },
+    { id: "active-product", variantId: "v2", qty: 2 }
+  ];
+  const result = reconcileCartWithStock(cart, {
+    v1: { stock_quantity: 5 },
+    v2: { stock_quantity: 5 }
+  }, new Set(["active-product"]));
+
+  assert.deepEqual(result, {
+    cart: [{ id: "active-product", variantId: "v2", qty: 2 }],
+    changed: true
+  });
+});
