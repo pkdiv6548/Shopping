@@ -240,6 +240,17 @@ test("keeps product-variant pairs separate when IDs contain delimiter characters
 
 
 
+test("reports browser storage write failures without throwing", async () => {
+  const { safeWriteStorage } = await import("../js/cart-rules.mjs");
+  const saved = new Map();
+  const storage = { setItem(key, value) { saved.set(key, value); } };
+  assert.equal(safeWriteStorage(storage, "cart", [{ id: 1 }]), true);
+  assert.equal(saved.get("cart"), '[{"id":1}]');
+  assert.equal(safeWriteStorage({ setItem() { throw new Error("quota exceeded"); } }, "cart", []), false);
+  assert.equal(safeWriteStorage({ setItem() {} }, "circular", (() => { const x = {}; x.self = x; return x; })()), false);
+});
+
+
 test("validates persisted demo orders and rejects malformed dates, totals, and items", async () => {
   const { validateDemoOrders } = await import("../js/cart-rules.mjs");
   const valid = {
