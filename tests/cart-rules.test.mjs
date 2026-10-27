@@ -93,3 +93,20 @@ test("removes stale cart items whose products are no longer in the catalog", () 
     changed: true
   });
 });
+
+
+test("does not remap an unknown persisted variant to a fallback variant", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  const fallback = { id: "local-4-s", stock_quantity: 10 };
+  assert.equal(resolveCartVariant(
+    { id: 4, variantId: "removed-db-variant-uuid" },
+    { [fallback.id]: fallback },
+    () => fallback
+  ), null);
+});
+
+test("allows legacy carts without a variant ID to use the current default", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  const fallback = { id: "local-4-s", stock_quantity: 10 };
+  assert.equal(resolveCartVariant({ id: 4, variantId: "" }, {}, () => fallback), fallback);
+});
