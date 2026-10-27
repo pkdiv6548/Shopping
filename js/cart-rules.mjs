@@ -32,7 +32,7 @@ export function reconcileCartWithStock(cart, variantById, validProductIds) {
       : 1;
 
     if (quantity !== item.qty) changed = true;
-    const key = `${String(item.id)}:${String(item.variantId)}`;
+    const key = JSON.stringify([String(item.id), String(item.variantId)]);
     const existingIndex = indexByKey.get(key);
 
     if (existingIndex !== undefined) {
