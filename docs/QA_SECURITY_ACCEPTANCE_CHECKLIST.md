@@ -80,3 +80,25 @@ Measure with an agreed production-like run; these are targets, not currently mea
 - Responsive and accessibility audit results have not been measured.
 - Leaked Password Protection remains disabled per the latest Security Advisor result.
 - Vercel deployment inspection API access is restricted for the currently connected account; GitHub status checks are available, but that is not equivalent to interactive browser testing.
+
+
+### Read-only Supabase policy inventory (2026-10-27)
+
+Project ref: `dbenwifjhdqhiznowncs`. The database policy catalog was queried read-only; no schema, data, or Auth settings were changed.
+
+- `sm_cart_items`: one `ALL` policy for `authenticated`; both `USING` and `WITH CHECK` require `auth.uid() = user_id`.
+- `sm_wishlists`: one `ALL` policy for `authenticated`; both `USING` and `WITH CHECK` require `auth.uid() = user_id`.
+- `sm_orders`: authenticated users may `SELECT) only rows with `user_id = auth.uid()`; no client insert/update/delete policy was present.
+- `sm_order_items`: authenticated users may read an item only when its parent order belongs to `auth.uid()`; no client write policy was present.
+- `sm_products`: public catalog reads are restricted to `status = 'active'`.
+- `sm_variants` and `sm_product_images`: public reads are restricted to records whose parent product is active.
+- `sm_categories`: public read policy allows category rows.
+- All eight tables report RLS enabled. The inspected policy predicates are consistent with owner-scoped cart/wishlist access and active-only public catalog access, but **this is not proof of cross-user isolation**. Two authenticated sessions still need adversarial read/update/delete tests.
+- Security Advisor still reports `auth_leaked_password_protection` as WARN. This is a Supabase Auth setting, not a repository code change; it was not changed during this audit.
+- Performance Advisor lists six unused indexes. No index was dropped because advisor observations alone do not establish that removal is safe.
+
+### QA status clarification (2026-10-27)
+
+- Verified by read-only inspection: policy definitions and RLS-enabled flags listed above.
+- Not verified: live User A/User B negative tests, browser checkout flow, responsive visual measurements, and accessibility measurements.
+- No Supabase schema/data/Auth settings were modified during this audit.
