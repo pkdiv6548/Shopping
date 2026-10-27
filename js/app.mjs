@@ -26,6 +26,10 @@ function loadGuestWishlist() {
   const value = readGuest("sm_guest_wishlist", []);
   return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
 }
+function loadUserWishlist(userId) {
+  const value = readGuest("sm_user_wishlist_" + userId, []);
+  return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
+}
 
 const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), cartRevision: 0, wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
 
@@ -271,6 +275,8 @@ async function loadCatalogue() {
         image:fallback.image||"/images/editorial-detail.svg",category:fallback.category||"Clothing",
         categoryHi:fallback.categoryHi||"कपड़े",badge:fallback.badge,variants:[]};
     });
+    const databaseSlugs = new Set(state.products.map(product=>product.slug));
+    state.products.push(...fallbackProducts.filter(product=>!databaseSlugs.has(product.slug)).map(product=>({...product,variants:localVariants(product)})));
     const {data:variants,error:variantError}=await supabase.from("sm_variants").select("id,product_id,size_label,stock_quantity,sku");
     if(variantError)throw variantError;
     const byProduct=new Map();
@@ -280,7 +286,8 @@ async function loadCatalogue() {
     });
     const order=["XS","S","M","L","XL","XXL","One size"];
     state.products.forEach(product=>{
-      product.variants=(byProduct.get(product.dbId)||[]).sort((a,b)=>order.indexOf(a.size_label)-order.indexOf(b.size_label));
+      if(product.dbId) product.variants=(byProduct.get(product.dbId)||[]).sort((a,b)=>order.indexOf(a.size_label)-order.indexOf(b.size_label));
+      else if(!product.variants?.length) product.variants=localVariants(product);
     });
     state.cart=state.cart.map(item=>{
       const variant=(item.variantId&&state.products.find(p=>p.id===item.id)?.variants?.find(v=>v.id===item.variantId))||defaultVariant(item.id);
@@ -322,10 +329,10 @@ async function restoreUser(user) {
     const idBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p.id]));
     const slugByDatabaseId=Object.fromEntries((productsResult.data||[]).map(row=>[row.id,row.slug]));
     state.dbIds=Object.fromEntries((productsResult.data||[]).map(row=>[idBySlug[row.slug],row.id]).filter(([localId])=>Number.isInteger(localId)));
-    const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart();
+    const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart(),accountWishlist=loadUserWishlist(user.id);
     const accountCart=readGuest("sm_user_cart_"+user.id,[]);
     const recoveryCart=Array.isArray(accountCart)?accountCart.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
-    state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist])];
+    state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist,...accountWishlist])];
     const variantById=Object.fromEntries(state.products.flatMap(product=>(product.variants||[]).map(variant=>[variant.id,{...variant,productId:product.id}])));
     const quantities=new Map();
     const addQuantity=(localId,variantId,qty,size)=>{
@@ -341,17 +348,17 @@ async function restoreUser(user) {
     });
     guestCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
-      if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
+      if(variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
     });
     recoveryCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
-      if(!state.dbIds[item.id]||!variant||variant.stock_quantity<=0)return;
+      if(!variant||variant.stock_quantity<=0)return;
       const key=item.id+":"+variant.id,existing=quantities.get(key),qty=Math.min(item.qty,variant.stock_quantity);
       if(!existing||qty>existing.qty)quantities.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty});
     });
     const cartChangedDuringRestore = state.cartRevision !== cartRevisionAtStart;
     if (!cartChangedDuringRestore) state.cart=[...quantities.values()];
-    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length||recoveryCart.length)){
+    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length||accountWishlist.length||recoveryCart.length)){
       // Route guest-cart migration through the same queues as click-driven saves to avoid competing writes.
       await Promise.all([saveCart(),saveWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
@@ -383,6 +390,7 @@ async function persistCart() {
 }
 async function persistWishlist() {
   if (!state.user) { saveGuest("sm_guest_wishlist", state.wishlist); return; }
+  saveGuest("sm_user_wishlist_" + state.user.id, state.wishlist);
   const rows = state.wishlist.map(id => ({ user_id: state.user.id, product_id: state.dbIds[id] })).filter(row => row.product_id);
   const { data: existing, error: readError } = await supabase.from("sm_wishlists").select("product_id").eq("user_id", state.user.id);
   if (readError) throw readError;
