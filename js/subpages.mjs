@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
-import { isValidCartQuantity, reconcileCartWithStock } from "./cart-rules.mjs";
+import { isValidCartQuantity, reconcileCartWithStock, resolveCartVariant } from "./cart-rules.mjs";
 
 const supabase = createClient(
   "https://dbenwifjhdqhiznowncs.supabase.co",
@@ -46,7 +46,7 @@ function localVariantsFor(product){
  const sizes=product.category==="Shoes"?["6","7","8","9","10"]:product.category==="Accessories"?["One size"]:["XS","S","M","L","XL"];
  return sizes.map(size=>({id:"local-"+product.id+"-"+size.toLowerCase().replace(/[^a-z0-9]+/g,"-"),size_label:size,stock_quantity:10,sku:"DEMO-"+product.slug+"-"+size}));
 }
-function normalizeGuestCart(){state.cart=state.cart.map(item=>{const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};}).filter(item=>Number.isInteger(item.id));}
+function normalizeGuestCart(){state.cart=state.cart.map(item=>{const variant=resolveCartVariant(item,variantById,defaultVariant);if(!variant&&item.variantId&&item.variantId!=="local-default")return item;return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};}).filter(item=>Number.isInteger(item.id));}
 function nameOf(product){return state.lang==="hi"?(product.hi||product.name):product.name;}
 function categoryOf(product){return state.lang==="hi"?(product.categoryHi||CATEGORY_HI[product.category]||product.category):product.category;}
 function badgeOf(product){if(state.lang!=="hi")return product.badge||"";return ({BESTSELLER:"सबसे लोकप्रिय","JUST IN":"नया आया",NEW:"नया"})[product.badge]||product.badge||"";}
@@ -159,7 +159,7 @@ async function restoreUser(user){
   cartByKey.set(key,{id:product.id,variantId:variant.id,size:variant.size_label,qty:Math.min(variant.stock_quantity,99,Math.max(1,Number(row.quantity)||1))});
  });
  oldGuestCart.forEach(item=>{
-  const variant=variantById[item.variantId]||defaultVariant(item.id);if(!variant||variant.stock_quantity<=0)return;
+  const variant=resolveCartVariant(item,variantById,defaultVariant);if(!variant||variant.stock_quantity<=0)return;
   const key=item.id+":"+variant.id,existing=cartByKey.get(key);
   cartByKey.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty:Math.min(variant.stock_quantity,99,(existing?.qty||0)+item.qty)});
  });
