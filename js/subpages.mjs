@@ -127,6 +127,7 @@ async function persistWishlist(){
  const active=new Set(rows.map(row=>row.product_id)),stale=(existing||[]).map(row=>row.product_id).filter(id=>!active.has(id));
  if(stale.length){const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error;}
 }
+let checkoutInProgress=false;
 let cartSaveQueue=Promise.resolve();
 let wishlistSaveQueue=Promise.resolve();
 function saveCart(){
@@ -361,6 +362,10 @@ document.addEventListener("click",async event=>{
    return;
   }
   if(action==="checkout-demo"){
+    if(checkoutInProgress)return;
+    checkoutInProgress=true;
+    button.disabled=true;
+    try {
     let cartAdjusted=false;
     state.cart=state.cart.filter(item=>{
      const variant=variantById[item.variantId];
@@ -393,6 +398,10 @@ document.addEventListener("click",async event=>{
    catch(error){console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
    location.href="/checkout.html?demo-order="+encodeURIComponent(order.id);
    return;
+    } finally {
+      checkoutInProgress=false;
+      button.disabled=false;
+    }
   }
   if(action==="clear-collection"){if($("#collection-search"))$("#collection-search").value="";if($("#collection-category"))$("#collection-category").value="All";if($("#collection-sort"))$("#collection-sort").value="recommended";if($("#collection-price"))$("#collection-price").value="all";if($("#collection-color"))$("#collection-color").value="All";renderCollection();return;}
   if(action==="clear-search-page"){if($("#site-search"))$("#site-search").value="";if($("#site-search-category"))$("#site-search-category").value="All";if($("#site-search-sort"))$("#site-search-sort").value="recommended";history.replaceState(null,"","/search.html");renderSearch();return;}
