@@ -315,9 +315,9 @@ async function addToCart(productId,variantId,quantity=1){
  const variant=(variantId&&variantById[variantId])||defaultVariant(product.id);
  if(!variant||variant.stock_quantity<=0)throw new Error(translate("invalidSize"));
  const existing=state.cart.find(item=>item.id===product.id&&item.variantId===variant.id);
- const requestedQuantity=Number(quantity);
+ const requestedQuantity=quantity;
  if(!isValidCartQuantity(requestedQuantity))throw new Error(state.lang==="hi"?"मात्रा 1 से 99 तक पूर्ण संख्या होनी चाहिए।":"Quantity must be a whole number from 1 to 99.");
- const amount=requestedQuantity;
+ const amount=Number(requestedQuantity);
  if((existing?.qty||0)+amount>variant.stock_quantity)throw new Error(state.lang==="hi"?"चुने गए साइज़ का पर्याप्त स्टॉक उपलब्ध नहीं है।":"There is not enough stock for the selected size.");
  if(existing)existing.qty+=amount;
  else state.cart.push({id:product.id,variantId:variant.id,size:variant.size_label,qty:amount});
