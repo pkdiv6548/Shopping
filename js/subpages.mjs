@@ -38,6 +38,10 @@ let productBySlug={}, productByDbId={}, variantById={};
 
 function toast(message){const node=$("#page-toast");if(!node)return;node.textContent=message;node.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{node.hidden=true;},3000);}
 function defaultVariant(productId){const product=state.products.find(p=>p.id===Number(productId));return product?.variants?.find(v=>v.stock_quantity>0)||product?.variants?.[0]||null;}
+function localVariantsFor(product){
+ const sizes=product.category==="Shoes"?["6","7","8","9","10"]:product.category==="Accessories"?["One size"]:["XS","S","M","L","XL"];
+ return sizes.map(size=>({id:"local-"+product.id+"-"+size.toLowerCase().replace(/[^a-z0-9]+/g,"-"),size_label:size,stock_quantity:10,sku:"DEMO-"+product.slug+"-"+size}));
+}
 function normalizeGuestCart(){state.cart=state.cart.map(item=>{const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};}).filter(item=>Number.isInteger(item.id));}
 function nameOf(product){return state.lang==="hi"?(product.hi||product.name):product.name;}
 function categoryOf(product){return state.lang==="hi"?(product.categoryHi||CATEGORY_HI[product.category]||product.category):product.category;}
@@ -78,9 +82,12 @@ async function loadCatalogue(){
      badge:fallback.badge,variants:variantsByProduct[row.id]||[]};
    });
   }else{
-   state.products=PRODUCTS.map(p=>({...p,variants:[]}));
+   state.products=PRODUCTS.map(p=>({...p,variants:localVariantsFor(p)}));
   }
- }catch(error){console.error("Supabase catalogue unavailable; using local catalogue",error);}
+ }catch(error){
+  console.error("Supabase catalogue unavailable; using local catalogue",error);
+  state.products=PRODUCTS.map(p=>({...p,variants:localVariantsFor(p)}));
+ }
  productBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p]));
  productByDbId=Object.fromEntries(state.products.filter(p=>p.dbId).map(p=>[p.dbId,p]));
  variantById=Object.fromEntries(state.products.flatMap(p=>(p.variants||[]).map(v=>[v.id,{...v,productId:p.id}])));
@@ -91,7 +98,7 @@ async function persistCart(){
  if(!state.user){writeStorage("sm_guest_cart",state.cart);return;}
  writeStorage("sm_user_cart_"+state.user.id,state.cart);
  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
-  .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+  .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
  if(readError)throw readError;
  if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
@@ -371,8 +378,13 @@ function populateCategorySelect(){
 }
 async function initialize(){
  await loadCatalogue();
- const sessionResult=await supabase.auth.getSession();
- await restoreUser(sessionResult.data.session?.user||null);
+ let session=null;
+ try{
+  const sessionResult=await supabase.auth.getSession();
+  session=sessionResult.data.session||null;
+ }catch(error){console.error("Unable to read auth session; continuing with local storefront",error);}
+ try{await restoreUser(session?.user||null);}
+ catch(error){console.error("Account data could not be restored; keeping storefront available",error);state.user=session?.user||null;toast(state.lang==="hi"?"अकाउंट का डेटा लोड नहीं हुआ। स्थानीय स्टोर जारी है।":"Account data could not be loaded. The local storefront is still available.");}
  supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{try{await restoreUser(session?.user||null);renderCurrentPage();}catch(error){console.error(error);toast(translate("error"));}},0);});
  populateCategorySelect();
  renderCurrentPage();
