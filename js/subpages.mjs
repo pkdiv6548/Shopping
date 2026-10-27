@@ -31,7 +31,7 @@ const translate = key => (text[state.lang] && text[state.lang][key]) || text.en[
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 const price = value => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(value)||0);
 function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback;}catch{return fallback;}}
-function writeStorage(key,value){const saved=safeWriteStorage(localStorage,key,value);if(!saved)console.warn("Storage unavailable");return saved;}
+function writeStorage(key,value){try{const saved=safeWriteStorage(localStorage,key,value);if(!saved)console.warn("Storage unavailable");return saved;}catch(error){console.warn("Storage unavailable",error);return false;}}
 function demoOrdersKey(){return state.user?"sm_demo_orders_"+state.user.id:"sm_demo_orders_guest";}
 function loadDemoOrders(){return validateDemoOrders(readStorage(demoOrdersKey(),[]));}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
