@@ -81,3 +81,27 @@ export function findRecentMatchingDemoOrder(orders, fingerprint, now = Date.now(
     return Number.isFinite(createdAt) && age >= 0 && age <= windowMs;
   }) || null;
 }
+
+
+// Reject malformed persisted demo orders before rendering dates, totals, or items.
+// checkoutFingerprint remains optional for compatibility with older demo orders.
+export function validateDemoOrders(value) {
+  if (!Array.isArray(value)) return [];
+  return value.filter(order => {
+    if (!order || typeof order !== "object" || Array.isArray(order)) return false;
+    if (typeof order.id !== "string" || !order.id.trim()) return false;
+    if (typeof order.createdAt !== "string" || !Number.isFinite(Date.parse(order.createdAt))) return false;
+    if (typeof order.total !== "number" || !Number.isFinite(order.total) || order.total < 0) return false;
+    if (!Array.isArray(order.items) || order.items.length === 0) return false;
+    if (order.checkoutFingerprint != null && typeof order.checkoutFingerprint !== "string") return false;
+    return order.items.every(item =>
+      item && typeof item === "object" && !Array.isArray(item) &&
+      (typeof item.productId === "string" || (typeof item.productId === "number" && Number.isFinite(item.productId))) &&
+      typeof item.name === "string" && item.name.trim().length > 0 &&
+      typeof item.slug === "string" &&
+      typeof item.price === "number" && Number.isFinite(item.price) && item.price >= 0 &&
+      (item.size == null || typeof item.size === "string") &&
+      Number.isInteger(item.quantity) && item.quantity >= 1 && item.quantity <= 99
+    );
+  });
+}

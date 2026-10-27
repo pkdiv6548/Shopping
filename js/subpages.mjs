@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
-import { createCartFingerprint, findRecentMatchingDemoOrder, isValidCartQuantity, reconcileCartWithStock, resolveCartVariant } from "./cart-rules.mjs";
+import { createCartFingerprint, findRecentMatchingDemoOrder, isValidCartQuantity, reconcileCartWithStock, resolveCartVariant, validateDemoOrders } from "./cart-rules.mjs";
 
 const supabase = createClient(
   "https://dbenwifjhdqhiznowncs.supabase.co",
@@ -33,7 +33,7 @@ const price = value => new Intl.NumberFormat("en-IN",{style:"currency",currency:
 function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback;}catch{return fallback;}}
 function writeStorage(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(error){console.warn("Storage unavailable",error);}}
 function demoOrdersKey(){return state.user?"sm_demo_orders_"+state.user.id:"sm_demo_orders_guest";}
-function loadDemoOrders(){const value=readStorage(demoOrdersKey(),[]);return Array.isArray(value)?value.filter(order=>order&&typeof order.id==="string"&&Array.isArray(order.items)):[];}
+function loadDemoOrders(){return validateDemoOrders(readStorage(demoOrdersKey(),[]));}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
 function guestWishlist(){const value=readStorage("sm_guest_wishlist",[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
 function userWishlist(userId){const value=readStorage("sm_user_wishlist_"+userId,[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
