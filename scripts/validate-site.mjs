@@ -9,7 +9,6 @@ const required = [
   "js/app.mjs", "js/subpages.mjs"
 ];
 const errors = [];
-const warn = [];
 for (const file of required) {
   if (!existsSync(path.join(root, file))) errors.push("Missing required file: " + file);
 }
@@ -34,14 +33,19 @@ for (const file of required.filter(file => file.endsWith(".html") && existsSync(
   }
   if (!/<meta\s+name=["']viewport["']/.test(html)) errors.push(file + ": missing responsive viewport metadata");
 }
-const products = read("js/products.mjs");
-for (const match of products.matchAll(/image:"(\/images\/[^"]+)"/g)) {
-  const file = match[1].replace(/^\/+/, "");
+const productsSource = read("js/products.mjs");
+const productRows = [...productsSource.matchAll(/\{id:(\d+),slug:"([^"]+)"[^}]*image:"([^"]+)"/g)];
+const ids = productRows.map(match => Number(match[1]));
+const slugs = productRows.map(match => match[2]);
+if (productRows.length < 20) errors.push("Expected at least 20 local products; found " + productRows.length);
+if (new Set(ids).size !== ids.length) errors.push("Product IDs must be unique");
+if (new Set(slugs).size !== slugs.length) errors.push("Product slugs must be unique");
+for (const match of productRows) {
+  const file = match[3].replace(/^\/+/, "");
   if (!existsSync(path.join(root, file))) errors.push("Missing local product image: " + file);
 }
-const combined = ["index.html","styles.css","js/products.mjs"].map(read).join("\n");
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
-  if (combined.includes(blocked)) errors.push("External asset dependency found: " + blocked);
+  if (["index.html","styles.css","pages.css","js/products.mjs"].some(file => read(file).includes(blocked))) errors.push("External asset dependency found: " + blocked);
 }
 for (const page of ["product.html","collection.html","cart.html","wishlist.html","account.html","women.html","men.html","new-arrivals.html","search.html","checkout.html","about.html"]) {
   if (!read(page).includes('src="/js/subpages.mjs"')) errors.push(page + ": missing subpage behaviour module");
@@ -59,4 +63,4 @@ if (errors.length) {
   for (const error of errors) console.error(" - " + error);
   process.exit(1);
 }
-console.log("Static site validation passed: " + required.filter(file => file.endsWith(".html")).length + " HTML pages, local assets, links, metadata and Vercel config.");
+console.log("Static site validation passed: " + required.filter(file => file.endsWith(".html")).length + " HTML pages, " + productRows.length + " unique products, local assets, links, metadata and Vercel config.");
