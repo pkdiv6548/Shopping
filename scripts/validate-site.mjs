@@ -18,7 +18,16 @@ function read(file) {
 }
 for (const file of required.filter(file => file.endsWith(".html") && existsSync(path.join(root,file)))) {
   const html = read(file);
-  const ids = new Set([...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]));
+  const idList = [...html.matchAll(/\bid=["']([^"']+)["']/g)].map(match => match[1]);
+  const idCounts = new Map();
+  for (const id of idList) idCounts.set(id, (idCounts.get(id) || 0) + 1);
+  for (const [id, count] of idCounts) {
+    if (count > 1) errors.push(file + ": duplicate id attribute #" + id);
+  }
+  const ids = new Set(idList);
+  for (const match of html.matchAll(/<img\b(?:[^>"']|"[^"]*"|'[^']*')*>/gi)) {
+    if (!/\balt\s*=/i.test(match[0])) errors.push(file + ": image missing alt attribute");
+  }
   for (const match of html.matchAll(/\b(?:href|src)=["']([^"']+)["']/g)) {
     let target = match[1].trim();
     if (!target || /^(?:https?:|mailto:|tel:|data:|javascript:|\/\/|#)/i.test(target)) {
@@ -44,8 +53,10 @@ for (const match of productRows) {
   const file = match[3].replace(/^\/+/, "");
   if (!existsSync(path.join(root, file))) errors.push("Missing local product image: " + file);
 }
+const sourceFiles = required.filter(file => /\.(?:html|css|mjs)$/.test(file));
+const combinedSource = sourceFiles.map(read).join("\n");
 for (const blocked of ["images.unsplash.com","fonts.googleapis.com"]) {
-  if (["index.html","styles.css","pages.css","js/products.mjs"].some(file => read(file).includes(blocked))) errors.push("External asset dependency found: " + blocked);
+  if (combinedSource.includes(blocked)) errors.push("External asset dependency found: " + blocked);
 }
 for (const page of ["product.html","collection.html","cart.html","wishlist.html","account.html","women.html","men.html","new-arrivals.html","search.html","checkout.html","about.html"]) {
   if (!read(page).includes('src="/js/subpages.mjs"')) errors.push(page + ": missing subpage behaviour module");
