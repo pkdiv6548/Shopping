@@ -15,7 +15,7 @@ const text = {
     youMayLike:"YOU MAY ALSO LIKE",new:"NEW",bestSeller:"BESTSELLER",size:"Select a size",color:"Colour",add:"ADD TO BAG",chooseSize:"CHOOSE SIZE",savedButton:"SAVE TO WISHLIST",removeWish:"REMOVE FROM WISHLIST",inStock:"In stock",outOfStock:"Currently unavailable",qty:"Quantity",ship:"Complimentary shipping on orders over ₹2,999.",details:"Product details",back:"BACK TO SHOP",productNotFound:"We couldn't find that piece.",continueShopping:"CONTINUE SHOPPING ↗",
     bagEyebrow:"YOUR EDIT",bagTitle:"Your bag.",bagIntro:"Review pieces and sizes before checkout.",emptyCart:"Your bag is empty.",subtotal:"Subtotal",demoCheckout:"Checkout is a demo only. Real payments and orders are not enabled.",remove:"REMOVE",update:"UPDATE",checkout:"CONTINUE TO CHECKOUT",sizeLabel:"Size",
     savedEyebrow:"YOUR FAVOURITES",savedTitle:"Saved pieces.",savedIntro:"The pieces you want to come back to.",emptyWish:"You haven't saved any pieces yet.",moveToBag:"ADD TO BAG",
-    accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",checkoutItems:"ORDER SUMMARY",checkoutSubtotal:"Subtotal",checkoutNotice:"This is a demo checkout. No payment will be collected and no real order will be placed.",checkoutAction:"CONFIRM DEMO ONLY",checkoutEmpty:"Your bag is empty. Add a few pieces before checkout.",searchMatches:"Matching pieces",searchHint:"Type a product, category or colour to begin.",instockQty:"Available"
+    accountEyebrow:"SHOPPING MART / ACCOUNT",accountTitle:"Your account.",accountIntro:"Sign in to keep your bag and favourites in sync.",welcome:"Welcome back.",createAccount:"Create account",signIn:"Sign in",fullName:"Full name",email:"Email address",password:"Password",confirm:"CREATE ACCOUNT",submit:"SIGN IN",signOut:"SIGN OUT",saveProfile:"SAVE PROFILE",profileSaved:"Profile updated.",signedIn:"Signed in successfully.",signedOut:"You are signed out.",checkEmail:"Check your email to confirm your account.",demoNewsletter:"Newsletter signup is not connected yet.",loading:"Loading…",continue:"CONTINUE",status:"Status",profile:"PROFILE DETAILS",accountHelp:"Your bag and wishlist stay linked to your account when you sign in.",invalidSize:"Choose an available size first.",added:"Added to your bag.",savedToast:"Saved to wishlist.",removedToast:"Removed from wishlist.",error:"Something went wrong. Please try again.",checkoutItems:"ORDER SUMMARY",checkoutSubtotal:"Subtotal",checkoutNotice:"This is a demo checkout. No payment will be collected and no real order will be placed.",checkoutAction:"CONFIRM DEMO ONLY",checkoutEmpty:"Your bag is empty. Add a few pieces before checkout.",searchMatches:"Matching pieces",searchHint:"Type a product, category or colour to begin.",instockQty:"Available",demoOrderSuccess:"Demo order confirmed",demoOrderId:"Demo order reference",demoOrderHistory:"Demo order history",demoOrderEmpty:"No demo orders yet.",demoOrderStatus:"Demo only · no payment collected",demoOrderContinue:"CONTINUE SHOPPING"
   },
   hi: {
     promo:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी",localMarket:"SHOPPING MART / भारत",searchLabel:"खोजें",priceFilter:"कीमत",colorFilter:"रंग",allPrices:"सभी कीमतें",under1500:"₹1,500 से कम",range1500:"₹1,500–₹2,500",above2500:"₹2,500 से अधिक",allColours:"सभी रंग",home:"होम",shopAll:"सभी प्रोडक्ट",saved:"विशलिस्ट",bag:"बैग",account:"अकाउंट",footer:"ऐसा स्टाइल जो आप जैसा लगे।",demo:"डेमो स्टोर · भुगतान उपलब्ध नहीं",
@@ -23,7 +23,7 @@ const text = {
     youMayLike:"आपको ये भी पसंद आ सकते हैं",new:"नया",bestSeller:"लोकप्रिय",size:"साइज़ चुनें",color:"रंग",add:"बैग में जोड़ें",chooseSize:"साइज़ चुनें",savedButton:"विशलिस्ट में सेव करें",removeWish:"विशलिस्ट से हटाएँ",inStock:"स्टॉक में उपलब्ध",outOfStock:"अभी उपलब्ध नहीं",qty:"मात्रा",ship:"₹2,999 से अधिक के ऑर्डर पर मुफ़्त डिलीवरी।",details:"प्रोडक्ट विवरण",back:"शॉप पर वापस जाएँ",productNotFound:"यह प्रोडक्ट नहीं मिला।",continueShopping:"खरीदारी जारी रखें ↗",
     bagEyebrow:"आपका कलेक्शन",bagTitle:"आपका बैग।",bagIntro:"चेकआउट से पहले प्रोडक्ट और साइज़ जाँचें।",emptyCart:"आपका बैग खाली है।",subtotal:"कुल",demoCheckout:"चेकआउट अभी डेमो है। वास्तविक भुगतान या ऑर्डर चालू नहीं हैं।",remove:"हटाएँ",update:"अपडेट",checkout:"चेकआउट जारी रखें",sizeLabel:"साइज़",
     savedEyebrow:"आपके पसंदीदा",savedTitle:"सेव किए गए प्रोडक्ट।",savedIntro:"वे प्रोडक्ट जिन्हें आप बाद में देखना चाहते हैं।",emptyWish:"अभी कोई प्रोडक्ट सेव नहीं किया है।",moveToBag:"बैग में जोड़ें",
-    accountEyebrow:"SHOPPING MART / अकाउंट",accountTitle:"आपका अकाउंट।",accountIntro:"लॉगिन करने पर आपका बैग और विशलिस्ट अकाउंट के साथ सेव रहेंगे।",welcome:"वापस स्वागत है।",createAccount:"अकाउंट बनाएँ",signIn:"लॉगिन",fullName:"पूरा नाम",email:"ईमेल पता",password:"पासवर्ड",confirm:"अकाउंट बनाएँ",submit:"लॉगिन करें",signOut:"लॉगआउट",saveProfile:"प्रोफाइल सेव करें",profileSaved:"प्रोफाइल अपडेट हो गई।",signedIn:"लॉगिन सफल हुआ।",signedOut:"आप लॉगआउट हो गए हैं।",checkEmail:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",demoNewsletter:"न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",loading:"लोड हो रहा है…",continue:"जारी रखें",status:"स्थिति",profile:"प्रोफाइल विवरण",accountHelp:"लॉगिन करने पर आपका बैग और विशलिस्ट आपके अकाउंट से जुड़े रहेंगे।",invalidSize:"पहले उपलब्ध साइज़ चुनें।",added:"बैग में जोड़ दिया गया।",savedToast:"विशलिस्ट में सेव किया गया।",removedToast:"विशलिस्ट से हटा दिया गया।",error:"कुछ गड़बड़ हुई। दोबारा कोशिश करें।",checkoutItems:"ऑर्डर का सारांश",checkoutSubtotal:"कुल",checkoutNotice:"यह डेमो चेकआउट है। कोई भुगतान नहीं लिया जाएगा और वास्तविक ऑर्डर नहीं बनेगा।",checkoutAction:"केवल डेमो की पुष्टि",checkoutEmpty:"आपका बैग खाली है। चेकआउट से पहले कुछ प्रोडक्ट जोड़ें।",searchMatches:"मिलते-जुलते प्रोडक्ट",searchHint:"शुरू करने के लिए प्रोडक्ट, कैटेगरी या रंग लिखें।",instockQty:"उपलब्ध"
+    accountEyebrow:"SHOPPING MART / अकाउंट",accountTitle:"आपका अकाउंट।",accountIntro:"लॉगिन करने पर आपका बैग और विशलिस्ट अकाउंट के साथ सेव रहेंगे।",welcome:"वापस स्वागत है।",createAccount:"अकाउंट बनाएँ",signIn:"लॉगिन",fullName:"पूरा नाम",email:"ईमेल पता",password:"पासवर्ड",confirm:"अकाउंट बनाएँ",submit:"लॉगिन करें",signOut:"लॉगआउट",saveProfile:"प्रोफाइल सेव करें",profileSaved:"प्रोफाइल अपडेट हो गई।",signedIn:"लॉगिन सफल हुआ।",signedOut:"आप लॉगआउट हो गए हैं।",checkEmail:"अकाउंट की पुष्टि के लिए अपना ईमेल देखें।",demoNewsletter:"न्यूज़लेटर साइनअप अभी कनेक्ट नहीं है।",loading:"लोड हो रहा है…",continue:"जारी रखें",status:"स्थिति",profile:"प्रोफाइल विवरण",accountHelp:"लॉगिन करने पर आपका बैग और विशलिस्ट आपके अकाउंट से जुड़े रहेंगे।",invalidSize:"पहले उपलब्ध साइज़ चुनें।",added:"बैग में जोड़ दिया गया।",savedToast:"विशलिस्ट में सेव किया गया।",removedToast:"विशलिस्ट से हटा दिया गया।",error:"कुछ गड़बड़ हुई। दोबारा कोशिश करें।",checkoutItems:"ऑर्डर का सारांश",checkoutSubtotal:"कुल",checkoutNotice:"यह डेमो चेकआउट है। कोई भुगतान नहीं लिया जाएगा और वास्तविक ऑर्डर नहीं बनेगा।",checkoutAction:"केवल डेमो की पुष्टि",checkoutEmpty:"आपका बैग खाली है। चेकआउट से पहले कुछ प्रोडक्ट जोड़ें।",searchMatches:"मिलते-जुलते प्रोडक्ट",searchHint:"शुरू करने के लिए प्रोडक्ट, कैटेगरी या रंग लिखें।",instockQty:"उपलब्ध",demoOrderSuccess:"डेमो ऑर्डर की पुष्टि हो गई",demoOrderId:"डेमो ऑर्डर संदर्भ",demoOrderHistory:"डेमो ऑर्डर हिस्ट्री",demoOrderEmpty:"अभी कोई डेमो ऑर्डर नहीं है।",demoOrderStatus:"केवल डेमो · कोई भुगतान नहीं लिया गया",demoOrderContinue:"खरीदारी जारी रखें"
   }
 };
 const translate = key => (text[state.lang] && text[state.lang][key]) || text.en[key] || key;
@@ -31,13 +31,20 @@ const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "
 const price = value => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(value)||0);
 function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback;}catch{return fallback;}}
 function writeStorage(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(error){console.warn("Storage unavailable",error);}}
+function demoOrdersKey(){return state.user?"sm_demo_orders_"+state.user.id:"sm_demo_orders_guest";}
+function loadDemoOrders(){const value=readStorage(demoOrdersKey(),[]);return Array.isArray(value)?value.filter(order=>order&&typeof order.id==="string"&&Array.isArray(order.items)):[];}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
 function guestWishlist(){const value=readStorage("sm_guest_wishlist",[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
+function userWishlist(userId){const value=readStorage("sm_user_wishlist_"+userId,[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
 const state={lang:readStorage("sm_lang","en")==="hi"?"hi":"en",user:null,products:PRODUCTS.map(p=>({...p,variants:[]})),dbIds:{},cart:guestCart(),cartRevision:0,wishlist:guestWishlist(),authMode:"signin"};
 let productBySlug={}, productByDbId={}, variantById={};
 
 function toast(message){const node=$("#page-toast");if(!node)return;node.textContent=message;node.hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>{node.hidden=true;},3000);}
 function defaultVariant(productId){const product=state.products.find(p=>p.id===Number(productId));return product?.variants?.find(v=>v.stock_quantity>0)||product?.variants?.[0]||null;}
+function localVariantsFor(product){
+ const sizes=product.category==="Shoes"?["6","7","8","9","10"]:product.category==="Accessories"?["One size"]:["XS","S","M","L","XL"];
+ return sizes.map(size=>({id:"local-"+product.id+"-"+size.toLowerCase().replace(/[^a-z0-9]+/g,"-"),size_label:size,stock_quantity:10,sku:"DEMO-"+product.slug+"-"+size}));
+}
 function normalizeGuestCart(){state.cart=state.cart.map(item=>{const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);return {...item,variantId:variant?.id||item.variantId||"local-default",size:item.size||variant?.size_label||"One size"};}).filter(item=>Number.isInteger(item.id));}
 function nameOf(product){return state.lang==="hi"?(product.hi||product.name):product.name;}
 function categoryOf(product){return state.lang==="hi"?(product.categoryHi||CATEGORY_HI[product.category]||product.category):product.category;}
@@ -45,7 +52,12 @@ function badgeOf(product){if(state.lang!=="hi")return product.badge||"";return (
 function renderPageTranslations(){
  document.documentElement.lang=state.lang;
  const search=$("#collection-search");if(search)search.placeholder=translate("search");
- $$("[data-page-copy]").forEach(node=>{const key=node.dataset.pageCopy;if(translate(key)!==key)node.textContent=translate(key);});
+ $$("[data-page-copy]").forEach(node=>{
+  const key=node.dataset.pageCopy;if(translate(key)===key)return;
+  const count=node.querySelector(".page-count");
+  if(count&&node.firstChild?.nodeType===3)node.firstChild.textContent=translate(key)+" ";
+  else node.textContent=translate(key);
+ });
  const language=$("#page-language");if(language){language.textContent=state.lang==="en"?"हिंदी में देखें":"View in English";language.setAttribute("aria-label",state.lang==="en"?"पेज हिंदी में बदलें":"Switch page to English");}
  const count=$("#page-cart-count");if(count)count.textContent=String(state.cart.reduce((sum,item)=>sum+item.qty,0));
 }
@@ -77,10 +89,15 @@ async function loadCatalogue(){
      category:fallback.category||"Clothing",categoryHi:fallback.categoryHi||"कपड़े",
      badge:fallback.badge,variants:variantsByProduct[row.id]||[]};
    });
+   const databaseSlugs=new Set(state.products.map(product=>product.slug));
+   state.products.push(...PRODUCTS.filter(product=>!databaseSlugs.has(product.slug)).map(product=>({...product,variants:localVariantsFor(product)})));
   }else{
-   state.products=PRODUCTS.map(p=>({...p,variants:[]}));
+   state.products=PRODUCTS.map(p=>({...p,variants:localVariantsFor(p)}));
   }
- }catch(error){console.error("Supabase catalogue unavailable; using local catalogue",error);}
+ }catch(error){
+  console.error("Supabase catalogue unavailable; using local catalogue",error);
+  state.products=PRODUCTS.map(p=>({...p,variants:localVariantsFor(p)}));
+ }
  productBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p]));
  productByDbId=Object.fromEntries(state.products.filter(p=>p.dbId).map(p=>[p.dbId,p]));
  variantById=Object.fromEntries(state.products.flatMap(p=>(p.variants||[]).map(v=>[v.id,{...v,productId:p.id}])));
@@ -91,7 +108,7 @@ async function persistCart(){
  if(!state.user){writeStorage("sm_guest_cart",state.cart);return;}
  writeStorage("sm_user_cart_"+state.user.id,state.cart);
  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
-  .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+  .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
  if(readError)throw readError;
  if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
@@ -102,6 +119,7 @@ async function persistCart(){
 }
 async function persistWishlist(){
  if(!state.user){writeStorage("sm_guest_wishlist",state.wishlist);return;}
+ writeStorage("sm_user_wishlist_"+state.user.id,state.wishlist);
  const rows=state.wishlist.map(id=>({user_id:state.user.id,product_id:state.dbIds[id]})).filter(row=>row.product_id);
  const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",state.user.id);if(readError)throw readError;
  if(rows.length){const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error;}
@@ -119,7 +137,7 @@ async function restoreUser(user){
  ]);
  if(wishResult.error)throw wishResult.error;if(cartResult.error)throw cartResult.error;
  if(sequence!==restoreSequence||state.user?.id!==user.id)return;
- const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),accountCache=readStorage("sm_user_cart_"+user.id,[]),cartByKey=new Map();
+ const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),accountWishlist=userWishlist(user.id),accountCache=readStorage("sm_user_cart_"+user.id,[]),cartByKey=new Map();
  const recoveryCart=Array.isArray(accountCache)?accountCache.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
  (cartResult.data||[]).forEach(row=>{
   const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
@@ -140,8 +158,8 @@ async function restoreUser(user){
  const cartChangedDuringRestore=state.cartRevision!==cartRevisionAtStart;
  if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
- state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist])];
- if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist,...accountWishlist])];
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
  else if(cartChangedDuringRestore){await persistCart();}
 }
 function card(product){
@@ -219,10 +237,12 @@ function renderAccount(){
  const root=$("#account-page");if(!root)return;
  if(state.user){
   const fullName=state.user.user_metadata?.full_name||state.user.user_metadata?.name||"";
+  const orders=loadDemoOrders();
+  const orderHistory='<section class="account-orders"><h2>'+escapeHtml(translate("demoOrderHistory"))+'</h2>'+(orders.length?orders.map(order=>'<article class="account-order"><div><strong>'+escapeHtml(order.id)+'</strong><span>'+escapeHtml(new Date(order.createdAt).toLocaleDateString(state.lang==="hi"?"hi-IN":"en-IN"))+'</span></div><p>'+escapeHtml(translate("demoOrderStatus"))+'</p><strong>'+price(order.total)+'</strong><small>'+escapeHtml(order.items.length+' '+(state.lang==="hi"?"आइटम":"items"))+'</small></article>').join(""):'<p class="account-help">'+escapeHtml(translate("demoOrderEmpty"))+'</p>')+'</section>';
   root.innerHTML='<p class="eyebrow">'+escapeHtml(translate("profile"))+'</p><p class="account-help">'+escapeHtml(translate("accountHelp"))+'</p><form id="profile-form" class="page-form">'+
    '<label>'+escapeHtml(translate("fullName"))+'<input name="full_name" maxlength="100" required value="'+escapeHtml(fullName)+'"></label>'+
    '<label>'+escapeHtml(translate("email"))+'<input name="email" type="email" required value="'+escapeHtml(state.user.email||"")+'"></label>'+
-   '<button class="button button-dark" type="submit">'+escapeHtml(translate("saveProfile"))+' ↗</button></form><button class="button account-signout" type="button" data-action="signout">'+escapeHtml(translate("signOut"))+'</button><p class="auth-notice" id="account-message" role="status" hidden></p>';
+   '<button class="button button-dark" type="submit">'+escapeHtml(translate("saveProfile"))+' ↗</button></form>'+orderHistory+'<button class="button account-signout" type="button" data-action="signout">'+escapeHtml(translate("signOut"))+'</button><p class="auth-notice" id="account-message" role="status" hidden></p>';
  }else{
   root.innerHTML='<p class="account-help">'+escapeHtml(translate("accountHelp"))+'</p><div class="auth-tabs"><button type="button" data-action="auth-mode" data-mode="signin" class="'+(state.authMode==="signin"?"is-active":"")+'">'+escapeHtml(translate("signIn"))+'</button><button type="button" data-action="auth-mode" data-mode="signup" class="'+(state.authMode==="signup"?"is-active":"")+'">'+escapeHtml(translate("createAccount"))+'</button></div><form id="account-auth-form" class="page-form">'+
    '<label data-name-field '+(state.authMode!=="signup"?"hidden":"")+'>'+escapeHtml(translate("fullName"))+'<input name="full_name" autocomplete="name" maxlength="100" '+(state.authMode==="signup"?"required":"")+'></label>'+
@@ -254,6 +274,14 @@ function renderSearch(){
 }
 function renderCheckout(){
  const root=$("#checkout-page");if(!root)return;
+ const orderId=new URLSearchParams(location.search).get("demo-order");
+ if(orderId){
+  const order=loadDemoOrders().find(item=>item.id===orderId);
+  if(order){
+   root.innerHTML='<div class="page-empty demo-order-success"><p class="eyebrow">'+escapeHtml(translate("demoOrderStatus"))+'</p><h2>'+escapeHtml(translate("demoOrderSuccess"))+'</h2><p>'+escapeHtml(translate("demoOrderId"))+': <strong>'+escapeHtml(order.id)+'</strong></p><p>'+escapeHtml(translate("checkoutSubtotal"))+': <strong>'+price(order.total)+'</strong></p><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("demoOrderContinue"))+'</a> <a class="text-link" href="/account.html">'+escapeHtml(translate("account"))+' ↗</a></div>';
+   return;
+  }
+ }
  const rows=state.cart.map(item=>({item,product:state.products.find(p=>p.id===item.id)})).filter(row=>row.product);
  const subtotal=rows.reduce((sum,row)=>sum+row.product.price*row.item.qty,0);
  if(!rows.length){root.innerHTML='<div class="page-empty"><p>'+escapeHtml(translate("checkoutEmpty"))+'</p><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("continueShopping"))+'</a></div>';return;}
@@ -319,7 +347,25 @@ document.addEventListener("click",async event=>{
    }
    return;
   }
-  if(action==="checkout-demo"){toast(translate("demoCheckout"));return;}
+  if(action==="checkout-demo"){
+   const rows=state.cart.map(item=>({item,product:state.products.find(product=>product.id===item.id)})).filter(row=>row.product);
+   if(!rows.length){toast(translate("checkoutEmpty"));return;}
+   const order={
+    id:"SM-DEMO-"+Date.now().toString(36).toUpperCase(),
+    createdAt:new Date().toISOString(),
+    status:"demo-only",
+    total:rows.reduce((sum,row)=>sum+row.product.price*row.item.qty,0),
+    items:rows.map(({item,product})=>({productId:product.id,slug:product.slug,name:nameOf(product),price:product.price,size:item.size||"One size",quantity:item.qty}))
+   };
+   const orders=loadDemoOrders();orders.unshift(order);
+   try{localStorage.setItem(demoOrdersKey(),JSON.stringify(orders.slice(0,20)));}
+   catch(error){throw new Error(state.lang==="hi"?"डेमो ऑर्डर सेव नहीं हो सका। ब्राउज़र स्टोरेज जाँचें।":"Could not save the demo order. Check browser storage.");}
+   state.cart=[];state.cartRevision++;
+   try{await persistCart();}
+   catch(error){console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
+   location.href="/checkout.html?demo-order="+encodeURIComponent(order.id);
+   return;
+  }
   if(action==="clear-collection"){if($("#collection-search"))$("#collection-search").value="";if($("#collection-category"))$("#collection-category").value="All";if($("#collection-sort"))$("#collection-sort").value="recommended";if($("#collection-price"))$("#collection-price").value="all";if($("#collection-color"))$("#collection-color").value="All";renderCollection();return;}
   if(action==="clear-search-page"){if($("#site-search"))$("#site-search").value="";if($("#site-search-category"))$("#site-search-category").value="All";if($("#site-search-sort"))$("#site-search-sort").value="recommended";history.replaceState(null,"","/search.html");renderSearch();return;}
   if(action==="auth-mode"){state.authMode=button.dataset.mode==="signup"?"signup":"signin";renderAccount();return;}
@@ -371,8 +417,13 @@ function populateCategorySelect(){
 }
 async function initialize(){
  await loadCatalogue();
- const sessionResult=await supabase.auth.getSession();
- await restoreUser(sessionResult.data.session?.user||null);
+ let session=null;
+ try{
+  const sessionResult=await supabase.auth.getSession();
+  session=sessionResult.data.session||null;
+ }catch(error){console.error("Unable to read auth session; continuing with local storefront",error);}
+ try{await restoreUser(session?.user||null);}
+ catch(error){console.error("Account data could not be restored; keeping storefront available",error);state.user=session?.user||null;toast(state.lang==="hi"?"अकाउंट का डेटा लोड नहीं हुआ। स्थानीय स्टोर जारी है।":"Account data could not be loaded. The local storefront is still available.");}
  supabase.auth.onAuthStateChange((_event,session)=>{setTimeout(async()=>{try{await restoreUser(session?.user||null);renderCurrentPage();}catch(error){console.error(error);toast(translate("error"));}},0);});
  populateCategorySelect();
  renderCurrentPage();

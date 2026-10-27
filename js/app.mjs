@@ -26,6 +26,10 @@ function loadGuestWishlist() {
   const value = readGuest("sm_guest_wishlist", []);
   return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
 }
+function loadUserWishlist(userId) {
+  const value = readGuest("sm_user_wishlist_" + userId, []);
+  return Array.isArray(value) ? [...new Set(value.map(Number).filter(Number.isInteger))] : [];
+}
 
 const state = { lang: readGuest("sm_lang","en")==="hi"?"hi":"en", category: "All", query: "", sort: "recommended", user: null, cart: loadGuestCart(), cartRevision: 0, wishlist: loadGuestWishlist(), dbIds: {}, products: fallbackProducts };
 
@@ -101,6 +105,30 @@ const t = () => words[state.lang];
 function defaultVariant(productId) {
   const product=state.products.find(item=>item.id===Number(productId));
   return product?.variants?.find(variant=>variant.stock_quantity>0)||product?.variants?.[0]||null;
+}
+function localVariants(product) {
+  const sizes = product.category === "Shoes"
+    ? ["6","7","8","9","10"]
+    : product.category === "Accessories"
+      ? ["One size"]
+      : ["XS","S","M","L","XL"];
+  return sizes.map(size => ({
+    id: "local-" + product.id + "-" + size.toLowerCase().replace(/[^a-z0-9]+/g,"-"),
+    size_label: size,
+    stock_quantity: 10,
+    sku: "DEMO-" + product.slug + "-" + size
+  }));
+}
+function useLocalCatalogue() {
+  state.products = fallbackProducts.map(product => ({...product, variants:localVariants(product)}));
+  state.dbIds = {};
+  state.cart = state.cart.map(item => {
+    const product = state.products.find(candidate => candidate.id === item.id);
+    const variant = product?.variants.find(candidate => candidate.id === item.variantId || candidate.size_label === item.size) || defaultVariant(item.id);
+    if (!product || !variant) return null;
+    return {...item, variantId:variant.id, size:item.size || variant.size_label, qty:Math.min(99,variant.stock_quantity,Math.max(1,Number(item.qty)||1))};
+  }).filter(Boolean);
+  if (!state.user) saveGuest("sm_guest_cart",state.cart);
 }
 const money = value => new Intl.NumberFormat("en-IN", { style:"currency", currency:"INR", maximumFractionDigits:0 }).format(Number(value || 0));
 const esc = value => String(value ?? "").replace(/[&<>"']/g, character => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[character]);
@@ -235,7 +263,7 @@ async function loadCatalogue() {
       .select("id,slug,name_en,name_hi,price_inr,compare_at_price_inr,colour_en,colour_hi,status,featured")
       .eq("status","active");
     if(error)throw error;
-    if(!Array.isArray(data)||!data.length)return;
+    if(!Array.isArray(data)||!data.length){useLocalCatalogue();return;}
     const localBySlug=Object.fromEntries(fallbackProducts.map(product=>[product.slug,product]));
     state.products=data.map((row,index)=>{
       const fallback=localBySlug[row.slug]||{};
@@ -247,6 +275,8 @@ async function loadCatalogue() {
         image:fallback.image||"/images/editorial-detail.svg",category:fallback.category||"Clothing",
         categoryHi:fallback.categoryHi||"कपड़े",badge:fallback.badge,variants:[]};
     });
+    const databaseSlugs = new Set(state.products.map(product=>product.slug));
+    state.products.push(...fallbackProducts.filter(product=>!databaseSlugs.has(product.slug)).map(product=>({...product,variants:localVariants(product)})));
     const {data:variants,error:variantError}=await supabase.from("sm_variants").select("id,product_id,size_label,stock_quantity,sku");
     if(variantError)throw variantError;
     const byProduct=new Map();
@@ -256,7 +286,8 @@ async function loadCatalogue() {
     });
     const order=["XS","S","M","L","XL","XXL","One size"];
     state.products.forEach(product=>{
-      product.variants=(byProduct.get(product.dbId)||[]).sort((a,b)=>order.indexOf(a.size_label)-order.indexOf(b.size_label));
+      if(product.dbId) product.variants=(byProduct.get(product.dbId)||[]).sort((a,b)=>order.indexOf(a.size_label)-order.indexOf(b.size_label));
+      else if(!product.variants?.length) product.variants=localVariants(product);
     });
     state.cart=state.cart.map(item=>{
       const variant=(item.variantId&&state.products.find(p=>p.id===item.id)?.variants?.find(v=>v.id===item.variantId))||defaultVariant(item.id);
@@ -267,6 +298,7 @@ async function loadCatalogue() {
     if(!state.user)saveGuest("sm_guest_cart",state.cart);
   } catch(error) {
     console.error("Catalogue fallback active; Supabase product/variant read failed",error);
+    useLocalCatalogue();
   }
 }
 
@@ -297,10 +329,10 @@ async function restoreUser(user) {
     const idBySlug=Object.fromEntries(state.products.map(p=>[p.slug,p.id]));
     const slugByDatabaseId=Object.fromEntries((productsResult.data||[]).map(row=>[row.id,row.slug]));
     state.dbIds=Object.fromEntries((productsResult.data||[]).map(row=>[idBySlug[row.slug],row.id]).filter(([localId])=>Number.isInteger(localId)));
-    const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart();
+    const guestWishlist=loadGuestWishlist(),guestCart=loadGuestCart(),accountWishlist=loadUserWishlist(user.id);
     const accountCart=readGuest("sm_user_cart_"+user.id,[]);
     const recoveryCart=Array.isArray(accountCart)?accountCart.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
-    state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist])];
+    state.wishlist=[...new Set([...(wishesResult.data||[]).map(row=>idBySlug[slugByDatabaseId[row.product_id]]).filter(Number.isInteger),...guestWishlist,...accountWishlist])];
     const variantById=Object.fromEntries(state.products.flatMap(product=>(product.variants||[]).map(variant=>[variant.id,{...variant,productId:product.id}])));
     const quantities=new Map();
     const addQuantity=(localId,variantId,qty,size)=>{
@@ -316,17 +348,17 @@ async function restoreUser(user) {
     });
     guestCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
-      if(state.dbIds[item.id]&&variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
+      if(variant&&variant.stock_quantity>0)addQuantity(item.id,variant.id,Math.min(item.qty,variant.stock_quantity),item.size||variant.size_label);
     });
     recoveryCart.forEach(item=>{
       const variant=(item.variantId&&variantById[item.variantId])||defaultVariant(item.id);
-      if(!state.dbIds[item.id]||!variant||variant.stock_quantity<=0)return;
+      if(!variant||variant.stock_quantity<=0)return;
       const key=item.id+":"+variant.id,existing=quantities.get(key),qty=Math.min(item.qty,variant.stock_quantity);
       if(!existing||qty>existing.qty)quantities.set(key,{id:item.id,variantId:variant.id,size:item.size||variant.size_label,qty});
     });
     const cartChangedDuringRestore = state.cartRevision !== cartRevisionAtStart;
     if (!cartChangedDuringRestore) state.cart=[...quantities.values()];
-    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length||recoveryCart.length)){
+    if(!cartChangedDuringRestore && (guestCart.length||guestWishlist.length||accountWishlist.length||recoveryCart.length)){
       // Route guest-cart migration through the same queues as click-driven saves to avoid competing writes.
       await Promise.all([saveCart(),saveWishlist()]);
       saveGuest("sm_guest_cart",[]);saveGuest("sm_guest_wishlist",[]);
@@ -345,7 +377,7 @@ async function persistCart() {
   if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
   saveGuest("sm_user_cart_"+state.user.id,state.cart);
   const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
-    .filter(row=>row.product_id&&row.variant_id&&row.variant_id!=="local-default");
+    .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
   const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
   if(readError)throw readError;
   if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
@@ -358,6 +390,7 @@ async function persistCart() {
 }
 async function persistWishlist() {
   if (!state.user) { saveGuest("sm_guest_wishlist", state.wishlist); return; }
+  saveGuest("sm_user_wishlist_" + state.user.id, state.wishlist);
   const rows = state.wishlist.map(id => ({ user_id: state.user.id, product_id: state.dbIds[id] })).filter(row => row.product_id);
   const { data: existing, error: readError } = await supabase.from("sm_wishlists").select("product_id").eq("user_id", state.user.id);
   if (readError) throw readError;
@@ -519,7 +552,11 @@ document.addEventListener("click", async event => {
     return;
   }
   if (button.dataset.quick !== undefined) { openQuickView(state.products.find(product => product.id === Number(button.dataset.quick))); return; }
-  if (button.dataset.checkout !== undefined) { toast(t().demoCheckout); return; }
+  if (button.dataset.checkout !== undefined) {
+    if (!state.cart.length) { toast(t().emptyCart); return; }
+    location.href = "/checkout.html";
+    return;
+  }
   if (button.id === "clear-filters") {
     state.query = ""; state.category = "All";
     if ($("#product-search")) $("#product-search").value = "";

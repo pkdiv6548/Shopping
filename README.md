@@ -13,5 +13,16 @@ The app uses:
 - `sm_wishlists` for each signed-in user's favourites
 - `sm_cart_items` for each signed-in user's bag
 
-## Current limitations
-Checkout is demo-only and does not take payments. Product images are hosted on Unsplash. Product catalogue is a 12-item local presentation catalogue; user-specific bag/favourites are loaded from Supabase. The app expects product slugs in Supabase to match `js/products.mjs`.
+## Current behavior and constraints
+- English and Hindi storefront.
+- 20 local presentation products with version-controlled SVG imagery.
+- User-specific bag/favourites are intended to sync through Supabase; guest data is stored locally.
+- Checkout is demo-only and does not take payments.
+- No paid APIs or services are required by the storefront.
+- Product slugs in Supabase must match `js/products.mjs`; database policies must be reviewed before production use.
+
+## Research-aligned plan
+See [docs/implementation-plan.md](docs/implementation-plan.md) for the product direction, user journeys, constraints and release gates.
+
+## Validation
+Run `npm run build` to syntax-check JavaScript and validate local pages/assets and Vercel configuration.
