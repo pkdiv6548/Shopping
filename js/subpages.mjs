@@ -317,11 +317,15 @@ function renderSearch(){
 }
 function renderCheckout(){
  const root=$("#checkout-page");if(!root)return;
- const orderId=new URLSearchParams(location.search).get("demo-order");
+ const params=new URLSearchParams(location.search);
+ const orderId=params.get("demo-order");
  if(orderId){
   const order=loadDemoOrders().find(item=>item.id===orderId);
   if(order){
-   root.innerHTML='<div class="page-empty demo-order-success"><p class="eyebrow">'+escapeHtml(translate("demoOrderStatus"))+'</p><h2>'+escapeHtml(translate("demoOrderSuccess"))+'</h2><p>'+escapeHtml(translate("demoOrderId"))+': <strong>'+escapeHtml(order.id)+'</strong></p><p>'+escapeHtml(translate("checkoutSubtotal"))+': <strong>'+price(order.total)+'</strong></p><a class="button button-dark" href="/collection.html">'+escapeHtml(translate("demoOrderContinue"))+'</a> <a class="text-link" href="/account.html">'+escapeHtml(translate("account"))+' ↗</a></div>';
+   const cartSyncWarning=params.get("cart-sync")==="failed"
+    ?'<p class="auth-notice" role="status">'+escapeHtml(state.lang==="hi"?"डेमो ऑर्डर इस ब्राउज़र में सेव है, लेकिन सर्वर पर बैग अपडेट नहीं हो सका। पेज दोबारा खोलने पर बैग फिर दिखाई दे सकता है। ऑर्डर हिस्ट्री और बैग जाँच लें।":"The demo order is saved in this browser, but the cart could not be updated on the server. Your cart may reappear after reopening the page. Please review your order history and bag.")+'</p>'
+    :"";
+   root.innerHTML='<div class="page-empty demo-order-success"><p class="eyebrow">'+escapeHtml(translate("demoOrderStatus"))+'</p><h2>'+escapeHtml(translate("demoOrderSuccess"))+'</h2><p>'+escapeHtml(translate("demoOrderId"))+': <strong>'+escapeHtml(order.id)+'</strong></p><p>'+escapeHtml(translate("checkoutSubtotal"))+': <strong>'+price(order.total)+'</strong></p>'+cartSyncWarning+'<a class="button button-dark" href="/collection.html">'+escapeHtml(translate("demoOrderContinue"))+'</a> <a class="text-link" href="/account.html">'+escapeHtml(translate("account"))+' ↗</a></div>';
    return;
   }
  }
@@ -422,9 +426,10 @@ document.addEventListener("click",async event=>{
    try{localStorage.setItem(demoOrdersKey(),JSON.stringify(orders.slice(0,20)));}
    catch(error){throw new Error(state.lang==="hi"?"डेमो ऑर्डर सेव नहीं हो सका। ब्राउज़र स्टोरेज जाँचें।":"Could not save the demo order. Check browser storage.");}
    state.cart=[];state.cartRevision++;
+   let cartSyncFailed=false;
    try{await saveCart();}
-   catch(error){console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
-   location.href="/checkout.html?demo-order="+encodeURIComponent(order.id);
+   catch(error){cartSyncFailed=true;console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
+   location.href="/checkout.html?demo-order="+encodeURIComponent(order.id)+(cartSyncFailed?"&cart-sync=failed":"");
    return;
     } finally {
       checkoutInProgress=false;
