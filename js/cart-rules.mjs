@@ -36,3 +36,17 @@ export function reconcileCartWithStock(cart, variantById, validProductIds) {
 
   return { cart: nextCart, changed };
 }
+
+
+// Do not silently replace an unknown persisted variant with a local fallback.
+// Only legacy carts with no variant ID (or the old local-default marker) may resolve
+// to a product's current default variant.
+export function resolveCartVariant(item, variantById, defaultVariantForProduct) {
+  const variantId = String(item?.variantId || "");
+  if (variantId && variantId !== "local-default") {
+    return variantById?.[variantId] || null;
+  }
+  return typeof defaultVariantForProduct === "function"
+    ? defaultVariantForProduct(item?.id) || null
+    : null;
+}
