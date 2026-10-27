@@ -219,3 +219,22 @@ test("handles non-array cart input and malformed cart entries safely", () => {
   assert.deepEqual(result, { cart: [], changed: true });
 });
 
+
+test("keeps product-variant pairs separate when IDs contain delimiter characters", () => {
+  const result = reconcileCartWithStock([
+    { id: "a:b", variantId: "c", qty: 2 },
+    { id: "a", variantId: "b:c", qty: 3 }
+  ], {
+    c: { stock_quantity: 5 },
+    "b:c": { stock_quantity: 7 }
+  });
+
+  assert.deepEqual(result, {
+    cart: [
+      { id: "a:b", variantId: "c", qty: 2 },
+      { id: "a", variantId: "b:c", qty: 3 }
+    ],
+    changed: false
+  });
+});
+
