@@ -61,6 +61,9 @@ Use two separate test accounts (User A and User B) and a logged-out session. Do 
 - [ ] Clearly label checkout and resulting order as demo-only; do not imply payment was taken.
 - [ ] Submit with an empty cart; checkout must not create a demo order.
 - [ ] Double-click/repeat-submit checkout; only one demo order should be created for a single action.
+- [ ] Immediately retry the same product/variant/quantity cart within two minutes after a successful demo order (including after refresh or restored stale cart); the existing order confirmation should be reused rather than creating a duplicate.
+- [ ] Within that two-minute window, change a product, variant, or quantity and verify the changed cart is not incorrectly treated as the previous checkout; after the window expires, a deliberate new checkout may create a new demo order.
+- [ ] If remote cart clearing fails after local order creation, refresh and retry the restored cart; verify the existing order is reused, cart clearing is retried, and the cart-sync warning remains visible if persistence fails again.
 - [ ] Reduce stock after adding to cart, then attempt checkout; the cart must be corrected and the user asked to review it before continuing.
 - [ ] Verify demo order is saved only in the intended demo storage, the cart clears after success, and failure to save does not silently report success.
 - [ ] Confirm no real payment, shipment, or inventory decrement is triggered by the demo flow.
