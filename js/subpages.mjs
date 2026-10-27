@@ -52,7 +52,7 @@ function badgeOf(product){if(state.lang!=="hi")return product.badge||"";return (
 function renderPageTranslations(){
  document.documentElement.lang=state.lang;
  const search=$("#collection-search");if(search)search.placeholder=translate("search");
- $("[data-page-copy]").forEach(node=>{
+ $$("[data-page-copy]").forEach(node=>{
   const key=node.dataset.pageCopy;if(translate(key)===key)return;
   const count=node.querySelector(".page-count");
   if(count&&node.firstChild?.nodeType===3)node.firstChild.textContent=translate(key)+" ";
