@@ -159,3 +159,44 @@ test("returns null when a legacy cart has no usable default-variant resolver", a
   const { resolveCartVariant } = await import("../js/cart-rules.mjs");
   assert.equal(resolveCartVariant({ id: 4 }, {}, null), null);
 });
+
+test("normalizes numeric-string quantities to numbers and caps them to the supported maximum", () => {
+  const result = reconcileCartWithStock([
+    { id: 1, variantId: "v1", qty: "4" },
+    { id: 2, variantId: "v2", qty: "120" }
+  ], {
+    v1: { stock_quantity: 8 },
+    v2: { stock_quantity: 200 }
+  });
+
+  assert.deepEqual(result, {
+    cart: [
+      { id: 1, variantId: "v1", qty: 4 },
+      { id: 2, variantId: "v2", qty: 99 }
+    ],
+    changed: true
+  });
+});
+
+test("treats infinite stock as invalid instead of allowing an unbounded quantity", () => {
+  const result = reconcileCartWithStock([
+    { id: 1, variantId: "infinite", qty: 1 },
+    { id: 2, variantId: "nan", qty: 1 }
+  ], {
+    infinite: { stock_quantity: Infinity },
+    nan: { stock_quantity: NaN }
+  });
+
+  assert.deepEqual(result, { cart: [], changed: true });
+});
+
+test("handles non-array cart input and malformed cart entries safely", () => {
+  assert.deepEqual(reconcileCartWithStock(null, {}), {
+    cart: [],
+    changed: false
+  });
+
+  const result = reconcileCartWithStock([null, undefined, {}, { id: 3, qty: 1 }], {});
+  assert.deepEqual(result, { cart: [], changed: true });
+});
+
