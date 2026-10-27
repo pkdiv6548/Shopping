@@ -35,6 +35,7 @@ function demoOrdersKey(){return state.user?"sm_demo_orders_"+state.user.id:"sm_d
 function loadDemoOrders(){const value=readStorage(demoOrdersKey(),[]);return Array.isArray(value)?value.filter(order=>order&&typeof order.id==="string"&&Array.isArray(order.items)):[];}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
 function guestWishlist(){const value=readStorage("sm_guest_wishlist",[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
+function userWishlist(userId){const value=readStorage("sm_user_wishlist_"+userId,[]);return Array.isArray(value)?[...new Set(value.map(Number).filter(Number.isInteger))]:[];}
 const state={lang:readStorage("sm_lang","en")==="hi"?"hi":"en",user:null,products:PRODUCTS.map(p=>({...p,variants:[]})),dbIds:{},cart:guestCart(),cartRevision:0,wishlist:guestWishlist(),authMode:"signin"};
 let productBySlug={}, productByDbId={}, variantById={};
 
@@ -83,6 +84,8 @@ async function loadCatalogue(){
      category:fallback.category||"Clothing",categoryHi:fallback.categoryHi||"कपड़े",
      badge:fallback.badge,variants:variantsByProduct[row.id]||[]};
    });
+   const databaseSlugs=new Set(state.products.map(product=>product.slug));
+   state.products.push(...PRODUCTS.filter(product=>!databaseSlugs.has(product.slug)).map(product=>({...product,variants:localVariantsFor(product)})));
   }else{
    state.products=PRODUCTS.map(p=>({...p,variants:localVariantsFor(p)}));
   }
@@ -111,6 +114,7 @@ async function persistCart(){
 }
 async function persistWishlist(){
  if(!state.user){writeStorage("sm_guest_wishlist",state.wishlist);return;}
+ writeStorage("sm_user_wishlist_"+state.user.id,state.wishlist);
  const rows=state.wishlist.map(id=>({user_id:state.user.id,product_id:state.dbIds[id]})).filter(row=>row.product_id);
  const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",state.user.id);if(readError)throw readError;
  if(rows.length){const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error;}
@@ -128,7 +132,7 @@ async function restoreUser(user){
  ]);
  if(wishResult.error)throw wishResult.error;if(cartResult.error)throw cartResult.error;
  if(sequence!==restoreSequence||state.user?.id!==user.id)return;
- const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),accountCache=readStorage("sm_user_cart_"+user.id,[]),cartByKey=new Map();
+ const oldGuestCart=guestCart(),oldGuestWishlist=guestWishlist(),accountWishlist=userWishlist(user.id),accountCache=readStorage("sm_user_cart_"+user.id,[]),cartByKey=new Map();
  const recoveryCart=Array.isArray(accountCache)?accountCache.filter(item=>Number.isInteger(item?.id)&&Number.isInteger(item?.qty)&&item.qty>0):[];
  (cartResult.data||[]).forEach(row=>{
   const product=productByDbId[row.product_id],variant=variantById[row.variant_id];
@@ -149,8 +153,8 @@ async function restoreUser(user){
  const cartChangedDuringRestore=state.cartRevision!==cartRevisionAtStart;
  if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
- state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist])];
- if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist,...accountWishlist])];
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
  else if(cartChangedDuringRestore){await persistCart();}
 }
 function card(product){
