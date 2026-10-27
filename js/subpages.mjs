@@ -368,7 +368,8 @@ document.addEventListener("click",async event=>{
     button.disabled=true;
     try {
     let cartAdjusted=false;
-    const reconciledCart=reconcileCartWithStock(state.cart,variantById);
+    const validProductIds=new Set(state.products.map(product=>product.id));
+    const reconciledCart=reconcileCartWithStock(state.cart,variantById,validProductIds);
     state.cart=reconciledCart.cart;
     cartAdjusted=reconciledCart.changed;
     if(cartAdjusted){
