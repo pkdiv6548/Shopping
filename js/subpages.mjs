@@ -69,6 +69,7 @@ async function loadCatalogue(){
    supabase.from("sm_product_images").select("id,product_id,image_path,alt_en,alt_hi,sort_order").order("sort_order")
   ]);
   if(productsResult.error)throw productsResult.error;
+  if(variantsResult.error)throw variantsResult.error;
   const fallbackBySlug=Object.fromEntries(PRODUCTS.map(p=>[p.slug,p]));
   const imagesByProduct={};
   if(!imagesResult.error)(imagesResult.data||[]).forEach(image=>{if(!imagesByProduct[image.product_id])imagesByProduct[image.product_id]=[];if(String(image.image_path||"").startsWith("/images/"))imagesByProduct[image.product_id].push(image);});
@@ -87,7 +88,7 @@ async function loadCatalogue(){
      imageAlt:state.lang==="hi"?(images[0]?.alt_hi||fallback.hi||row.name_hi):(images[0]?.alt_en||fallback.name||row.name_en),
      images:images.map(image=>({src:image.image_path,alt:state.lang==="hi"?(image.alt_hi||row.name_hi):(image.alt_en||row.name_en)})),
      category:fallback.category||"Clothing",categoryHi:fallback.categoryHi||"कपड़े",
-     badge:fallback.badge,variants:variantsByProduct[row.id]||[]};
+     badge:fallback.badge,variants:variantsByProduct[row.id]?.length?variantsByProduct[row.id]:localVariantsFor({...fallback,id:Number.isInteger(fallback.id)?fallback.id:index+101,slug:row.slug,category:fallback.category||"Clothing"})};
    });
    const databaseSlugs=new Set(state.products.map(product=>product.slug));
    state.products.push(...PRODUCTS.filter(product=>!databaseSlugs.has(product.slug)).map(product=>({...product,variants:localVariantsFor(product)})));
