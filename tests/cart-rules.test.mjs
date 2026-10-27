@@ -71,8 +71,26 @@ test("normalizes invalid quantities to one and flags the cart for review", () =>
   ], { v1: { stock_quantity: 5 } });
   assert.deepEqual(result, {
     cart: [
-      { id: 1, variantId: "v1", qty: 1 },
-      { id: 2, variantId: "v1", qty: 1 }
+      { id: 1, variantId: "v1", qty: 2 }
+    ],
+    changed: true
+  });
+});
+
+test("merges duplicate product-variant lines and caps their combined quantity to stock", () => {
+  const result = reconcileCartWithStock([
+    { id: 1, variantId: "v1", size: "M", qty: 3 },
+    { id: 1, variantId: "v1", size: "M", qty: 4 },
+    { id: 1, variantId: "v2", size: "L", qty: 2 }
+  ], {
+    v1: { stock_quantity: 5 },
+    v2: { stock_quantity: 8 }
+  });
+
+  assert.deepEqual(result, {
+    cart: [
+      { id: 1, variantId: "v1", size: "M", qty: 5 },
+      { id: 1, variantId: "v2", size: "L", qty: 2 }
     ],
     changed: true
   });
