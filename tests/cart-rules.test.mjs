@@ -240,6 +240,33 @@ test("keeps product-variant pairs separate when IDs contain delimiter characters
 
 
 
+test("validates persisted demo orders and rejects malformed dates, totals, and items", async () => {
+  const { validateDemoOrders } = await import("../js/cart-rules.mjs");
+  const valid = {
+    id: "SM-DEMO-VALID",
+    createdAt: "2026-10-27T12:00:00.000Z",
+    status: "demo-only",
+    total: 1250,
+    items: [{ productId: 1, slug: "shirt", name: "Shirt", price: 1250, size: "M", quantity: 1 }]
+  };
+  const legacy = { ...valid, id: "SM-DEMO-LEGACY" };
+  delete legacy.checkoutFingerprint;
+  const malformed = [
+    null,
+    { ...valid, id: "" },
+    { ...valid, createdAt: "not-a-date" },
+    { ...valid, total: Infinity },
+    { ...valid, total: -1 },
+    { ...valid, items: [null] },
+    { ...valid, items: [{ ...valid.items[0], quantity: 0 }] },
+    { ...valid, items: [{ ...valid.items[0], price: "1250" }] }
+  ];
+  assert.deepEqual(validateDemoOrders([valid, legacy, ...malformed]), [valid, legacy]);
+  assert.deepEqual(validateDemoOrders(null), []);
+  assert.deepEqual(validateDemoOrders({ id: "not-an-array" }), []);
+});
+
+
 test("creates stable fingerprints for the same cart regardless of line order", async () => {
   const { createCartFingerprint } = await import("../js/cart-rules.mjs");
   const first = [
