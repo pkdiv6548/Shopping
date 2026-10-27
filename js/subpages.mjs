@@ -1,6 +1,6 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.0";
 import { PRODUCTS, CATEGORIES, CATEGORY_HI } from "./products.mjs";
-import { createCartFingerprint, findRecentMatchingDemoOrder, isValidCartQuantity, reconcileCartWithStock, resolveCartVariant, validateDemoOrders } from "./cart-rules.mjs";
+import { createCartFingerprint, findRecentMatchingDemoOrder, isValidCartQuantity, reconcileCartWithStock, resolveCartVariant, validateDemoOrders, safeWriteStorage } from "./cart-rules.mjs";
 
 const supabase = createClient(
   "https://dbenwifjhdqhiznowncs.supabase.co",
@@ -31,7 +31,7 @@ const translate = key => (text[state.lang] && text[state.lang][key]) || text.en[
 const escapeHtml = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;" })[char]);
 const price = value => new Intl.NumberFormat("en-IN",{style:"currency",currency:"INR",maximumFractionDigits:0}).format(Number(value)||0);
 function readStorage(key,fallback){try{return JSON.parse(localStorage.getItem(key)||"null")??fallback;}catch{return fallback;}}
-function writeStorage(key,value){try{localStorage.setItem(key,JSON.stringify(value));}catch(error){console.warn("Storage unavailable",error);}}
+function writeStorage(key,value){const saved=safeWriteStorage(localStorage,key,value);if(!saved)console.warn("Storage unavailable");return saved;}
 function demoOrdersKey(){return state.user?"sm_demo_orders_"+state.user.id:"sm_demo_orders_guest";}
 function loadDemoOrders(){return validateDemoOrders(readStorage(demoOrdersKey(),[]));}
 function guestCart(){const value=readStorage("sm_guest_cart",[]);return Array.isArray(value)?value.filter(x=>Number.isInteger(x?.id)&&Number.isInteger(x?.qty)&&x.qty>0).map(x=>({id:x.id,qty:Math.min(99,x.qty),variantId:String(x.variantId||""),size:String(x.size||"")})):[];}
@@ -141,7 +141,7 @@ function saveCart(){
  const userId=state.user?.id||null;
  const cartSnapshot=state.cart.map(item=>({...item}));
  const databaseIds={...state.dbIds};
- if(!userId){writeStorage("sm_guest_cart",cartSnapshot);return Promise.resolve();}
+ if(!userId){if(!writeStorage("sm_guest_cart",cartSnapshot))return Promise.reject(new Error(state.lang==="hi"?"बैग ब्राउज़र में सेव नहीं हो सका। ब्राउज़र स्टोरेज जाँचें।":"Could not save the bag in this browser. Check browser storage."));return Promise.resolve();}
  writeStorage("sm_user_cart_"+userId,cartSnapshot);
  cartSaveQueue=cartSaveQueue.catch(()=>{}).then(()=>persistCart(userId,cartSnapshot,databaseIds));
  return cartSaveQueue;
@@ -323,7 +323,7 @@ function renderCheckout(){
   const order=loadDemoOrders().find(item=>item.id===orderId);
   if(order){
    const cartSyncWarning=params.get("cart-sync")==="failed"
-    ?'<p class="auth-notice" role="status">'+escapeHtml(state.lang==="hi"?"डेमो ऑर्डर इस ब्राउज़र में सेव है, लेकिन सर्वर पर बैग अपडेट नहीं हो सका। पेज दोबारा खोलने पर बैग फिर दिखाई दे सकता है। ऑर्डर हिस्ट्री और बैग जाँच लें।":"The demo order is saved in this browser, but the cart could not be updated on the server. Your cart may reappear after reopening the page. Please review your order history and bag.")+'</p>'
+    ?'<p class="auth-notice" role="status">'+escapeHtml(state.lang==="hi"?"डेमो ऑर्डर इस ब्राउज़र में सेव है, लेकिन बैग हर जगह सेव या क्लियर नहीं हो सका। पेज दोबारा खोलने पर बैग फिर दिखाई दे सकता है। ऑर्डर हिस्ट्री और बैग जाँच लें।":"The demo order is saved in this browser, but the cart could not be saved or cleared everywhere. Your cart may reappear after reopening the page. Please review your order history and bag.")+'</p>'
     :"";
    root.innerHTML='<div class="page-empty demo-order-success"><p class="eyebrow">'+escapeHtml(translate("demoOrderStatus"))+'</p><h2>'+escapeHtml(translate("demoOrderSuccess"))+'</h2><p>'+escapeHtml(translate("demoOrderId"))+': <strong>'+escapeHtml(order.id)+'</strong></p><p>'+escapeHtml(translate("checkoutSubtotal"))+': <strong>'+price(order.total)+'</strong></p>'+cartSyncWarning+'<a class="button button-dark" href="/collection.html">'+escapeHtml(translate("demoOrderContinue"))+'</a> <a class="text-link" href="/account.html">'+escapeHtml(translate("account"))+' ↗</a></div>';
    return;
