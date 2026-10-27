@@ -352,7 +352,8 @@ document.addEventListener("click",async event=>{
    try{localStorage.setItem(demoOrdersKey(),JSON.stringify(orders.slice(0,20)));}
    catch(error){throw new Error(state.lang==="hi"?"डेमो ऑर्डर सेव नहीं हो सका। ब्राउज़र स्टोरेज जाँचें।":"Could not save the demo order. Check browser storage.");}
    state.cart=[];state.cartRevision++;
-   await persistCart();
+   try{await persistCart();}
+   catch(error){console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
    location.href="/checkout.html?demo-order="+encodeURIComponent(order.id);
    return;
   }
