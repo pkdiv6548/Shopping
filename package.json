@@ -4,6 +4,6 @@
   "private": true,
   "description": "Static HTML, CSS and JavaScript storefront with Supabase backend",
   "scripts": {
-    "build": "node --check js/products.mjs && node --check js/app.mjs && node --check js/subpages.mjs && node scripts/validate-site.mjs"
+    "build": "node --test tests/*.test.mjs && node --check js/products.mjs && node --check js/app.mjs && node --check js/subpages.mjs && node --check js/cart-rules.mjs && node scripts/validate-site.mjs"
   }
 }
