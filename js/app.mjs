@@ -373,46 +373,57 @@ async function restoreUser(user) {
   }
 }
 
-async function persistCart() {
-  if(!state.user){saveGuest("sm_guest_cart",state.cart);return;}
-  saveGuest("sm_user_cart_"+state.user.id,state.cart);
-  const rows=state.cart.map(item=>({user_id:state.user.id,product_id:state.dbIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
+async function persistCart(userId,cartSnapshot,databaseIds) {
+  if(!userId||state.user?.id!==userId)return;
+  const rows=cartSnapshot.map(item=>({user_id:userId,product_id:databaseIds[item.id],variant_id:item.variantId,quantity:item.qty,updated_at:new Date().toISOString()}))
     .filter(row=>row.product_id&&row.variant_id&&!String(row.variant_id).startsWith("local-"));
-  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",state.user.id);
+  const {data:existing,error:readError}=await supabase.from("sm_cart_items").select("product_id,variant_id").eq("user_id",userId);
   if(readError)throw readError;
+  if(state.user?.id!==userId)return;
   if(rows.length){const {error}=await supabase.from("sm_cart_items").upsert(rows,{onConflict:"user_id,product_id,variant_id"});if(error)throw error;}
+  if(state.user?.id!==userId)return;
   const activeKeys=new Set(rows.map(row=>row.product_id+":"+row.variant_id));
   const stale=(existing||[]).filter(row=>!activeKeys.has(row.product_id+":"+row.variant_id));
   for(const row of stale){
-    const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",state.user.id).eq("product_id",row.product_id).eq("variant_id",row.variant_id);
+    if(state.user?.id!==userId)return;
+    const {error}=await supabase.from("sm_cart_items").delete().eq("user_id",userId).eq("product_id",row.product_id).eq("variant_id",row.variant_id);
     if(error)throw error;
   }
 }
-async function persistWishlist() {
-  if (!state.user) { saveGuest("sm_guest_wishlist", state.wishlist); return; }
-  saveGuest("sm_user_wishlist_" + state.user.id, state.wishlist);
-  const rows = state.wishlist.map(id => ({ user_id: state.user.id, product_id: state.dbIds[id] })).filter(row => row.product_id);
-  const { data: existing, error: readError } = await supabase.from("sm_wishlists").select("product_id").eq("user_id", state.user.id);
-  if (readError) throw readError;
-  if (rows.length) {
-    const { error } = await supabase.from("sm_wishlists").upsert(rows, { onConflict: "user_id,product_id" });
-    if (error) throw error;
-  }
-  const activeIds = new Set(rows.map(row => row.product_id));
-  const staleIds = (existing || []).map(row => row.product_id).filter(id => !activeIds.has(id));
-  if (staleIds.length) {
-    const { error } = await supabase.from("sm_wishlists").delete().eq("user_id", state.user.id).in("product_id", staleIds);
-    if (error) throw error;
+async function persistWishlist(userId,wishlistSnapshot,databaseIds) {
+  if(!userId||state.user?.id!==userId)return;
+  const rows=wishlistSnapshot.map(id=>({user_id:userId,product_id:databaseIds[id]})).filter(row=>row.product_id);
+  const {data:existing,error:readError}=await supabase.from("sm_wishlists").select("product_id").eq("user_id",userId);
+  if(readError)throw readError;
+  if(state.user?.id!==userId)return;
+  if(rows.length){const {error}=await supabase.from("sm_wishlists").upsert(rows,{onConflict:"user_id,product_id"});if(error)throw error;}
+  if(state.user?.id!==userId)return;
+  const activeIds=new Set(rows.map(row=>row.product_id));
+  const staleIds=(existing||[]).map(row=>row.product_id).filter(id=>!activeIds.has(id));
+  if(staleIds.length){
+    if(state.user?.id!==userId)return;
+    const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",userId).in("product_id",staleIds);
+    if(error)throw error;
   }
 }
 let cartSaveQueue = Promise.resolve();
 let wishlistSaveQueue = Promise.resolve();
 function saveCart() {
-  cartSaveQueue = cartSaveQueue.catch(() => {}).then(() => persistCart());
+  const userId=state.user?.id||null;
+  const cartSnapshot=state.cart.map(item=>({...item}));
+  const databaseIds={...state.dbIds};
+  if(!userId){saveGuest("sm_guest_cart",cartSnapshot);return Promise.resolve();}
+  saveGuest("sm_user_cart_"+userId,cartSnapshot);
+  cartSaveQueue=cartSaveQueue.catch(()=>{}).then(()=>persistCart(userId,cartSnapshot,databaseIds));
   return cartSaveQueue;
 }
 function saveWishlist() {
-  wishlistSaveQueue = wishlistSaveQueue.catch(() => {}).then(() => persistWishlist());
+  const userId=state.user?.id||null;
+  const wishlistSnapshot=[...state.wishlist];
+  const databaseIds={...state.dbIds};
+  if(!userId){saveGuest("sm_guest_wishlist",wishlistSnapshot);return Promise.resolve();}
+  saveGuest("sm_user_wishlist_"+userId,wishlistSnapshot);
+  wishlistSaveQueue=wishlistSaveQueue.catch(()=>{}).then(()=>persistWishlist(userId,wishlistSnapshot,databaseIds));
   return wishlistSaveQueue;
 }
 
