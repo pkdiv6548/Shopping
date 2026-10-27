@@ -196,8 +196,14 @@ async function restoreUser(user){
  if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
  state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist,...accountWishlist])];
- if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){await Promise.all([saveCart(),saveWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
- else if(cartChangedDuringRestore){await saveCart();}
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){
+  await Promise.all([saveCart(),saveWishlist()]);
+  // The active account may change while persistence is in flight. Only the
+  // restore operation that still owns the current session may clear guest data.
+  if(sequence!==restoreSequence||state.user?.id!==user.id)return;
+  writeStorage("sm_guest_cart",[]);
+  writeStorage("sm_guest_wishlist",[]);
+ }else if(cartChangedDuringRestore){await saveCart();}
 }
 function card(product){
  const saved=state.wishlist.includes(product.id);
