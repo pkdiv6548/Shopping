@@ -110,3 +110,52 @@ test("allows legacy carts without a variant ID to use the current default", asyn
   const fallback = { id: "local-4-s", stock_quantity: 10 };
   assert.equal(resolveCartVariant({ id: 4, variantId: "" }, {}, () => fallback), fallback);
 });
+
+
+test("floors fractional stock and never permits quantities above stock", () => {
+  const result = reconcileCartWithStock([
+    { id: 1, variantId: "fractional", qty: 3 },
+    { id: 2, variantId: "string-stock", qty: 4 }
+  ], {
+    fractional: { stock_quantity: 2.8 },
+    "string-stock": { stock_quantity: "3" }
+  });
+  assert.deepEqual(result, {
+    cart: [
+      { id: 1, variantId: "fractional", qty: 2 },
+      { id: 2, variantId: "string-stock", qty: 3 }
+    ],
+    changed: true
+  });
+});
+
+test("removes variants with negative, non-numeric, or missing stock values", () => {
+  const result = reconcileCartWithStock([
+    { id: 1, variantId: "negative", qty: 1 },
+    { id: 2, variantId: "invalid", qty: 1 },
+    { id: 3, variantId: "missing-stock", qty: 1 }
+  ], {
+    negative: { stock_quantity: -2 },
+    invalid: { stock_quantity: "unknown" },
+    "missing-stock": {}
+  });
+  assert.deepEqual(result, { cart: [], changed: true });
+});
+
+test("supports only the explicit legacy default marker when a variant ID is present", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  const fallback = { id: "default-variant", stock_quantity: 4 };
+  const getDefault = () => fallback;
+
+  assert.equal(resolveCartVariant(
+    { id: 4, variantId: "local-default" }, {}, getDefault
+  ), fallback);
+  assert.equal(resolveCartVariant(
+    { id: 4, variantId: "deleted-variant" }, {}, getDefault
+  ), null);
+});
+
+test("returns null when a legacy cart has no usable default-variant resolver", async () => {
+  const { resolveCartVariant } = await import("../js/cart-rules.mjs");
+  assert.equal(resolveCartVariant({ id: 4 }, {}, null), null);
+});
