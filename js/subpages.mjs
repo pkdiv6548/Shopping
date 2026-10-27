@@ -127,6 +127,16 @@ async function persistWishlist(){
  const active=new Set(rows.map(row=>row.product_id)),stale=(existing||[]).map(row=>row.product_id).filter(id=>!active.has(id));
  if(stale.length){const {error}=await supabase.from("sm_wishlists").delete().eq("user_id",state.user.id).in("product_id",stale);if(error)throw error;}
 }
+let cartSaveQueue=Promise.resolve();
+let wishlistSaveQueue=Promise.resolve();
+function saveCart(){
+ cartSaveQueue=cartSaveQueue.catch(()=>{}).then(()=>persistCart());
+ return cartSaveQueue;
+}
+function saveWishlist(){
+ wishlistSaveQueue=wishlistSaveQueue.catch(()=>{}).then(()=>persistWishlist());
+ return wishlistSaveQueue;
+}
 let restoreSequence=0;
 async function restoreUser(user){
  const sequence=++restoreSequence,cartRevisionAtStart=state.cartRevision;
@@ -160,8 +170,8 @@ async function restoreUser(user){
  if(!cartChangedDuringRestore)state.cart=[...cartByKey.values()];
  const dbWishlist=(wishResult.data||[]).map(row=>productByDbId[row.product_id]?.id).filter(Number.isInteger);
  state.wishlist=[...new Set([...dbWishlist,...oldGuestWishlist,...accountWishlist])];
- if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){await Promise.all([persistCart(),persistWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
- else if(cartChangedDuringRestore){await persistCart();}
+ if(!cartChangedDuringRestore&&(oldGuestCart.length||oldGuestWishlist.length||accountWishlist.length||recoveryCart.length)){await Promise.all([saveCart(),saveWishlist()]);writeStorage("sm_guest_cart",[]);writeStorage("sm_guest_wishlist",[]);}
+ else if(cartChangedDuringRestore){await saveCart();}
 }
 function card(product){
  const saved=state.wishlist.includes(product.id);
@@ -310,12 +320,12 @@ async function addToCart(productId,variantId,quantity=1){
  if(existing)existing.qty+=amount;
  else state.cart.push({id:product.id,variantId:variant.id,size:variant.size_label,qty:amount});
  state.cartRevision++;
- await persistCart();renderPageAfterState();toast(translate("added"));
+ await saveCart();renderPageAfterState();toast(translate("added"));
 }
 async function toggleWishlist(productId){
  const id=Number(productId),has=state.wishlist.includes(id);
  state.wishlist=has?state.wishlist.filter(item=>item!==id):[...state.wishlist,id];
- await persistWishlist();renderPageAfterState();toast(translate(has?"removedToast":"savedToast"));
+ await saveWishlist();renderPageAfterState();toast(translate(has?"removedToast":"savedToast"));
 }
 function renderPageAfterState(){
  renderPageTranslations();
@@ -330,14 +340,14 @@ document.addEventListener("click",async event=>{
   if(action==="toggle-wishlist"){await toggleWishlist(button.dataset.product);return;}
   if(action==="add-default"){const product=state.products.find(item=>item.id===Number(button.dataset.product));if(!product)throw new Error(translate("error"));const available=(product.variants||[]).filter(variant=>variant.stock_quantity>0);if(available.length>1){location.href="/product.html?slug="+encodeURIComponent(product.slug);return;}const variant=available[0]||defaultVariant(button.dataset.product);if(!variant)throw new Error(translate("invalidSize"));await addToCart(button.dataset.product,variant.id,1);return;}
   if(action==="add-detail"){const amount=Number($("#detail-quantity")?.value||1),variantId=$("#detail-size")?.value||"";await addToCart(button.dataset.product,variantId,amount);return;}
-  if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));state.cartRevision++;await persistCart();renderCart();renderPageTranslations();return;}
+  if(action==="remove-cart"){state.cart=state.cart.filter(item=>!(item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant));state.cartRevision++;await saveCart();renderCart();renderPageTranslations();return;}
   if(action==="quantity-up"||action==="quantity-down"){
    const row=state.cart.find(item=>item.id===Number(button.dataset.product)&&item.variantId===button.dataset.variant);
    if(row){
     const variant=variantById[row.variantId];
     if(!variant||variant.stock_quantity<=0){
      state.cart=state.cart.filter(item=>item!==row);
-     await persistCart();renderCart();renderPageTranslations();
+     await saveCart();renderCart();renderPageTranslations();
      toast(state.lang==="hi"?"यह साइज़ अब उपलब्ध नहीं है।":"This size is no longer available.");
      return;
     }
@@ -346,7 +356,7 @@ document.addEventListener("click",async event=>{
     row.qty=action==="quantity-up"?Math.min(max,row.qty+1):row.qty-1;
     if(row.qty<1)state.cart=state.cart.filter(item=>item!==row);
     state.cartRevision++;
-    await persistCart();renderCart();renderPageTranslations();
+    await saveCart();renderCart();renderPageTranslations();
    }
    return;
   }
@@ -361,7 +371,7 @@ document.addEventListener("click",async event=>{
     });
     if(cartAdjusted){
      state.cartRevision++;
-     try{await persistCart();}catch(error){console.warn("Could not persist stock-adjusted cart",error);}
+     try{await saveCart();}catch(error){console.warn("Could not persist stock-adjusted cart",error);}
      renderPageAfterState();
      toast(state.lang==="hi"?"स्टॉक के अनुसार बैग अपडेट किया गया है। ऑर्डर देने से पहले जाँच लें।":"Your bag was updated to match available stock. Review it before placing the demo order.");
      return;
@@ -379,7 +389,7 @@ document.addEventListener("click",async event=>{
    try{localStorage.setItem(demoOrdersKey(),JSON.stringify(orders.slice(0,20)));}
    catch(error){throw new Error(state.lang==="hi"?"डेमो ऑर्डर सेव नहीं हो सका। ब्राउज़र स्टोरेज जाँचें।":"Could not save the demo order. Check browser storage.");}
    state.cart=[];state.cartRevision++;
-   try{await persistCart();}
+   try{await saveCart();}
    catch(error){console.error("Demo order was saved locally, but the remote cart could not be cleared",error);}
    location.href="/checkout.html?demo-order="+encodeURIComponent(order.id);
    return;
