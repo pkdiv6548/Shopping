@@ -157,7 +157,15 @@ function saveWishlist(){
 }
 let restoreSequence=0;
 async function restoreUser(user){
- const sequence=++restoreSequence,cartRevisionAtStart=state.cartRevision;
+ const previousUserId=state.user?.id||null;
+ const sequence=++restoreSequence;
+ if(user&&previousUserId&&previousUserId!==user.id){
+  // Never leave one account's cart or wishlist visible while the next account restores.
+  state.cart=[];
+  state.cartRevision++;
+  state.wishlist=[];
+ }
+ const cartRevisionAtStart=state.cartRevision;
  state.user=user||null;
  if(!user){state.cart=guestCart();normalizeGuestCart();state.wishlist=guestWishlist();return;}
  const [wishResult,cartResult]=await Promise.all([
