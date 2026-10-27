@@ -349,9 +349,24 @@ document.addEventListener("click",async event=>{
    return;
   }
   if(action==="checkout-demo"){
-   const rows=state.cart.map(item=>({item,product:state.products.find(product=>product.id===item.id)})).filter(row=>row.product);
-   if(!rows.length){toast(translate("checkoutEmpty"));return;}
-   const order={
+    let cartAdjusted=false;
+    state.cart=state.cart.filter(item=>{
+     const variant=variantById[item.variantId];
+     if(!variant||variant.stock_quantity<=0){cartAdjusted=true;return false;}
+     const available=Math.min(99,Number(variant.stock_quantity)||0);
+     if(item.qty>available){item.qty=available;cartAdjusted=true;}
+     return true;
+    });
+    if(cartAdjusted){
+     state.cartRevision++;
+     try{await persistCart();}catch(error){console.warn("Could not persist stock-adjusted cart",error);}
+     renderPageAfterState();
+     toast(state.lang==="hi"?"स्टॉक के अनुसार बैग अपडेट किया गया है। ऑर्डर देने से पहले जाँच लें।":"Your bag was updated to match available stock. Review it before placing the demo order.");
+     return;
+    }
+    const rows=state.cart.map(item=>({item,product:state.products.find(product=>product.id===item.id)})).filter(row=>row.product);
+    if(!rows.length){toast(translate("checkoutEmpty"));return;}
+    const order={
     id:"SM-DEMO-"+Date.now().toString(36).toUpperCase(),
     createdAt:new Date().toISOString(),
     status:"demo-only",
