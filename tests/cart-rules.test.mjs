@@ -71,7 +71,8 @@ test("normalizes invalid quantities to one and flags the cart for review", () =>
   ], { v1: { stock_quantity: 5 } });
   assert.deepEqual(result, {
     cart: [
-      { id: 1, variantId: "v1", qty: 2 }
+      { id: 1, variantId: "v1", qty: 1 },
+      { id: 2, variantId: "v1", qty: 1 }
     ],
     changed: true
   });
